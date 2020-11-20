@@ -18,42 +18,6 @@ async function authenticate(){
   return answers
 }
 
-// _detect_environment() {
-//   environment=${GT_ENV:-"development"}
-
-//   if [ "$environment" == "development" ]
-//   then
-//     host="http://localhost:3000"
-//   fi
-
-//   if [ "$environment" == "stage" ]
-//   then
-//     host="https://guidedtrack-stage.herokuapp.com"
-//   fi
-
-//   if [ "$environment" == "production" ]
-//   then
-
-//     echo ""
-//     echo "+------------------------------------------------------------------------------------------------------------+"
-//     echo "| WARNING: You're about to change programs in production, which will have an immediate effect on your users. |"
-//     echo '| To push out a new version of the programs in this folder, confirm by typing "production" below.            |'
-//     echo "+------------------------------------------------------------------------------------------------------------+"
-//     echo ""
-
-//     read -p "Confirmation: " confirmation
-//     echo ""
-
-//     if [ "$confirmation" != "production" ]
-//     then
-//       echo "Aborting push"
-//       exit 1
-//     fi
-
-//     host="https://www.guidedtrack.com"
-//   fi
-// }
-
 async function setEnvironment(){
   let answer
   let hosts = {
