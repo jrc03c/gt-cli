@@ -1,7 +1,7 @@
 const inquirer = require("inquirer")
 
 async function authenticate(){
-  let answers = await inquirer.prompt([
+  let credentials = await inquirer.prompt([
     {
       type: "input",
       name: "username",
@@ -15,7 +15,7 @@ async function authenticate(){
     }
   ])
 
-  return answers
+  return credentials
 }
 
 async function setEnvironment(){
