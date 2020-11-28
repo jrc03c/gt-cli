@@ -1,7 +1,43 @@
+const http = require("http")
+const https = require("https")
 const inquirer = require("inquirer")
 const DEVELOPMENT = "http://localhost:3000"
 const STAGE = "https://guidedtrack-stage.herokuapp.com"
 const PRODUCTION = "https://www.guidedtrack.com"
+
+function fetch(options){
+  return new Promise(function(resolve, reject){
+    try {
+      let protocol
+      
+      if (options.hostname.split("://")[0] === "http"){
+        protocol = http
+        options.port = 80
+      } else {
+        protocol = https
+        options.port = 443
+      }
+
+      options.hostname = options.hostname.split("://")[1]
+
+      let request = protocol.request(options, function(response){
+        response.on("data", function(data){
+          return resolve(data)
+        })
+      })
+
+      request.on("error", function(error){
+        return reject(error)
+      })
+    } catch(e) {
+      return reject(e)
+    }
+  })
+}
+
+function btoa(s){
+  return Buffer.from(s, "utf8").toString("base64")
+}
 
 async function authenticate(){
   let credentials = await inquirer.prompt([
@@ -55,7 +91,7 @@ async function setEnvironment(){
   
   return {
     environment: answer.environment,
-    host: hosts[answer.environment]
+    host: hosts[answer.environment],
   }
 }
 
@@ -66,9 +102,27 @@ async function setEnvironment(){
 //     | jq -f <(echo "map(select(.name == \"$1\"))[0]") 2>&1
 // }
 
-function findProgram(){
+async function findProgram(host, credentials, query){
+  let response = await fetch({
+    hostname: host,
+    path: "/programs.json?query=" + query,
+    method: "GET",
+    headers: {
+      "Authorization": "Basic: " + btoa(credentials.username + ":" + credentials.password),
+    },
+  })
 
+  return await response.json()
 }
+
+async function go(){
+  let credentials = await authenticate()
+  let host = (await setEnvironment()).host
+  let query = "SAPA"
+  console.log(await findProgram(host, credentials, query))
+}
+
+go()
 
 // _poll_job_status() {
 //   curl -sS -u "${email}:${password}" "$host/delayed_jobs/$1" \
