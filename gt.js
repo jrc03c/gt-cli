@@ -1,4 +1,7 @@
 const inquirer = require("inquirer")
+const DEVELOPMENT = "http://localhost:3000"
+const STAGE = "https://guidedtrack-stage.herokuapp.com"
+const PRODUCTION = "https://www.guidedtrack.com"
 
 async function authenticate(){
   let credentials = await inquirer.prompt([
@@ -21,9 +24,9 @@ async function authenticate(){
 async function setEnvironment(){
   let answer
   let hosts = {
-    development: "http://localhost:3000",
-    stage: "https://guidedtrack-stage.herokuapp.com",
-    production: "https://www.guidedtrack.com",
+    development: DEVELOPMENT,
+    stage: STAGE,
+    production: PRODUCTION,
   }
 
   answer = await inquirer.prompt([
