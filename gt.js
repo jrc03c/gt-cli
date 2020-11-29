@@ -113,17 +113,8 @@ async function getAllPrograms(host, credentials){
 }
 
 async function findProgram(host, credentials, query){
-  // let response = await fetch({
-  //   hostname: host,
-  //   path: "/programs.json",
-  //   method: "GET",
-  //   headers: {
-  //     "Authorization": "Basic: " + btoa(credentials.username + ":" + credentials.password),
-  //   },
-  // })
-
-  // return await response.json()
-
+  let programs = await getAllPrograms(host, credentials)
+  return programs.filter(program => program.name.match(query))
 }
 
 async function go(){
@@ -140,7 +131,7 @@ async function go(){
     host = (await setEnvironment()).host
   }
 
-  console.log(getAllPrograms(host, credentials))
+  console.log(await findProgram(host, credentials, "Cheating"))
 }
 
 go()
