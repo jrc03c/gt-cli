@@ -1,5 +1,7 @@
+const fs = require("fs")
 const http = require("http")
 const https = require("https")
+const execSync = require("child_process").execSync
 const inquirer = require("inquirer")
 const DEVELOPMENT = "http://localhost:3000"
 const STAGE = "https://guidedtrack-stage.herokuapp.com"
@@ -98,28 +100,47 @@ async function setEnvironment(){
 // _find_program() {
 //   name_query=`echo -n "$1" | jq --slurp --raw-input --raw-output '@uri'`
 //   url="$host/programs.json?query=$name_query"
-//   curl -sS -u "${email}:${password}" $url \
+//    \
 //     | jq -f <(echo "map(select(.name == \"$1\"))[0]") 2>&1
 // }
 
-async function findProgram(host, credentials, query){
-  let response = await fetch({
-    hostname: host,
-    path: "/programs.json?query=" + query,
-    method: "GET",
-    headers: {
-      "Authorization": "Basic: " + btoa(credentials.username + ":" + credentials.password),
-    },
-  })
+async function getAllPrograms(host, credentials){
+  let url = host + "/programs.json"
+  let command = `curl -sS -u "${credentials.username}:${credentials.password}" ${url} > programs.json`
+  execSync(command)
+  let programs = require("./programs.json")
+  return programs
+}
 
-  return await response.json()
+async function findProgram(host, credentials, query){
+  // let response = await fetch({
+  //   hostname: host,
+  //   path: "/programs.json",
+  //   method: "GET",
+  //   headers: {
+  //     "Authorization": "Basic: " + btoa(credentials.username + ":" + credentials.password),
+  //   },
+  // })
+
+  // return await response.json()
+
 }
 
 async function go(){
-  let credentials = await authenticate()
-  let host = (await setEnvironment()).host
-  let query = "SAPA"
-  console.log(await findProgram(host, credentials, query))
+  let credentials, host
+
+  if (fs.existsSync("config.json")){
+    let config = require("./config.json")
+    credentials = {username: config.username, password: config.password}
+    if (config.environment === "development") host = DEVELOPMENT
+    if (config.environment === "stage") host = STAGE
+    if (config.environment === "production") host = PRODUCTION
+  } else {
+    credentials = await authenticate()
+    host = (await setEnvironment()).host
+  }
+
+  console.log(getAllPrograms(host, credentials))
 }
 
 go()
