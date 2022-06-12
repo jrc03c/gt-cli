@@ -39,11 +39,15 @@ function btoa(x) {
 }
 
 async function sendRequest(options) {
-  if (!options.path || !options.method) {
+  if (typeof options === "string") {
+    options = { path: options }
+  }
+
+  if (!options.path) {
     throw new Error(
       [
         "The `options` object passed into the `sendRequest` function must",
-        "have `path` and `method` properties!",
+        "have a `path` property!",
       ].join(" ")
     )
   }
@@ -58,8 +62,15 @@ async function sendRequest(options) {
   }
 
   const requestOptions = {
-    method: options.method,
+    method: options.method || "GET",
     headers: { Authorization: `Basic ${credentials}` },
+  }
+
+  if (options.headers) {
+    requestOptions.headers = {
+      ...requestOptions.headers,
+      ...options.headers,
+    }
   }
 
   if (options.body) {
@@ -145,18 +156,34 @@ async function findProgram(query) {
   return data
 }
 
-// _poll_job_status() {
-//   curl -sS -u "${email}:${password}" "$host/delayed_jobs/$1" \
-//     | jq '.status' --raw-output 2>&1
-// }
+async function pollJobStatus(jobID) {
+  const response = await sendRequest({
+    path: `/delayed_jobs/${jobID}`,
+    method: "GET",
+  })
 
-function pollJobStatus() {}
+  const data = await response.json()
+  return data
+}
 
-// _program_contents() {
-//   curl -Ss -u "${email}:${password}" -H "X-GuidedTrack-Access-Key: $access_key" $host/runs/$run_id/contents
-// }
+async function getEmbedInfo(key) {
+  const response = await sendRequest(`/programs/${key}/embed`)
+  const data = await response.json()
+  return data
+}
 
-function getProgramContents() {}
+async function getProgramContents(key, runID) {
+  const embedInfo = await getEmbedInfo(key)
+  const { accessKey } = embedInfo
+
+  const response = await sendRequest({
+    path: `/runs/${runID}/contents`,
+    headers: { "X-GuidedTrack-Access-Key": accessKey },
+  })
+
+  const contents = await response.text()
+  return contents
+}
 
 // push() {
 //   _authenticate
@@ -336,6 +363,9 @@ if (typeof module !== "undefined") {
     getEnvironment,
     getHost,
     findProgram,
+    pollJobStatus,
+    getEmbedInfo,
+    getProgramContents,
   }
 
   if (typeof require !== "undefined" && require.main === module) {
