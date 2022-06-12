@@ -185,30 +185,65 @@ async function getProgramContents(key, runID) {
   return contents
 }
 
-// push() {
-//   _authenticate
-//   _detect_environment
+async function push(dict) {
+  // const dict = {
+  //   shouldBuild: true,
+  //   programs: [
+  //     { file: "/some/file.gt", id: "foobar" },
+  //     { contents: "Hello", id: "blah" },
+  //   ],
+  // }
 
-//   selector="*"
-//   while getopts ":o:b" opt
-//   do
-//     case $opt in
-//       o)
-//         selector=$OPTARG
-//         ;;
-//       b)
-//         build="yes"
-//         ;;
-//       \?)
-//         echo "Invalid option: -$OPTARG" >&2
-//         exit 1
-//         ;;
-//       :)
-//         echo "Option -$OPTARG requires an argument." >&2
-//         exit 1
-//         ;;
-//     esac
-//   done
+  throw new Error(
+    [
+      "NOTE: In Lyudmil's implementation, he searches for the program first",
+      "before updating its code! We should probably do that too!",
+    ].join(" ")
+  )
+
+  const message = [
+    "You must pass an object into the `push` function with a `programs`",
+    "property that points to an array of program objects (each with",
+    "`file` / `contents` and `id` properties)!",
+  ].join(" ")
+
+  if (typeof dict !== "object" || dict === null) {
+    throw new Error(message)
+  }
+
+  const promises = dict.programs.map(program => {
+    if (!program.contents) {
+      if (!program.file) {
+        throw new Error(message)
+      }
+
+      program.contents = fs.readFileSync(program.file, "utf8")
+    }
+
+    if (!program.id) {
+      throw new Error(message)
+    }
+
+    return sendRequest({
+      path: `/programs/${id}.json`,
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: { code: { contents: program.contents } },
+    })
+  })
+
+  const responses = await Promise.all(promises)
+  const datas = await Promise.all(responses.map(r => r.json()))
+
+  if (dict.shouldBuild) {
+    return await build(dict)
+  } else {
+    return datas
+  }
+}
+
+// push() {
+//
 
 //   echo "Pushing to $environment ($host)..."
 
@@ -252,8 +287,6 @@ async function getProgramContents(key, runID) {
 
 //   exit 0
 // }
-
-function push() {}
 
 // create() {
 //   _authenticate
