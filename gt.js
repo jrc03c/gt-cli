@@ -99,13 +99,6 @@ function getHost() {
   }
 }
 
-// _find_program() {
-//   name_query=`echo -n "$1" | jq --slurp --raw-input --raw-output '@uri'`
-//   url="$host/programs.json?query=$name_query"
-//   curl -sS -u "${email}:${password}" $url \
-//     | jq -f <(echo "map(select(.name == \"$1\"))[0]") 2>&1
-// }
-
 async function findProgram(query) {
   const { username, password } = await getCredentials()
   const credentials = btoa(`${username}:${password}`)
