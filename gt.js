@@ -1,157 +1,139 @@
+// NOTES
+// curl flags:
+//   -s = silent
+//   -S = show errors
+
+const fetch = require("node-fetch")
 const fs = require("fs")
-const http = require("http")
-const https = require("https")
-const execSync = require("child_process").execSync
 const inquirer = require("inquirer")
-const DEVELOPMENT = "http://localhost:3000"
-const STAGE = "https://guidedtrack-stage.herokuapp.com"
-const PRODUCTION = "https://www.guidedtrack.com"
 
-function fetch(options){
-  return new Promise(function(resolve, reject){
-    try {
-      let protocol
-      
-      if (options.hostname.split("://")[0] === "http"){
-        protocol = http
-        options.port = 80
-      } else {
-        protocol = https
-        options.port = 443
-      }
-
-      options.hostname = options.hostname.split("://")[1]
-
-      let request = protocol.request(options, function(response){
-        response.on("data", function(data){
-          return resolve(data)
-        })
-      })
-
-      request.on("error", function(error){
-        return reject(error)
-      })
-    } catch(e) {
-      return reject(e)
-    }
-  })
+const Host = {
+  DEVELOPMENT: "http://localhost:3000",
+  STAGING: "https://guidedtrack-stage.herokuapp.com",
+  PRODUCTION: "https://www.guidedtrack.com",
 }
 
-function btoa(s){
-  return Buffer.from(s, "utf8").toString("base64")
+const Environment = {
+  DEVELOPMENT: "development",
+  STAGING: "staging",
+  PRODUCTION: "production",
 }
 
-async function authenticate(){
-  let credentials = await inquirer.prompt([
-    {
-      type: "input",
-      name: "username",
-      message: "GT Email:"
-    },
+const Config = (() => {
+  try {
+    const temp = require("./config.json")
 
-    {
-      type: "password",
-      name: "password",
-      message: "GT Password:"
-    }
-  ])
+    Object.keys(temp).forEach(key => {
+      temp[key.toUpperCase()] = temp[key]
+      delete temp[key]
+    })
 
-  return credentials
-}
-
-async function setEnvironment(){
-  let answer
-  let hosts = {
-    development: DEVELOPMENT,
-    stage: STAGE,
-    production: PRODUCTION,
+    return temp
+  } catch (e) {
+    return {}
   }
+})()
 
-  answer = await inquirer.prompt([
-    {
-      type: "list",
-      message: "Environment:",
-      name: "environment",
-      choices: ["development", "stage", "production"],
-    }
-  ])
+function btoa(x) {
+  return Buffer.from(x).toString("base64")
+}
 
-  if (answer.environment === "production"){
-    let confirmation = await inquirer.prompt([
+async function getCredentials() {
+  if (!Config.USERNAME) {
+    const { username } = await inquirer.prompt([
       {
-        type: "list",
-        message: "WARNING: You're about to change programs in production, which will have an immediate effect on your users. Are you sure that you want to use the production environment?",
-        name: "confirmation",
-        choices: ["yes", "no"],
-      }
+        type: "input",
+        name: "username",
+        message: "GT username / email:",
+      },
     ])
 
-    if (confirmation.confirmation === "no"){
-      return process.exit()
-    }
+    Config.USERNAME = username
   }
-  
-  return {
-    environment: answer.environment,
-    host: hosts[answer.environment],
+
+  if (!Config.PASSWORD) {
+    const { password } = await inquirer.prompt([
+      {
+        type: "password",
+        name: "password",
+        message: "GT password:",
+      },
+    ])
+
+    Config.PASSWORD = password
+  }
+
+  return { username: Config.USERNAME, password: Config.PASSWORD }
+}
+
+async function getEnvironment() {
+  // NOTE: By this definition, the environment variable overrides the
+  // "environment" property in the config file (if present). If neither is
+  // present, the environment defaults to "development".
+  Config.ENVIRONMENT = process.env.GT_ENV || Config.ENVIRONMENT
+
+  if (!Config.ENVIRONMENT) {
+    const { environment } = await inquirer.prompt([
+      {
+        type: "input",
+        name: "environment",
+      },
+    ])
+
+    Config.ENVIRONMENT = environment
+  }
+
+  return Config.ENVIRONMENT
+}
+
+function getHost() {
+  switch (Config.ENVIRONMENT) {
+    case Environment.DEVELOPMENT:
+      return Host.DEVELOPMENT
+
+    case Environment.STAGING:
+      return Host.STAGING
+
+    case Environment.PRODUCTION:
+      return Host.PRODUCTION
   }
 }
 
 // _find_program() {
 //   name_query=`echo -n "$1" | jq --slurp --raw-input --raw-output '@uri'`
 //   url="$host/programs.json?query=$name_query"
-//    \
+//   curl -sS -u "${email}:${password}" $url \
 //     | jq -f <(echo "map(select(.name == \"$1\"))[0]") 2>&1
 // }
 
-async function getAllPrograms(host, credentials){
-  let url = host + "/programs.json"
-  let command = `curl -sS -u "${credentials.username}:${credentials.password}" ${url} > programs.json`
-  execSync(command)
-  let programs = require("./programs.json")
-  return programs
+async function findProgram(query) {
+  const { username, password } = await getCredentials()
+  const credentials = btoa(`${username}:${password}`)
+  const host = getHost()
+  const params = new URLSearchParams({ query })
+  const url = `${host}/programs.json?${params}`
+
+  const response = await fetch(url, {
+    method: "GET",
+    headers: { Authorization: `Basic ${credentials}` },
+  })
+
+  const data = await response.json()
+  return data
 }
-
-async function findProgram(host, credentials, query){
-  let programs = await getAllPrograms(host, credentials)
-  return programs.filter(program => program.name.match(query))
-}
-
-async function go(){
-  let credentials, host
-
-  if (fs.existsSync("config.json")){
-    let config = require("./config.json")
-    credentials = {username: config.username, password: config.password}
-    if (config.environment === "development") host = DEVELOPMENT
-    if (config.environment === "stage") host = STAGE
-    if (config.environment === "production") host = PRODUCTION
-  } else {
-    credentials = await authenticate()
-    host = (await setEnvironment()).host
-  }
-
-  console.log(await findProgram(host, credentials, "Cheating"))
-}
-
-go()
 
 // _poll_job_status() {
 //   curl -sS -u "${email}:${password}" "$host/delayed_jobs/$1" \
 //     | jq '.status' --raw-output 2>&1
 // }
 
-function pollJobStatus(){
-
-}
+function pollJobStatus() {}
 
 // _program_contents() {
 //   curl -Ss -u "${email}:${password}" -H "X-GuidedTrack-Access-Key: $access_key" $host/runs/$run_id/contents
 // }
 
-function getProgramContents(){
-
-}
+function getProgramContents() {}
 
 // push() {
 //   _authenticate
@@ -221,9 +203,7 @@ function getProgramContents(){
 //   exit 0
 // }
 
-function push(){
-
-}
+function push() {}
 
 // create() {
 //   _authenticate
@@ -259,9 +239,7 @@ function push(){
 //   exit 0
 // }
 
-function create(){
-
-}
+function create() {}
 
 // build() {
 //   if [ -z $environment ]
@@ -315,9 +293,7 @@ function create(){
 //   fi
 // }
 
-function build(){
-
-}
+function build() {}
 
 // if [[ $1 =~ ^(push|create|build)$ ]]
 // then
@@ -327,3 +303,24 @@ function build(){
 //   exit 1
 // fi
 
+if (typeof module !== "undefined") {
+  module.exports = {
+    Host,
+    Environment,
+    Config,
+    btoa,
+    getCredentials,
+    getEnvironment,
+    getHost,
+    findProgram,
+  }
+
+  if (typeof require !== "undefined" && require.main === module) {
+    async function run() {
+      await getCredentials()
+      await getEnvironment()
+    }
+
+    run()
+  }
+}

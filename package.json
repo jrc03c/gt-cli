@@ -4,9 +4,9 @@
   "description": "## Description",
   "main": "gt.js",
   "dependencies": {
-    "inquirer": "^7.3.3"
+    "inquirer": "^7.3.3",
+    "node-fetch": "^2.6.7"
   },
-  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
