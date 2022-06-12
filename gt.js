@@ -38,6 +38,41 @@ function btoa(x) {
   return Buffer.from(x).toString("base64")
 }
 
+async function sendRequest(options) {
+  if (!options.path || !options.method) {
+    throw new Error(
+      [
+        "The `options` object passed into the `sendRequest` function must",
+        "have `path` and `method` properties!",
+      ].join(" ")
+    )
+  }
+
+  const { username, password } = await getCredentials()
+  const credentials = btoa(`${username}:${password}`)
+  const host = getHost()
+  let url = `${host}${options.path}`
+
+  if (options.query) {
+    url = url + "?" + new URLSearchParams(options.query)
+  }
+
+  const requestOptions = {
+    method: options.method,
+    headers: { Authorization: `Basic ${credentials}` },
+  }
+
+  if (options.body) {
+    requestOptions.body =
+      typeof options.body === "string"
+        ? options.body
+        : JSON.stringify(options.body)
+  }
+
+  const response = await fetch(url, requestOptions)
+  return response
+}
+
 async function getCredentials() {
   if (!Config.USERNAME) {
     const { username } = await inquirer.prompt([
@@ -100,15 +135,10 @@ function getHost() {
 }
 
 async function findProgram(query) {
-  const { username, password } = await getCredentials()
-  const credentials = btoa(`${username}:${password}`)
-  const host = getHost()
-  const params = new URLSearchParams({ query })
-  const url = `${host}/programs.json?${params}`
-
-  const response = await fetch(url, {
+  const response = await sendRequest({
+    path: "/programs.json",
     method: "GET",
-    headers: { Authorization: `Basic ${credentials}` },
+    query: { query },
   })
 
   const data = await response.json()
