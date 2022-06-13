@@ -1,5 +1,9 @@
 const fs = require("fs")
 
+function btoa(x) {
+  return Buffer.from(x).toString("base64")
+}
+
 function findUpward(pattern, startingDirectory) {
   const cwd = startingDirectory || process.cwd()
   const parts = cwd.split("/")
@@ -16,4 +20,4 @@ function findUpward(pattern, startingDirectory) {
   return null
 }
 
-module.exports = findUpward
+module.exports = { btoa, findUpward }
