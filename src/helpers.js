@@ -38,7 +38,7 @@ function findUpward(pattern, startingDirectory) {
   return null
 }
 
-class PrettyError extends Error {
+class GTError extends Error {
   constructor(message) {
     message = message
       .split("\n")
@@ -49,4 +49,4 @@ class PrettyError extends Error {
   }
 }
 
-module.exports = { btoa, findUpward, PrettyError }
+module.exports = { btoa, findUpward, GTError }
