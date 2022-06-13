@@ -13,15 +13,23 @@ const Environment = {
   PRODUCTION: "production",
 }
 
-const config = (() => {
-  let out = {}
+let hasBeenLoaded = false
 
-  try {
-    out = require(findUpward(".gtconfig"))
-  } catch (e) {}
+const config = {
+  async load() {
+    if (hasBeenLoaded) {
+      return config
+    }
 
-  out.load = async function () {
-    if (!out.username) {
+    try {
+      const temp = require(findUpward(".gtconfig"))
+
+      Object.keys(temp).forEach(key => {
+        config[key] = temp[key]
+      })
+    } catch (e) {}
+
+    if (!config.username) {
       const response = await inquirer.prompt([
         {
           type: "input",
@@ -30,10 +38,10 @@ const config = (() => {
         },
       ])
 
-      out.username = response.value
+      config.username = response.value
     }
 
-    if (!out.password) {
+    if (!config.password) {
       const response = await inquirer.prompt([
         {
           type: "password",
@@ -42,10 +50,10 @@ const config = (() => {
         },
       ])
 
-      out.password = response.value
+      config.password = response.value
     }
 
-    if (!out.environment) {
+    if (!config.environment) {
       const response = await inquirer.prompt([
         {
           type: "input",
@@ -63,23 +71,23 @@ const config = (() => {
         `)
       }
 
-      out.environment = env
+      config.environment = env
     }
 
-    if (!out.host) {
-      if (out.environment === Environment.DEVELOPMENT) {
-        out.host = Host.DEVELOPMENT
+    if (!config.host) {
+      if (config.environment === Environment.DEVELOPMENT) {
+        config.host = Host.DEVELOPMENT
       }
 
-      if (out.environment === Environment.STAGING) {
-        out.host = Host.STAGING
+      if (config.environment === Environment.STAGING) {
+        config.host = Host.STAGING
       }
 
-      if (out.environment === Environment.PRODUCTION) {
-        out.host = Host.PRODUCTION
+      if (config.environment === Environment.PRODUCTION) {
+        config.host = Host.PRODUCTION
       }
 
-      if (!Object.values(Host).some(v => v.includes(out.host))) {
+      if (!Object.values(Host).some(v => v.includes(config.host))) {
         throw new GTError(`
           The host could not be determined because the environment value was
           invalid. Please set the environment value to one of "development",
@@ -88,46 +96,51 @@ const config = (() => {
       }
     }
 
-    Object.defineProperty(out, "credentials", {
-      enumerable: true,
-      configurable: false,
+    if (!config.credentials) {
+      Object.defineProperty(config, "credentials", {
+        enumerable: true,
+        configurable: false,
 
-      get() {
-        return {
-          username: out.username,
-          password: out.password,
-        }
-      },
+        get() {
+          return {
+            username: config.username,
+            password: config.password,
+          }
+        },
 
-      set() {
-        throw new GTError(`
-          The \`credentials\` property of the configuration cannot be set
-          directly; instead, please set the \`username\` and \`password\`
-          properties.
-        `)
-      },
-    })
+        set() {
+          throw new GTError(`
+            The \`credentials\` property of the configuration cannot be set
+            directly; instead, please set the \`username\` and \`password\`
+            properties.
+          `)
+        },
+      })
+    }
 
-    Object.defineProperty(out, "credentialsBase64", {
-      enumerable: true,
-      configurable: false,
+    if (!config.credentialsBase64) {
+      Object.defineProperty(config, "credentialsBase64", {
+        enumerable: true,
+        configurable: false,
 
-      get() {
-        const { username, password } = out
-        return btoa(`${username}:${password}`)
-      },
+        get() {
+          const { username, password } = config
+          return btoa(`${username}:${password}`)
+        },
 
-      set() {
-        throw new GTError(`
+        set() {
+          throw new GTError(`
           The \`credentialsBase64\` property of the configuration cannot be set
           directly; instead, please set the \`username\` and \`password\`
           properties.
         `)
-      },
-    })
-  }
+        },
+      })
+    }
 
-  return out
-})()
+    hasBeenLoaded = true
+    return config
+  },
+}
 
 module.exports = { config, Host, Environment }
