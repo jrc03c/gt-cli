@@ -1,4 +1,4 @@
-const { findUpward, PrettyError } = require("./helpers.js")
+const { btoa, findUpward, PrettyError } = require("./helpers.js")
 const inquirer = require("inquirer")
 
 const Host = {
@@ -23,6 +23,8 @@ const config = (() => {
 
 let _environment = config.environment
 let _host
+let _username = config.username
+let _password = config.password
 
 Object.defineProperty(config, "environment", {
   enumerable: true,
@@ -58,12 +60,10 @@ Object.defineProperty(config, "environment", {
         )
 
         if (!answerWasValid) {
-          throw new PrettyError(
-            `
-              Invalid environment value! The environment must be one of
-              "development", "staging", or "production".
-            `
-          )
+          throw new PrettyError(`
+            Invalid environment value! The environment must be one of
+            "development", "staging", or "production".
+          `)
         }
 
         _environment = answer
@@ -106,13 +106,11 @@ Object.defineProperty(config, "host", {
             return resolve(_host)
           }
 
-          throw new PrettyError(
-            `
-              The host could not be determined because the environment was
-              either not specified or not set to a valid value! Please set the
-              environment to one of "development", "staging", or "production".
-            `
-          )
+          throw new PrettyError(`
+            The host could not be determined because the environment was
+            either not specified or not set to a valid value! Please set the
+            environment to one of "development", "staging", or "production".
+          `)
         })
       } catch (e) {
         return reject(e)
@@ -125,40 +123,122 @@ Object.defineProperty(config, "host", {
   },
 })
 
-// module.exports = async function () {
-//   if (!Config.USERNAME) {
-//     const { username } = await inquirer.prompt([
-//       {
-//         type: "input",
-//         name: "username",
-//         message: "GT username / email:",
-//       },
-//     ])
+Object.defineProperty(config, "username", {
+  enumerable: true,
+  configurable: false,
 
-//     Config.USERNAME = username
-//   }
+  get() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        if (_username) {
+          return resolve(_username)
+        }
 
-//   if (!Config.PASSWORD) {
-//     const { password } = await inquirer.prompt([
-//       {
-//         type: "password",
-//         name: "password",
-//         message: "GT password:",
-//       },
-//     ])
+        while (!_username || _username.length === 0) {
+          const response = await inquirer.prompt([
+            {
+              type: "input",
+              name: "answer",
+              message: "Username:",
+            },
+          ])
 
-//     Config.PASSWORD = password
-//   }
+          _username = response.answer.trim()
+        }
 
-//   return { username: Config.USERNAME, password: Config.PASSWORD }
-// }
+        return resolve(_username)
+      } catch (e) {
+        return reject(e)
+      }
+    })
+  },
 
-Object.defineProperty(config, "username", {})
+  set(value) {
+    _username = value
+  },
+})
 
-Object.defineProperty(config, "password", {})
+Object.defineProperty(config, "password", {
+  enumerable: true,
+  configurable: false,
 
-Object.defineProperty(config, "credentials", {})
+  get() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        if (_password) {
+          return resolve(_password)
+        }
 
-Object.defineProperty(config, "credentialsBase64", {})
+        while (!_password || _password.length === 0) {
+          const response = await inquirer.prompt([
+            {
+              type: "password",
+              name: "answer",
+              message: "Password:",
+            },
+          ])
+
+          _password = response.answer.trim()
+        }
+
+        return resolve(_password)
+      } catch (e) {
+        return reject(e)
+      }
+    })
+  },
+
+  set(value) {
+    _password = value
+  },
+})
+
+Object.defineProperty(config, "credentials", {
+  enumerable: true,
+  configurable: false,
+
+  get() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        return resolve({
+          username: await config.username,
+          password: await config.password,
+        })
+      } catch (e) {
+        return reject(e)
+      }
+    })
+  },
+
+  set(value) {
+    _username = value.username
+    _password = value.password
+  },
+})
+
+Object.defineProperty(config, "credentialsBase64", {
+  enumerable: true,
+  configurable: false,
+
+  get() {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const username = await config.username
+        const password = await config.password
+        return resolve(btoa(`${username}:${password}`))
+      } catch (e) {
+        return reject(e)
+      }
+    })
+  },
+
+  set() {
+    throw new PrettyError(`
+      The value of the \`credentialsBase64\` property cannot be set directly.
+      Please set the \`username\` / \`password\` or \`credentials\` fields
+      instead.
+    `)
+  },
+})
 
 module.exports = { config, Host, Environment }
