@@ -17,7 +17,6 @@ const config = (() => {
   try {
     return require(findUpward(".gtconfig"))
   } catch (e) {
-    console.log(e)
     return {}
   }
 })()
