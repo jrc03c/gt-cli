@@ -20,4 +20,15 @@ function findUpward(pattern, startingDirectory) {
   return null
 }
 
-module.exports = { btoa, findUpward }
+class PrettyError extends Error {
+  constructor(message) {
+    message = message
+      .split("\n")
+      .map(line => line.trim())
+      .join(" ")
+
+    super(message)
+  }
+}
+
+module.exports = { btoa, findUpward, PrettyError }
