@@ -15,8 +15,9 @@ const Environment = {
 
 const config = (() => {
   try {
-    return require(findUpward(/\.gitconfig.*/g))
+    return require(findUpward(".gtconfig"))
   } catch (e) {
+    console.log(e)
     return {}
   }
 })()
