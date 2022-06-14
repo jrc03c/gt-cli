@@ -1,14 +1,4 @@
 // build() {
-//   if [ -z $environment ]
-//   then
-//     _detect_environment
-//   fi
-
-//   if [ -z $email ] || [ -z $password ]
-//   then
-//     _authenticate
-//   fi
-
 //   if [ -f ".gt_projects" ]
 //   then
 //     cat .gt_projects |\
@@ -49,5 +39,25 @@
 //     exit 0
 //   fi
 // }
+
+const request = require("../request")
+
+async function getProgramEmbedInfo(key) {
+  const response = await request.send({ path: `/programs/${key}/embed` })
+  return await response.json()
+}
+
+async function getProgramContents(key) {
+  const embedInfo = await getProgramEmbedInfo(key)
+  const runID = embedInfo.run_id
+  const accessKey = embedInfo.access_key
+
+  const response = await request.send({
+    path: `/runs/${runID}/contents`,
+    headers: { "X-GuidedTrack-Access-Key": accessKey },
+  })
+
+  return await response.json()
+}
 
 module.exports = async function () {}

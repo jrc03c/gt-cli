@@ -10,8 +10,9 @@ module.exports = gt
 
 if (require.main === module) {
   async function run() {
-    const result = await gt.program.filter(p => p.id > 1000)
-    console.log(result)
+    const program = await gt.program.get(19868)
+    const contents = await gt.program.build.getProgramContents(program.key)
+    console.log(contents)
   }
 
   run()
