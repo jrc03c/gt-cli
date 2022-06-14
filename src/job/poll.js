@@ -6,6 +6,5 @@ module.exports = async function (jobID) {
     method: "GET",
   })
 
-  const data = await response.json()
-  return data
+  return await response.json()
 }

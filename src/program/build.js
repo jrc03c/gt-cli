@@ -40,6 +40,10 @@
 //   fi
 // }
 
+const { GTError } = require("../common.js")
+const { isUndefined, pause } = require("../helpers.js")
+const { poll } = require("../job")
+const get = require("./get.js")
 const request = require("../request")
 
 async function getProgramEmbedInfo(key) {
@@ -60,4 +64,39 @@ async function getProgramContents(key) {
   return await response.json()
 }
 
-module.exports = async function () {}
+module.exports = async function (idOrKey, timeBetweenPolls) {
+  const message = `
+    The second (and optional) argument to the \`gt.program.build\` function
+    must be a whole number representing the amount of time in milliseconds to
+    wait between successive job status polls!
+  `
+
+  if (!isUndefined(timeBetweenPolls) && typeof timeBetweenPolls !== "number") {
+    throw new GTError(message)
+  }
+
+  if (timeBetweenPolls <= 0) {
+    throw new GTError(message)
+  }
+
+  timeBetweenPolls = parseInt(timeBetweenPolls) || 3000
+
+  const program = await get(idOrKey)
+  const key = program.key
+  const contents = await getProgramContents(key)
+  const { job } = contents
+  console.log(`job: ${job} (${typeof job})`)
+
+  if (isUndefined(job)) {
+    return undefined
+  }
+
+  let status = "running"
+
+  while (status === "running") {
+    await pause(timeBetweenPolls)
+    status = (await poll(job)).status
+  }
+
+  return true
+}

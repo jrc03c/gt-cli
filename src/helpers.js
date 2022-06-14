@@ -42,4 +42,14 @@ function isUndefined(x) {
   return typeof x === "undefined" || x === null
 }
 
-module.exports = { btoa, findUpward, isUndefined }
+function pause(ms) {
+  return new Promise((resolve, reject) => {
+    try {
+      return setTimeout(resolve, ms)
+    } catch (e) {
+      return reject(e)
+    }
+  })
+}
+
+module.exports = { btoa, findUpward, isUndefined, pause }

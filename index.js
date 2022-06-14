@@ -10,9 +10,8 @@ module.exports = gt
 
 if (require.main === module) {
   async function run() {
-    const program = await gt.program.get(19868)
-    const contents = await gt.program.build.getProgramContents(program.key)
-    console.log(contents)
+    const result = await gt.program.build(19868)
+    console.log(result)
   }
 
   run()
