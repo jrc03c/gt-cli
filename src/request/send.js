@@ -18,13 +18,18 @@ module.exports = async function (options) {
     options = { path: options }
   }
 
+  if (typeof options !== "object") {
+    throw new common.GTError(`
+      The value passed into the \`gt.request.send\` function must be a string
+      (i.e., an API endpoint path) or an object with a \`path\` property!
+    `)
+  }
+
   if (!options.path) {
-    throw new Error(
-      [
-        "The `options` object passed into the `sendRequest` function must",
-        "have a `path` property!",
-      ].join(" ")
-    )
+    throw new common.GTError(`
+      The \`options\` object passed into the \`gt.request.send\` function must
+      have a \`path\` property!
+    `)
   }
 
   const credentials = common.config.credentialsBase64

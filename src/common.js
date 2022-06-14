@@ -1,5 +1,17 @@
-const { btoa, findUpward, GTError } = require("./helpers.js")
+const { btoa, findUpward } = require("./helpers.js")
 const inquirer = require("inquirer")
+
+class GTError extends Error {
+  constructor(message) {
+    message = message
+      .split("\n")
+      .map(line => line.trim())
+      .join(" ")
+      .trim()
+
+    super(message)
+  }
+}
 
 const Host = {
   DEVELOPMENT: "http://localhost:3000",
@@ -143,4 +155,4 @@ const config = {
   },
 }
 
-module.exports = { config, Host, Environment }
+module.exports = { config, GTError, Host, Environment }

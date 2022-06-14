@@ -38,15 +38,8 @@ function findUpward(pattern, startingDirectory) {
   return null
 }
 
-class GTError extends Error {
-  constructor(message) {
-    message = message
-      .split("\n")
-      .map(line => line.trim())
-      .join(" ")
-
-    super(message)
-  }
+function isUndefined(x) {
+  return typeof x === "undefined" || x === null
 }
 
-module.exports = { btoa, findUpward, GTError }
+module.exports = { btoa, findUpward, isUndefined }
