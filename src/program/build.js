@@ -64,39 +64,57 @@ async function getProgramContents(key) {
   return await response.json()
 }
 
-module.exports = async function (idOrKey, timeBetweenPolls) {
-  const message = `
-    The second (and optional) argument to the \`gt.program.build\` function
-    must be a whole number representing the amount of time in milliseconds to
-    wait between successive job status polls!
-  `
-
-  if (!isUndefined(timeBetweenPolls) && typeof timeBetweenPolls !== "number") {
-    throw new GTError(message)
+module.exports = async function (idOrKey, callback) {
+  if (!isUndefined(callback) && typeof callback !== "function") {
+    throw new GTError(`
+      The second (and optional) argument to the \`gt.program.build\` function
+      must be a function!
+    `)
   }
 
-  if (timeBetweenPolls <= 0) {
-    throw new GTError(message)
-  }
+  callback = callback || (() => {})
 
-  timeBetweenPolls = parseInt(timeBetweenPolls) || 3000
+  // fetch the program
+  callback({ finished: false, status: `Fetching program ${idOrKey}...` })
 
   const program = await get(idOrKey)
   const key = program.key
+
+  // get the program's contents
+  callback({ finished: false, status: `Getting program contents...` })
+
   const contents = await getProgramContents(key)
   const { job } = contents
   console.log(`job: ${job} (${typeof job})`)
 
   if (isUndefined(job)) {
+    callback({
+      finished: true,
+      status: "No changes were made, so building was not initiated.",
+    })
+
     return undefined
   }
 
+  // poll the build job status
   let status = "running"
 
   while (status === "running") {
-    await pause(timeBetweenPolls)
+    callback({
+      finished: false,
+      status: "Waiting for build job to finish...",
+    })
+
     status = (await poll(job)).status
   }
 
+  // get the updated program contents; if there were any compilation errors,
+  // then throw them; otherwise, return true
+  callback({ finished: false, status: "Checking for compilation errors..." })
+
+  const updatedContents = await getProgramContents(key)
+  console.log(updatedContents)
+
+  callback({ finished: true, status: "Build finished successfully!" })
   return true
 }
