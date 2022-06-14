@@ -1,4 +1,4 @@
-const common = require("./common.js")
+const common = require("../common.js")
 const fetch = require("node-fetch")
 
 module.exports = async function (options) {

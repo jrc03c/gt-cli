@@ -1,5 +1,7 @@
+const request = require("../request")
+
 module.exports = async function (query) {
-  const response = await sendRequest({
+  const response = await request.send({
     path: "/programs.json",
     method: "GET",
     query: { query },
