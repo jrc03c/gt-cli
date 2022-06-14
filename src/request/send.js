@@ -12,6 +12,8 @@ module.exports = async function (options) {
   //
   // note: the only required field is `path`!
 
+  await common.config.load()
+
   if (typeof options === "string") {
     options = { path: options }
   }
@@ -25,8 +27,8 @@ module.exports = async function (options) {
     )
   }
 
-  const credentials = common.credentialsBase64
-  const host = common.host
+  const credentials = common.config.credentialsBase64
+  const host = common.config.host
   let url = `${host}${options.path}`
 
   if (options.query) {
