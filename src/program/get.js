@@ -17,4 +17,17 @@
 //   return contents
 // }
 
-module.exports = async function () {}
+const find = require("./find.js")
+
+module.exports = async function (idOrKey) {
+  const all = await find()
+
+  const program = all.find(
+    program =>
+      program.id === parseInt(idOrKey) ||
+      program.key.includes(idOrKey.toString())
+  )
+
+  if (program) return program
+  return null
+}

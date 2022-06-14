@@ -10,8 +10,8 @@ module.exports = gt
 
 if (require.main === module) {
   async function run() {
-    const results = await gt.program.find("demo")
-    console.log(results)
+    const program = await gt.program.get("wbis0sv")
+    console.log(program)
   }
 
   run()
