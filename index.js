@@ -10,8 +10,8 @@ module.exports = gt
 
 if (require.main === module) {
   async function run() {
-    const program = await gt.program.find()
-    console.log(program)
+    const result = await gt.program.create("Josh's 2nd gt-cli test program!")
+    console.log(result)
   }
 
   run()

@@ -1,35 +1,24 @@
-// create() {
-//   _authenticate
-//   _detect_environment
+const request = require("../request")
+const get = require("./get.js")
+const { GTError } = require("../common.js")
 
-//   echo "Creating programs in $environment ($host)..."
+module.exports = async function (name) {
+  const response = await request.send({
+    path: "/programs",
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: { name },
+  })
 
-//   for file in *
-//   do
-//     if [ -f "./$file" ]
-//     then
-//       printf ">> Creating \"${file}\"... "
+  const data = await response.json()
 
-//       response=$(jq -n "{name:\"$file\"}" | curl -X POST -u "${email}:${password}" -d @- -H 'Content-Type: application/json' "$host/programs" 2>/dev/null)
-//       if [ $? -eq 0 ]
-//       then
-//         result=$(echo "${response}" | jq 'if .job_id then 0 else 1 end')
-//         if [ $result -eq 0 ]
-//         then
-//           echo "done"
-//         else
-//           echo "failed" >&2
-//           echo "${response} -- skipping" >&2
-//         fi
-//       else
-//         echo "failed" >&2
-//         echo ${response} >&2
-//         exit 1
-//       fi
-//     fi
-//   done
+  if (data.name && data.name[0] === "has already been taken") {
+    throw new GTError(`
+      This program name has already been taken! Please try a different name.
+    `)
+  }
 
-//   exit 0
-// }
-
-module.exports = async function () {}
+  const parts = data.program_path.split("/")
+  const id = parts[parts.length - 1]
+  return await get(id)
+}
