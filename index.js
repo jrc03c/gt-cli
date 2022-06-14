@@ -10,7 +10,7 @@ module.exports = gt
 
 if (require.main === module) {
   async function run() {
-    const result = await gt.program.create("Josh's 2nd gt-cli test program!")
+    const result = await gt.program.filter(p => p.id > 1000)
     console.log(result)
   }
 

@@ -9,14 +9,9 @@ module.exports = async function (idOrKey) {
     `)
   }
 
-  const all = await find()
-
-  const program = all.find(
+  return await find(
     program =>
       program.id === parseInt(idOrKey) ||
       program.key.includes(idOrKey.toString())
   )
-
-  if (program) return program
-  return null
 }
