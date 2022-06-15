@@ -1,5 +1,9 @@
 const common = require("../common.js")
 const fetch = require("node-fetch")
+const Queue = require("@jrc03c/queue")
+
+const timeBetweenJobs = 1000
+const queue = new Queue(timeBetweenJobs)
 
 module.exports = async function (options) {
   // options = {
@@ -59,6 +63,7 @@ module.exports = async function (options) {
         : JSON.stringify(options.body)
   }
 
-  const response = await fetch(url, requestOptions)
-  return response
+  return await queue.process(async () => {
+    return await fetch(url, requestOptions)
+  })
 }
