@@ -4,6 +4,8 @@
   "description": "## Description",
   "main": "gt.js",
   "dependencies": {
+    "@jrc03c/queue": "github:jrc03c/queue",
+    "express": "^4.18.1",
     "inquirer": "^7.3.3",
     "node-fetch": "^2.6.7"
   },

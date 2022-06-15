@@ -85,7 +85,6 @@ module.exports = async function (idOrKey, callback) {
 
   const contents = await getProgramContents(key)
   const { job } = contents
-  console.log(`job: ${job} (${typeof job})`)
 
   if (isUndefined(job)) {
     callback({
@@ -111,9 +110,17 @@ module.exports = async function (idOrKey, callback) {
   // get the updated program contents; if there were any compilation errors,
   // then throw them; otherwise, return true
   callback({ finished: false, status: "Checking for compilation errors..." })
-
   const updatedContents = await getProgramContents(key)
-  console.log(updatedContents)
+  const name = updatedContents.starting_program
+  const errors = updatedContents[name].metadata.errors
+
+  if (errors && errors.length > 0) {
+    throw new GTError(
+      [`The update succeeded, but there were some syntax errors:`].concat(
+        errors.map((e, i) => `🚨 (${i + 1}) ${e}`)
+      )
+    )
+  }
 
   callback({ finished: true, status: "Build finished successfully!" })
   return true

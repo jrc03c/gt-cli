@@ -1,102 +1,74 @@
-// push() {
-//
+const { GTError } = require("../common.js")
+const { isUndefined } = require("../helpers.js")
+const build = require("./build.js")
+const get = require("./get.js")
+const { poll } = require("../job")
+const request = require("../request")
 
-//   echo "Pushing to $environment ($host)..."
-
-//   for file in $selector
-//   do
-//     if [ -f "./$file" ]
-//     then
-//       id=`_find_program "$file" | jq '.id' 2>&1`
-
-//       if [ $? -eq 0 ]
-//       then
-//         if [ $id = "null" ]
-//         then
-//           printf ">> Program named \"$file\" not found, skipping... "
-//         else
-//           printf ">> Updating \"${file}\" (id: $id)... "
-//         fi
-//       else
-//         echo $id >&2
-//         exit 1
-//       fi
-
-//       result=$(cat "./$file" | jq --slurp --raw-input '{code:{contents: .}}' | curl -X PUT -u "${email}:${password}" -d @- -H 'Content-Type: application/json' "$host/programs/$id.json" 2>&1)
-//       if [ $? -eq 0 ]
-//       then
-//         echo "done"
-//       else
-//         echo "failed" >&2
-//         echo $result >&2
-//         exit 1
-//       fi
-//     fi
-//   done
-
-//   if [ -z $build ]
-//   then
-//     echo ""
-//   else
-//     build
-//   fi
-
-//   exit 0
-// }
-
-module.exports = async function (dict) {
-  // const dict = {
-  //   shouldBuild: true,
-  //   programs: [
-  //     { file: "/some/file.gt", id: "foobar" },
-  //     { contents: "Hello", id: "blah" },
-  //   ],
-  // }
-
-  throw new Error(
-    [
-      "NOTE: In Lyudmil's implementation, he searches for the program first",
-      "before updating its code! We should probably do that too!",
-    ].join(" ")
-  )
-
-  const message = [
-    "You must pass an object into the `push` function with a `programs`",
-    "property that points to an array of program objects (each with",
-    "`file` / `contents` and `id` properties)!",
-  ].join(" ")
-
-  if (typeof dict !== "object" || dict === null) {
-    throw new Error(message)
+module.exports = async function (idOrKey, contents, shouldBuild, callback) {
+  if (isUndefined(idOrKey)) {
+    throw new GTError(`
+      The first value passed into the \`gt.program.update\` function must be a
+      string (i.e., a program key) or a number (i.e., a program ID)!
+    `)
   }
 
-  const promises = dict.programs.map(program => {
-    if (!program.contents) {
-      if (!program.file) {
-        throw new Error(message)
-      }
+  if (isUndefined(contents) || typeof contents !== "string") {
+    throw new GTError(`
+      The second value passed into the \`gt.program.update\` function must be a
+      string (i.e., the code contents of the program).
+    `)
+  }
 
-      program.contents = fs.readFileSync(program.file, "utf8")
-    }
+  if (!isUndefined(callback) && typeof callback !== "function") {
+    throw new GTError(`
+      The fourth value passed into the \`gt.program.update\` function must be a
+      function!
+    `)
+  }
 
-    if (!program.id) {
-      throw new Error(message)
-    }
+  callback = callback || (() => {})
+  callback({ finished: false, status: `Fetching program ${idOrKey}...` })
 
-    return sendRequest({
-      path: `/programs/${id}.json`,
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: { code: { contents: program.contents } },
-    })
+  const id = (await get(idOrKey)).id
+
+  callback({ finished: false, status: "Updating program contents..." })
+
+  const response = await request.send({
+    path: `/programs/${id}.json`,
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: { contents },
   })
 
-  const responses = await Promise.all(promises)
-  const datas = await Promise.all(responses.map(r => r.json()))
+  const data = await response.json()
+  const job = data.job_id
+  let status = "running"
 
-  if (dict.shouldBuild) {
-    return await build(dict)
-  } else {
-    return datas
+  while (status === "running") {
+    callback({
+      finished: false,
+      status: "Waiting for update job to finish...",
+    })
+
+    status = (await poll(job)).status
   }
+
+  shouldBuild = !isUndefined(shouldBuild) ? shouldBuild : true
+
+  if (shouldBuild) {
+    callback({
+      finished: true,
+      status: "Update succeeded! Now rebuilding the program...",
+    })
+
+    await build(id, callback)
+  }
+
+  callback({
+    finished: true,
+    status: "Update and build finished successfully!",
+  })
+
+  return true
 }

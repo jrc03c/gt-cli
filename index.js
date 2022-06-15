@@ -10,7 +10,16 @@ module.exports = gt
 
 if (require.main === module) {
   async function run() {
-    const result = await gt.program.build(19868)
+    const contents = "*question: Why?\n\tWhy not?\n\tBecause..."
+    const shouldBuild = true
+
+    const result = await gt.program.update(
+      19868,
+      contents,
+      shouldBuild,
+      status => console.log(status.status)
+    )
+
     console.log(result)
   }
 

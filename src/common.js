@@ -3,11 +3,15 @@ const inquirer = require("inquirer")
 
 class GTError extends Error {
   constructor(message) {
-    message = message
-      .split("\n")
-      .map(line => line.trim())
-      .join(" ")
-      .trim()
+    if (message instanceof Array) {
+      message = message.join("\n")
+    } else {
+      message = message
+        .split("\n")
+        .map(line => line.trim())
+        .join(" ")
+        .trim()
+    }
 
     super(message)
   }
