@@ -1,45 +1,3 @@
-// build() {
-//   if [ -f ".gt_projects" ]
-//   then
-//     cat .gt_projects |\
-//       while read proj
-//       do
-//         key=`_find_program "$proj" | jq '.key' --raw-output`
-//         echo ">> Building project \"$proj\" (key: $key)"
-
-//         embed_info=`curl -u "${email}:${password}" $host/programs/$key/embed -Ss`
-//         run_id=`echo $embed_info | jq ".run_id" --raw-output`
-//         access_key=`echo $embed_info | jq ".access_key" --raw-output`
-
-//         job_id=$(_program_contents | jq '.job' --raw-output)
-
-//         if [ $job_id = "null" ]
-//         then
-//           echo ">>>> No changes to build"
-//         else
-//           printf ">>>> Waiting for new build (job: $job_id)... "
-//           while [ `_poll_job_status $job_id` = "running" ]
-//           do
-//             sleep 3
-//           done
-//           echo "done"
-//         fi
-
-//         errors=$(_program_contents | jq '[.[] | objects | .metadata.errors] | flatten | join("\n")' --raw-output)
-//         if [ -z $errors ]
-//         then
-//           echo ">>>> No errors"
-//         else
-//           echo ">>>> Found compilation errors:"
-//           echo $errors
-//         fi
-//       done
-//   else
-//     echo "No .gt_projects file, nothing to build"
-//     exit 0
-//   fi
-// }
-
 const { GTError } = require("../common.js")
 const { isUndefined, pause } = require("../helpers.js")
 const { poll } = require("../job")
@@ -64,7 +22,7 @@ async function getProgramContents(key) {
   return await response.json()
 }
 
-module.exports = async function (idOrKey, callback) {
+async function build(idOrKey, callback) {
   if (!isUndefined(callback) && typeof callback !== "function") {
     throw new GTError(`
       The second (and optional) argument to the \`gt.program.build\` function
@@ -125,3 +83,5 @@ module.exports = async function (idOrKey, callback) {
   callback({ finished: true, status: "Build finished successfully!" })
   return true
 }
+
+module.exports = build
