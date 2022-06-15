@@ -1,16 +1,16 @@
 {
   "name": "gt",
-  "version": "1.0.0",
-  "description": "## Description",
-  "main": "gt.js",
+  "version": "0.0.1",
+  "description": "",
+  "main": "index.js",
   "dependencies": {
+    "@jrc03c/fs-extras": "github:jrc03c/fs-extras",
+    "@jrc03c/js-text-tools": "github:jrc03c/js-text-tools",
     "@jrc03c/queue": "github:jrc03c/queue",
+    "chalk": "^5.0.1",
     "express": "^4.18.1",
     "inquirer": "^7.3.3",
     "node-fetch": "^2.6.7"
-  },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",

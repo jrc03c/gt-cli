@@ -21,4 +21,7 @@ module.exports = async function (name) {
   const parts = data.program_path.split("/")
   const id = parts[parts.length - 1]
   return await get(id)
+
+  // note: we should ask if people want to add the newly-created files to the
+  // configuration file (and provide an equivalent parameter)!
 }
