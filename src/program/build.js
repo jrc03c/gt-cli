@@ -24,10 +24,9 @@ async function getProgramContents(key) {
 
 async function build(idOrKey, callback) {
   if (!isUndefined(callback) && typeof callback !== "function") {
-    throw new GTError(`
-      The second (and optional) argument to the \`gt.program.build\` function
-      must be a function!
-    `)
+    throw new GTError(
+      `The second argument to the \`gt.program.build\` function (if used) must be a function!`
+    )
   }
 
   callback = callback || (() => {})
@@ -74,9 +73,9 @@ async function build(idOrKey, callback) {
 
   if (errors && errors.length > 0) {
     throw new GTError(
-      [`The update succeeded, but there were some syntax errors:`].concat(
-        errors.map((e, i) => `🚨 (${i + 1}) ${e}`)
-      )
+      [`The update succeeded, but there were some syntax errors:`]
+        .concat(errors.map((e, i) => `(${i + 1}) ${e}`))
+        .join("\n")
     )
   }
 

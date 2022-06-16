@@ -1,20 +1,14 @@
 const { GTError } = require("../common.js")
-const { isUndefined } = require("../helpers.js")
-const find = require("./find.js")
+const get = require("./get.js")
 
 module.exports = async function (fn) {
-  if (!isUndefined(fn) && typeof fn !== "function") {
+  if (typeof fn !== "function") {
     throw new GTError(`
       The value passed into the \`gt.program.filter\` function must be a
       function!
     `)
   }
 
-  const all = await find()
-
-  if (fn) {
-    return all.filter(fn)
-  }
-
-  return all
+  const all = await get()
+  return all.filter(fn)
 }

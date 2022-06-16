@@ -78,10 +78,9 @@ const config = {
       const env = response.value.trim()
 
       if (!Object.values(Environment).some(v => v.includes(env))) {
-        throw new GTError(`
-          Invalid environment! The environment value must be one of
-          "development", "staging", or "production".
-        `)
+        throw new GTError(
+          `Invalid environment! The environment value must be one of"development", "staging", or "production".`
+        )
       }
 
       config.environment = env
@@ -101,11 +100,9 @@ const config = {
       }
 
       if (!Object.values(Host).some(v => v.includes(config.host))) {
-        throw new GTError(`
-          The host could not be determined because the environment value was
-          invalid. Please set the environment value to one of "development",
-          "staging", or "production".
-        `)
+        throw new GTError(
+          `The host could not be determined because the environment value was invalid. Please set the environment value to one of "development", "staging", or "production".`
+        )
       }
     }
 
@@ -122,11 +119,9 @@ const config = {
         },
 
         set() {
-          throw new GTError(`
-            The \`credentials\` property of the configuration cannot be set
-            directly; instead, please set the \`username\` and \`password\`
-            properties.
-          `)
+          throw new GTError(
+            `The \`credentials\` property of the configuration cannot be set directly; instead, please set the \`username\` and \`password\` properties.`
+          )
         },
       })
     }
@@ -142,11 +137,9 @@ const config = {
         },
 
         set() {
-          throw new GTError(`
-          The \`credentialsBase64\` property of the configuration cannot be set
-          directly; instead, please set the \`username\` and \`password\`
-          properties.
-        `)
+          throw new GTError(
+            `The \`credentialsBase64\` property of the configuration cannot be set directly; instead, please set the \`username\` and \`password\` properties.`
+          )
         },
       })
     }

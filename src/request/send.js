@@ -2,6 +2,7 @@ const common = require("../common.js")
 const fetch = require("node-fetch")
 const Queue = require("@jrc03c/queue")
 
+const { GTError } = common
 const timeBetweenJobs = 1000
 const queue = new Queue(timeBetweenJobs)
 
@@ -16,7 +17,6 @@ module.exports = async function (options) {
   //
   // note: the only required field is `path`!
 
-  const { GTError } = common
   const config = await common.config.load()
 
   if (typeof options === "string") {
@@ -24,17 +24,15 @@ module.exports = async function (options) {
   }
 
   if (typeof options !== "object") {
-    throw new GTError(`
-      The value passed into the \`gt.request.send\` function must be a string
-      (i.e., an API endpoint path) or an object with a \`path\` property!
-    `)
+    throw new GTError(
+      `The value passed into the \`gt.request.send\` function must be a string (i.e., an API endpoint path) or an object with a \`path\` property!`
+    )
   }
 
   if (!options.path) {
-    throw new GTError(`
-      The \`options\` object passed into the \`gt.request.send\` function must
-      have a \`path\` property!
-    `)
+    throw new GTError(
+      `The \`options\` object passed into the \`gt.request.send\` function must have a \`path\` property!`
+    )
   }
 
   const credentials = config.credentialsBase64

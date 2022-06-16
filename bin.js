@@ -9,6 +9,7 @@ async function run() {
   const gt = require(".")
   const inquirer = require("inquirer")
   const path = require("path")
+  const util = require("util")
 
   const chalk = new Chalk()
 
@@ -42,8 +43,12 @@ async function run() {
         )} = creates a new program with the given name
 
         ${chalk.yellow(
+          "filter [query]"
+        )} = searches for and returns all programs with names that include the query
+
+        ${chalk.yellow(
           "find [query]"
-        )} = searches for programs with names that match a given query
+        )} = searches for and returns the first program with a name that includes the query
 
         ${chalk.yellow(
           "get [id or key]"
@@ -290,10 +295,61 @@ async function run() {
       )
     }
 
+    if (subcommand === "filter") {
+      if (params.length === 0) {
+        throw new GTError(
+          "You must specify a string pattern to match! See `gt help` for more info."
+        )
+      }
+
+      const query = params[0]
+
+      const results = await gt.program.filter(program =>
+        program.name.includes(query)
+      )
+
+      console.log("")
+      console.log(prettify(util.inspect(results, { colors: true })))
+      console.log("")
+    }
+
     if (subcommand === "find") {
+      if (params.length === 0) {
+        throw new GTError(
+          "You must specify a string pattern to match! See `gt help` for more info."
+        )
+      }
+
+      const query = params[0]
+
+      const results = await gt.program.find(program =>
+        program.name.includes(query)
+      )
+
+      console.log("")
+      console.log(prettify(util.inspect(results, { colors: true })))
+      console.log("")
     }
 
     if (subcommand === "get") {
+      if (params.length === 0) {
+        throw new GTError(
+          "You must specify a program ID or key to retrieve a specific program, or use `--all` to retrieve all programs! See `gt help` for more info."
+        )
+      }
+
+      const results = await (async () => {
+        if (params[0] === "--all") {
+          return await gt.program.get()
+        } else {
+          const idOrKey = params[0]
+          return await gt.program.get(idOrKey)
+        }
+      })
+
+      console.log("")
+      console.log(prettify(util.inspect(results, { colors: true })))
+      console.log("")
     }
 
     if (subcommand === "update") {

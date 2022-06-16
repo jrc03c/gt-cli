@@ -1,8 +1,15 @@
-const request = require("../request")
-const get = require("./get.js")
 const { GTError } = require("../common.js")
+const { isUndefined } = require("../helpers.js")
+const get = require("./get.js")
+const request = require("../request")
 
 module.exports = async function (name) {
+  if (isUndefined(name)) {
+    throw new GTError(
+      `The value passed into the \`gt.program.create\` function must be a string representing the name of the new program!`
+    )
+  }
+
   const response = await request.send({
     path: "/programs",
     method: "POST",
