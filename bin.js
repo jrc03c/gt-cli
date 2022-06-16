@@ -55,8 +55,8 @@ async function run() {
         )} = retrieves the metadata of a program with the given ID or key, or gets all programs if --all is used
 
         ${chalk.yellow(
-          "update [id or key]"
-        )} = updates the code contents of the program with the given ID or key (or all programs if no value is given); automatically builds remote programs by default, but this behavior can be disabled with --no-build
+          "update [key]"
+        )} = updates the code contents of the program with the given key (or all programs if --all is used); automatically builds remote programs by default, but this behavior can be disabled with --no-build
 
       ${chalk.green(
         "pull"
@@ -136,8 +136,7 @@ async function run() {
   // ==========================================================================
 
   if (command === "help") {
-    console.log(help)
-    process.exit(0)
+    return console.log(help)
   }
 
   // ==========================================================================
@@ -208,7 +207,7 @@ async function run() {
 
     fs.writeFileSync(configFilePath, JSON.stringify(template, null, 2), "utf8")
 
-    console.log(
+    return console.log(
       prettify(`
         ---
 
@@ -234,12 +233,17 @@ async function run() {
   // PROGRAM
   // ==========================================================================
 
+  const config = await gt.common.config.load()
+
   if (command === "program") {
     if (subcommand === "build") {
       const idOrKey = params[0]
-      await gt.program.build(idOrKey, info => console.log(info.status))
 
-      console.log(
+      await gt.program.build(idOrKey, info =>
+        console.log(prettify(info.status))
+      )
+
+      return console.log(
         prettify(
           `Program ${
             typeof idOrKey === "string" ? `"${idOrKey}"` : idOrKey
@@ -258,7 +262,7 @@ async function run() {
       const name = params[0]
       const data = await gt.program.create(name)
 
-      console.log(
+      return console.log(
         prettify(`
           Program "${name}" was created successfully!
 
@@ -310,7 +314,7 @@ async function run() {
 
       console.log("")
       console.log(prettify(util.inspect(results, { colors: true })))
-      console.log("")
+      return console.log("")
     }
 
     if (subcommand === "find") {
@@ -328,7 +332,7 @@ async function run() {
 
       console.log("")
       console.log(prettify(util.inspect(results, { colors: true })))
-      console.log("")
+      return console.log("")
     }
 
     if (subcommand === "get") {
@@ -349,10 +353,50 @@ async function run() {
 
       console.log("")
       console.log(prettify(util.inspect(results, { colors: true })))
-      console.log("")
+      return console.log("")
     }
 
     if (subcommand === "update") {
+      if (params.length === 0) {
+        throw new GTError(
+          "You must specify at least one program ID or key! Multiple IDs and/or keys should be separated by spaces. See `gt-help` for more info."
+        )
+      }
+
+      const shouldBuild = params.indexOf("--no-build") < 0
+      const shouldUpdateAll = params.indexOf("--all") > -1
+
+      const keys = shouldUpdateAll
+        ? Object.keys(config.programs)
+        : params.filter(p => p !== "--no-build" && p !== "--all")
+
+      for (let i = 0; i < keys; i++) {
+        const key = keys[i]
+        let file
+
+        if (config.programs[key]) {
+          file = path.resolve(config.programs[key])
+        } else {
+          const response = await inquirer.prompt([
+            {
+              type: "input",
+              name: "answer",
+              message: `The program with key "${key}" is not listed in your .gtconfig file. What is the path to the GT program file (i.e., the file with a .gt or .guidedtrack extension) for this program?`,
+            },
+          ])
+
+          file = path.resolve(response.answer)
+        }
+
+        const raw = fs.readFileSync(file, "utf8")
+        console.log(prettify("---"))
+
+        await gt.program.update(key, raw, shouldBuild, info =>
+          console.log(prettify(info.status))
+        )
+      }
+
+      return
     }
   }
 
