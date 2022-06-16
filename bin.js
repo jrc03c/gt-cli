@@ -47,7 +47,7 @@ async function run() {
 
         ${chalk.yellow(
           "get [id or key]"
-        )} = retrieves the metadata of a program with the given ID or key
+        )} = retrieves the metadata of a program with the given ID or key, or gets all programs if --all is used
 
         ${chalk.yellow(
           "update [id or key]"
