@@ -29,7 +29,7 @@ module.exports = async function (idOrKey, contents, shouldBuild, callback) {
   callback({
     finished: false,
     status: `Fetching program ${idOrKey}...`,
-    step: 1 / 5,
+    progress: 1 / 5,
   })
 
   const id = (await get(idOrKey)).id
@@ -37,7 +37,7 @@ module.exports = async function (idOrKey, contents, shouldBuild, callback) {
   callback({
     finished: false,
     status: "Updating program contents...",
-    step: 2 / 5,
+    progress: 2 / 5,
   })
 
   const response = await request.send({
@@ -55,7 +55,7 @@ module.exports = async function (idOrKey, contents, shouldBuild, callback) {
     callback({
       finished: false,
       status: "Waiting for update job to finish...",
-      step: 3 / 5,
+      progress: 3 / 5,
     })
 
     status = (await poll(job)).status
@@ -67,7 +67,7 @@ module.exports = async function (idOrKey, contents, shouldBuild, callback) {
     callback({
       finished: true,
       status: "Update succeeded! Now rebuilding the program...",
-      step: 4 / 5,
+      progress: 4 / 5,
     })
 
     await build(id, callback)
@@ -76,7 +76,7 @@ module.exports = async function (idOrKey, contents, shouldBuild, callback) {
   callback({
     finished: true,
     status: "Update and build finished successfully!",
-    step: 5 / 5,
+    progress: 5 / 5,
   })
 
   return true

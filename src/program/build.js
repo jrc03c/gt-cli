@@ -32,13 +32,21 @@ async function build(idOrKey, callback) {
   callback = callback || (() => {})
 
   // fetch the program
-  callback({ finished: false, status: `Fetching program ${idOrKey}...` })
+  callback({
+    finished: false,
+    status: `Fetching program ${idOrKey}...`,
+    progress: 1 / 6,
+  })
 
   const program = await get(idOrKey)
   const key = program.key
 
   // get the program's contents
-  callback({ finished: false, status: `Getting program contents...` })
+  callback({
+    finished: false,
+    status: `Getting program contents...`,
+    progress: 2 / 6,
+  })
 
   const contents = await getProgramContents(key)
   const { job } = contents
@@ -47,6 +55,7 @@ async function build(idOrKey, callback) {
     callback({
       finished: true,
       status: "No changes were made, so building was not initiated.",
+      progress: 3 / 6,
     })
 
     return undefined
@@ -59,6 +68,7 @@ async function build(idOrKey, callback) {
     callback({
       finished: false,
       status: "Waiting for build job to finish...",
+      progress: 4 / 6,
     })
 
     status = (await poll(job)).status
@@ -66,7 +76,12 @@ async function build(idOrKey, callback) {
 
   // get the updated program contents; if there were any compilation errors,
   // then throw them; otherwise, return true
-  callback({ finished: false, status: "Checking for compilation errors..." })
+  callback({
+    finished: false,
+    status: "Checking for compilation errors...",
+    progress: 5 / 6,
+  })
+
   const updatedContents = await getProgramContents(key)
   const name = updatedContents.starting_program
   const errors = updatedContents[name].metadata.errors
@@ -79,7 +94,12 @@ async function build(idOrKey, callback) {
     )
   }
 
-  callback({ finished: true, status: "Build finished successfully!" })
+  callback({
+    finished: true,
+    status: "Build finished successfully!",
+    progress: 6 / 6,
+  })
+
   return true
 }
 
