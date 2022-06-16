@@ -1,19 +1,15 @@
 const { btoa, findUpward } = require("./helpers.js")
+const fs = require("fs")
 const inquirer = require("inquirer")
 
 class GTError extends Error {
   constructor(message) {
-    if (message instanceof Array) {
-      message = message.join("\n")
-    } else {
-      message = message
-        .split("\n")
-        .map(line => line.trim())
-        .join(" ")
-        .trim()
-    }
+    message = message.replaceAll(
+      "`gt help`",
+      "\x1b[1m\x1b[31m`gt help`\x1b[0m\x1b[33m"
+    )
 
-    super(message)
+    super(`🚨 \x1b[33m${message}\x1b[0m`)
   }
 }
 
@@ -38,7 +34,8 @@ const config = {
     }
 
     try {
-      const temp = require(findUpward(".gtconfig"))
+      const configFilePath = findUpward(".gtconfig")
+      const temp = JSON.parse(fs.readFileSync(configFilePath, "utf8"))
 
       Object.keys(temp).forEach(key => {
         config[key] = temp[key]

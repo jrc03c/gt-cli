@@ -1,3 +1,4 @@
+const { indent, unindent, wrap } = require("@jrc03c/js-text-tools")
 const fs = require("fs")
 const path = require("path")
 
@@ -52,4 +53,8 @@ function pause(ms) {
   })
 }
 
-module.exports = { btoa, findUpward, isUndefined, pause }
+function prettify(text) {
+  return wrap(indent(unindent(text), "  "), null, "  ")
+}
+
+module.exports = { btoa, findUpward, isUndefined, pause, prettify }

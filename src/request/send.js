@@ -16,28 +16,29 @@ module.exports = async function (options) {
   //
   // note: the only required field is `path`!
 
-  await common.config.load()
+  const { GTError } = common
+  const config = await common.config.load()
 
   if (typeof options === "string") {
     options = { path: options }
   }
 
   if (typeof options !== "object") {
-    throw new common.GTError(`
+    throw new GTError(`
       The value passed into the \`gt.request.send\` function must be a string
       (i.e., an API endpoint path) or an object with a \`path\` property!
     `)
   }
 
   if (!options.path) {
-    throw new common.GTError(`
+    throw new GTError(`
       The \`options\` object passed into the \`gt.request.send\` function must
       have a \`path\` property!
     `)
   }
 
-  const credentials = common.config.credentialsBase64
-  const host = common.config.host
+  const credentials = config.credentialsBase64
+  const host = config.host
   let url = `${host}${options.path}`
 
   if (options.query) {

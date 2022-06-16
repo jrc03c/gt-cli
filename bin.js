@@ -2,36 +2,34 @@
 
 async function run() {
   const { Chalk } = await import("chalk")
-  const { indent, unindent, wrap } = require("@jrc03c/js-text-tools")
+  const { GTError } = require("./src/common.js")
+  const { prettify } = require("./src/helpers.js")
   const fs = require("fs")
   const fsx = require("@jrc03c/fs-extras")
   const gt = require(".")
   const inquirer = require("inquirer")
-  const chalk = new Chalk()
   const path = require("path")
 
-  function prettify(text) {
-    return wrap(indent(unindent(text), "  "), null, "  ")
-  }
+  const chalk = new Chalk()
 
   const help = prettify(`
     ${chalk.bold("===========")}
     ${chalk.bold("gt-cli help")}
     ${chalk.bold("===========")}
 
+    ------
     ${chalk.bold("Syntax")}
+    ------
 
       ${chalk.blue.bold("gt [command] [sub-command] [options]")}
 
+    --------
     ${chalk.bold("Commands")}
+    --------
 
       ${chalk.green("help")} = Shows this help message
 
       ${chalk.green("init")} = Creates a new .gtconfig file
-
-      ${chalk.green("job")}
-
-        ${chalk.yellow("poll [id]")} = shows the status of a job given a job ID
 
       ${chalk.green("program")}
 
@@ -72,16 +70,15 @@ async function run() {
           --body [body as JSON]
           --query [query as JSON]
 
+    --------
     ${chalk.bold("Examples")}
+    --------
 
       ${chalk.dim("# print this help message again")}
       gt help
 
       ${chalk.dim("# initialize a project by generating a .gtconfig file")}
       gt init
-
-      ${chalk.dim("# check the status of a running job")}
-      gt job poll 12345
 
       ${chalk.dim("# build a program")}
       gt program build 19868
@@ -129,22 +126,48 @@ async function run() {
   const subcommand = args[1]
   const params = args.slice(2)
 
+  // ==========================================================================
+  // HELP
+  // ==========================================================================
+
   if (command === "help") {
     console.log(help)
     process.exit(0)
   }
 
+  // ==========================================================================
+  // INIT
+  // ==========================================================================
+
   if (command === "init") {
-    const template = {
-      username: "YOUR_GT_USERNAME_OR_EMAIL",
-      password: "YOUR_GT_PASSWORD",
-      environment: "production",
-      programs: {},
+    const cwd = process.cwd()
+    const configFilePath = path.join(cwd, ".gtconfig")
+
+    const template = (() => {
+      try {
+        return JSON.parse(fs.readFileSync(configFilePath, "utf8"))
+      } catch (e) {
+        return {}
+      }
+    })()
+
+    if (!template.username) {
+      template.username = "YOUR_GT_USERNAME_OR_EMAIL"
+    }
+
+    if (!template.password) {
+      template.password = "YOUR_GT_PASSWORD"
+    }
+
+    if (!template.environment) {
+      template.environment = "production"
+    }
+
+    if (!template.programs) {
+      template.programs = {}
     }
 
     console.log(prettify(`\nSearching for GT program files...`))
-
-    const cwd = process.cwd()
 
     const gtFiles = fsx.findSync(cwd, file => {
       const lowerFile = file.toLowerCase()
@@ -155,8 +178,20 @@ async function run() {
       console.log(prettify("\nFound these files:\n"))
 
       gtFiles.forEach((file, i) => {
-        console.log(chalk.green(prettify(`➔ ${file.replace(cwd, "")}`)))
-        template.programs["id" + i] = file
+        const hasAlreadyBeenAdded = Object.keys(template.programs).some(key => {
+          const previous = template.programs[key].replace(cwd, "")
+          const current = file.replace(cwd, "")
+          return previous === current
+        })
+
+        if (hasAlreadyBeenAdded) {
+          console.log(
+            chalk.dim(prettify(`➔ ${file.replace(cwd, "")} (already added)`))
+          )
+        } else {
+          console.log(chalk.green(prettify(`➔ ${file.replace(cwd, "")}`)))
+          template.programs["id" + i] = file
+        }
       })
 
       console.log(
@@ -166,7 +201,7 @@ async function run() {
       )
     }
 
-    fs.writeFileSync(".gtconfig", JSON.stringify(template, null, 2), "utf8")
+    fs.writeFileSync(configFilePath, JSON.stringify(template, null, 2), "utf8")
 
     console.log(
       prettify(`
@@ -188,6 +223,102 @@ async function run() {
         .replaceAll("`username`", chalk.blue("`username`"))
         .replaceAll("`password`", chalk.blue("`password`"))
     )
+  }
+
+  // ==========================================================================
+  // PROGRAM
+  // ==========================================================================
+
+  if (command === "program") {
+    if (subcommand === "build") {
+      const idOrKey = params[0]
+      await gt.program.build(idOrKey, info => console.log(info.status))
+
+      console.log(
+        prettify(
+          `Program ${
+            typeof idOrKey === "string" ? `"${idOrKey}"` : idOrKey
+          } was built successfully!`
+        )
+      )
+    }
+
+    if (subcommand === "create") {
+      if (params.length === 0) {
+        throw new GTError(
+          "You must specify a program name! See `gt help` for more info."
+        )
+      }
+
+      const name = params[0]
+      const data = await gt.program.create(name)
+
+      console.log(
+        prettify(`
+          Program "${name}" was created successfully!
+
+          ID:       ${data.id}
+          Key:      ${data.key}
+          Edit:     https://www.guidedtrack.com/programs/${data.id}/edit
+          Preview:  https://www.guidedtrack.com/programs/${data.key}/preview
+          Run:      https://www.guidedtrack.com/programs/${data.key}/run
+        `)
+          .split("\n")
+          .map(line => {
+            const indentation = line.slice(
+              0,
+              line.split("").findIndex(s => !s.match(/\s/g))
+            )
+
+            if (line.match(/Program.*?!/g)) {
+              return indentation + chalk.green.bold(line.trim())
+            }
+
+            const itemsToReplace = ["ID:", "Key:", "Edit:", "Preview:", "Run:"]
+
+            for (let i = 0; i < itemsToReplace.length; i++) {
+              const item = itemsToReplace[i]
+
+              if (line.trim().startsWith(item)) {
+                return indentation + chalk.blue.bold(item) + line.split(item)[1]
+              }
+            }
+
+            return line
+          })
+          .join("\n")
+      )
+    }
+
+    if (subcommand === "find") {
+    }
+
+    if (subcommand === "get") {
+    }
+
+    if (subcommand === "update") {
+    }
+  }
+
+  // ==========================================================================
+  // PULL
+  // ==========================================================================
+
+  if (command === "pull") {
+  }
+
+  // ==========================================================================
+  // PUSH
+  // ==========================================================================
+
+  if (command === "push") {
+  }
+
+  // ==========================================================================
+  // REQUEST
+  // ==========================================================================
+
+  if (command === "request") {
   }
 }
 
