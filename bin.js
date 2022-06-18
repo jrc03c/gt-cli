@@ -62,7 +62,7 @@ async function run() {
 
         ${chalk.yellow(
           "upload [id or key]"
-        )} = uploads the code contents of the program with the given key (or all programs if --all is used); it automatically compiles the remote programs by default, but this behavior can be disabled with --no-build
+        )} = uploads the code contents of the program with the given key (or all programs if --all is used); it automatically compiles the remote program by default, but this behavior can be disabled with --no-build
 
       ${chalk.green(
         "pull"
