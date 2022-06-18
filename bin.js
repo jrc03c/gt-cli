@@ -103,7 +103,7 @@ async function run() {
       gt program get --all
 
       ${chalk.dim("# update the remote program with the local contents")}
-      gt program update 19868
+      gt program update "abcd123"
 
       ${chalk.dim("# update all remote programs with all local contents")}
       gt program update --all
@@ -130,6 +130,8 @@ async function run() {
   const command = args[0]
   const subcommand = args[1]
   const params = args.slice(2)
+  const cwd = process.cwd()
+  const configFilePath = path.join(cwd, ".gtconfig")
 
   // ==========================================================================
   // HELP
@@ -144,9 +146,6 @@ async function run() {
   // ==========================================================================
 
   if (command === "init") {
-    const cwd = process.cwd()
-    const configFilePath = path.join(cwd, ".gtconfig")
-
     const template = (() => {
       try {
         return JSON.parse(fs.readFileSync(configFilePath, "utf8"))
@@ -262,7 +261,7 @@ async function run() {
       const name = params[0]
       const data = await gt.program.create(name)
 
-      return console.log(
+      console.log(
         prettify(`
           Program "${name}" was created successfully!
 
@@ -297,6 +296,80 @@ async function run() {
           })
           .join("\n")
       )
+
+      const response1 = await inquirer.prompt([
+        {
+          type: "list",
+          choices: [
+            { name: "Yes", value: true },
+            { name: "No", value: false },
+          ],
+          message: `Would you like for us to add this program to your .gtconfig file?`,
+          name: "answer",
+        },
+      ])
+
+      if (response1.answer) {
+        const response2 = await inquirer.prompt([
+          {
+            type: "list",
+            choices: [
+              { name: "Yes", value: true },
+              { name: "No", value: false },
+            ],
+            message: `Do you already have a program file (i.e., a .gt or .guidedtrack file) that contains the contents of this program?`,
+            name: "answer",
+          },
+        ])
+
+        let file
+        let specifiedAPath = false
+
+        if (response2.answer) {
+          const response3 = await inquirer.prompt([
+            {
+              type: "input",
+              name: "answer",
+              message: "What is the path to the program file?",
+            },
+          ])
+
+          file = response3.answer
+          specifiedAPath = true
+        } else {
+          file = `placeholder/path/to/${data.key}.gt`
+        }
+
+        if (!config.programs) {
+          config.programs = {}
+        }
+
+        config.programs[data.key] = file
+
+        fs.writeFileSync(
+          configFilePath,
+          JSON.stringify(config, null, 2),
+          "utf8"
+        )
+
+        if (specifiedAPath) {
+          console.log(
+            prettify(
+              `Your .gtconfig file was updated with the path you provided!`
+            )
+          )
+        } else {
+          console.log(
+            prettify(
+              `Since you don't already have a file for this program, your .gtconfig file was updated to include a placeholder path for this program. You'll need to change that placeholder path before running any other program operations.`
+            )
+          )
+        }
+      } else {
+        console.log(prettify("Your configuration file was not updated."))
+      }
+
+      return
     }
 
     if (subcommand === "filter") {
@@ -377,7 +450,7 @@ async function run() {
         if (config.programs[key]) {
           file = path.resolve(config.programs[key])
         } else {
-          const response = await inquirer.prompt([
+          const response1 = await inquirer.prompt([
             {
               type: "input",
               name: "answer",
@@ -385,7 +458,28 @@ async function run() {
             },
           ])
 
-          file = path.resolve(response.answer)
+          file = path.resolve(response1.answer)
+
+          const response2 = await inquirer.prompt([
+            {
+              type: "list",
+              choices: [
+                { name: "Yes", value: true },
+                { name: "No", value: false },
+              ],
+              message: `Would you like for us to add program "${key}" to your .gtconfig file so that you don't need to answer these questions next time?`,
+              name: "answer",
+            },
+          ])
+
+          if (response2.answer) {
+            config.programs[key] = response1.answer
+            fs.writeFileSync(
+              configFilePath,
+              JSON.stringify(config, null, 2),
+              "utf8"
+            )
+          }
         }
 
         const raw = fs.readFileSync(file, "utf8")

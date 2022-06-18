@@ -24,7 +24,8 @@ module.exports = async function (idOrKey) {
     return results
   } else {
     return results.find(
-      program => program.id === idOrKey || program.key === idOrKey
+      program =>
+        program.id === parseInt(idOrKey) || program.key === idOrKey.toString()
     )
   }
 }

@@ -1,5 +1,6 @@
 const { GTError } = require("../common.js")
 const { isUndefined } = require("../helpers.js")
+const { poll } = require("../job")
 const get = require("./get.js")
 const request = require("../request")
 
@@ -27,6 +28,13 @@ module.exports = async function (name) {
 
   const parts = data.program_path.split("/")
   const id = parts[parts.length - 1]
+  const jobID = data.job_id
+  let status = "running"
+
+  while (status === "running") {
+    status = (await poll(jobID)).status
+  }
+
   return await get(id)
 
   // note: we should ask if people want to add the newly-created files to the
