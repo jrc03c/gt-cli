@@ -23,9 +23,15 @@ module.exports = async function (idOrKey) {
   if (isUndefined(idOrKey)) {
     return results
   } else {
-    return results.find(
+    const out = results.find(
       program =>
         program.id === parseInt(idOrKey) || program.key === idOrKey.toString()
     )
+
+    if (!out) {
+      throw new GTError(`No such program exists!`)
+    }
+
+    return out
   }
 }

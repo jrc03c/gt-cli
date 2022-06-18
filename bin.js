@@ -43,10 +43,16 @@ async function run() {
         )} = creates a new program with the given name
 
         ${chalk.yellow(
+          "delete [options] [id or key]"
+        )} = deletes the program with the given ID or key; by default, you'll be prompted to confirm the deletion before the request is sent, but this behavior can be disabled by using --unsafe; options are:
+
+          --unsafe
+
+        ${chalk.yellow(
           "download [options] [id or key]"
         )} = fetches the contents of the remote program with the given ID or key; options are:
+
           --save [path]
-          --print
 
         ${chalk.yellow(
           "filter [query]"
@@ -58,11 +64,16 @@ async function run() {
 
         ${chalk.yellow(
           "get [id or key]"
-        )} = retrieves the metadata of a program with the given ID or key, or gets all programs if --all is used
+        )} = retrieves the metadata of a program with the given ID or key, or gets all programs if --all is used; options are:
+
+          --all
 
         ${chalk.yellow(
           "upload [id or key]"
-        )} = uploads the code contents of the program with the given key (or all programs if --all is used); it automatically compiles the remote program by default, but this behavior can be disabled with --no-build
+        )} = uploads the code contents of the program with the given key (or all programs if --all is used); it automatically compiles the remote program by default, but this behavior can be disabled with --no-build; options are:
+
+          --all
+          --no-build
 
       ${chalk.green(
         "pull"
@@ -77,6 +88,7 @@ async function run() {
         ${chalk.yellow(
           "send [options] [path]"
         )} = sends an HTTP request to an API endpoint; options are:
+
           --method [method] (default is "GET")
           --headers [headers as JSON]
           --body [body as JSON]
@@ -381,6 +393,68 @@ async function run() {
       return
     }
 
+    if (subcommand === "delete") {
+      if (params.length === 0) {
+        throw new GTError(
+          "You must specify the ID or key of the program to delete! See `gt help` for more info."
+        )
+      }
+
+      const idOrKey = params.pop()
+      const program = await gt.program.get(idOrKey)
+      const isUnsafe = params.indexOf("--unsafe") > -1
+      let shouldDelete = false
+
+      if (isUnsafe) {
+        shouldDelete = true
+      } else {
+        const response1 = await inquirer.prompt([
+          {
+            type: "list",
+            choices: [
+              { name: "Yes, I want to delete this program", value: true },
+              { name: "No, I don't want to delete this program", value: false },
+            ],
+            name: "answer",
+            message: chalk.red.bold(
+              prettify(
+                `You are about to delete the program called "${program.name}" from the GuidedTrack servers. (Any local copies will not be deleted.) This action cannot be undone! Are you sure you want to delete this program?`
+              )
+            ),
+          },
+        ])
+
+        if (response1.answer) {
+          const response2 = await inquirer.prompt([
+            {
+              type: "input",
+              name: "answer",
+              message: chalk.yellow.bold(
+                prettify(
+                  `To initiate deletion of the program called "${program.name}", please type the program's name here:`
+                )
+              ),
+            },
+          ])
+
+          if (response2.answer.trim() !== program.name.trim()) {
+            throw new GTError(
+              "The name you typed doesn't match the name of the program!"
+            )
+          }
+
+          shouldDelete = true
+        }
+      }
+
+      if (shouldDelete) {
+        await gt.program.delete(idOrKey)
+        console.log(prettify(`The program was deleted!`))
+      } else {
+        console.log(prettify("The program was not deleted."))
+      }
+    }
+
     if (subcommand === "download") {
       if (params.length === 0) {
         throw new GTError(
@@ -389,51 +463,46 @@ async function run() {
       }
 
       const idOrKey = params.pop()
-      let shouldSave, shouldPrint, file
+      let shouldSave, file
 
-      if (params.indexOf("--print") < 0) {
-        if (params.indexOf("--save") > -1) {
-          shouldSave = true
-          file = params[params.indexOf("--save") + 1]
-        } else {
+      if (params.indexOf("--save") > -1) {
+        shouldSave = true
+        file = params[params.indexOf("--save") + 1]
+      } else {
+        const response = await inquirer.prompt([
+          {
+            type: "list",
+            choices: [
+              { name: "Yes", value: true },
+              { name: "No", value: false },
+            ],
+            name: "answer",
+            message: prettify(
+              "Would you like to save the contents of the program to a file?"
+            ),
+          },
+        ])
+
+        shouldSave = response.answer
+
+        if (shouldSave) {
           const response = await inquirer.prompt([
             {
-              type: "list",
-              choices: [
-                { name: "Yes", value: true },
-                { name: "No", value: false },
-              ],
+              type: "input",
               name: "answer",
-              message: prettify(
-                "Would you like to save the contents of the program to a file?"
-              ),
+              message: prettify("Path for the new file:"),
             },
           ])
 
-          shouldSave = response.answer
-
-          if (shouldSave) {
-            const response = await inquirer.prompt([
-              {
-                type: "input",
-                name: "answer",
-                message: prettify("Path for the new file:"),
-              },
-            ])
-
-            file = path.resolve(response.answer)
-          }
+          file = path.resolve(response.answer)
         }
       }
 
-      shouldPrint = params.indexOf("--save") < 0 && !shouldSave
       const contents = await gt.program.download(idOrKey)
 
       if (shouldSave) {
         fs.writeFileSync(file, contents, "utf8")
-      }
-
-      if (shouldPrint) {
+      } else {
         console.log(contents)
       }
     }
