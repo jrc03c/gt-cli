@@ -177,7 +177,7 @@ async function run() {
       template.programs = {}
     }
 
-    console.log(prettify(`Searching for GT program files...`))
+    console.log(prettify(`Searching for GT program files...`) + "\n")
 
     const gtFiles = fsx.findSync(cwd, file => {
       const lowerFile = file.toLowerCase()
@@ -215,8 +215,6 @@ async function run() {
 
     return console.log(
       prettify(`
-        ---
-
         The configuration has been stored in .gtconfig!
         
         Note that the \`environment\` property is set by default to 'production' but can be changed to 'development' or 'staging' as needed (though 'development' only makes sense if you're running a local version of the GT server, which you probably aren't doing unless you're a GT engineer).
@@ -271,12 +269,12 @@ async function run() {
       console.log(
         prettify(`
           Program "${name}" was created successfully!
-
           ID:       ${data.id}
           Key:      ${data.key}
           Edit:     https://www.guidedtrack.com/programs/${data.id}/edit
           Preview:  https://www.guidedtrack.com/programs/${data.key}/preview
           Run:      https://www.guidedtrack.com/programs/${data.key}/run
+          ---
         `)
           .split("\n")
           .map(line => {
@@ -311,7 +309,9 @@ async function run() {
             { name: "Yes", value: true },
             { name: "No", value: false },
           ],
-          message: `Would you like for us to add this program to your .gtconfig file?`,
+          message: prettify(
+            `Would you like for us to add this program to your .gtconfig file?`
+          ),
           name: "answer",
         },
       ])
@@ -324,7 +324,9 @@ async function run() {
               { name: "Yes", value: true },
               { name: "No", value: false },
             ],
-            message: `Do you already have a program file (i.e., a .gt or .guidedtrack file) that contains the contents of this program?`,
+            message: prettify(
+              `Do you already have a program file (i.e., a .gt or .guidedtrack file) that contains the contents of this program?`
+            ),
             name: "answer",
           },
         ])
@@ -337,7 +339,7 @@ async function run() {
             {
               type: "input",
               name: "answer",
-              message: "What is the path to the program file?",
+              message: prettify("What is the path to the program file?"),
             },
           ])
 
@@ -402,8 +404,9 @@ async function run() {
                 { name: "No", value: false },
               ],
               name: "answer",
-              message:
-                "Would you like to save the contents of the program to a file?",
+              message: prettify(
+                "Would you like to save the contents of the program to a file?"
+              ),
             },
           ])
 
@@ -414,7 +417,7 @@ async function run() {
               {
                 type: "input",
                 name: "answer",
-                message: "Path for the new file:",
+                message: prettify("Path for the new file:"),
               },
             ])
 
@@ -511,7 +514,9 @@ async function run() {
             {
               type: "input",
               name: "answer",
-              message: `The program with key "${key}" is not listed in your .gtconfig file. What is the path to the GT program file (i.e., the file with a .gt or .guidedtrack extension) for this program?`,
+              message: prettify(
+                `The program with key "${key}" is not listed in your .gtconfig file. What is the path to the GT program file (i.e., the file with a .gt or .guidedtrack extension) for this program?`
+              ),
             },
           ])
 
@@ -524,7 +529,9 @@ async function run() {
                 { name: "Yes", value: true },
                 { name: "No", value: false },
               ],
-              message: `Would you like for us to add program "${key}" to your .gtconfig file so that you don't need to answer these questions next time?`,
+              message: prettify(
+                `Would you like for us to add program "${key}" to your .gtconfig file so that you don't need to answer these questions next time?`
+              ),
               name: "answer",
             },
           ])

@@ -40,7 +40,9 @@ const config = {
       Object.keys(temp).forEach(key => {
         config[key] = temp[key]
       })
-    } catch (e) {}
+    } catch (e) {
+      throw new GTError("Your .gtconfig file doesn't seem to be valid JSON!")
+    }
 
     if (!config.username) {
       const response = await inquirer.prompt([

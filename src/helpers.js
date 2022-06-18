@@ -1,4 +1,4 @@
-const { indent, unindent, wrap } = require("@jrc03c/js-text-tools")
+const { unindent, wrap } = require("@jrc03c/js-text-tools")
 const fs = require("fs")
 const path = require("path")
 
