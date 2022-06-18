@@ -22,7 +22,7 @@ async function run() {
     ${chalk.bold("Syntax")}
     ------
 
-      ${chalk.blue.bold("gt [command] [sub-command] [options]")}
+      ${chalk.blue.bold("gt [command] [sub-command] [parameters]")}
 
     --------
     ${chalk.bold("Commands")}
@@ -43,6 +43,10 @@ async function run() {
         )} = creates a new program with the given name
 
         ${chalk.yellow(
+          "download [id or key]"
+        )} = fetches the contents of the remote program with the given ID or key
+
+        ${chalk.yellow(
           "filter [query]"
         )} = searches for and returns all programs with names that include the query
 
@@ -56,7 +60,7 @@ async function run() {
 
         ${chalk.yellow(
           "upload [key]"
-        )} = uploads the code contents of the program with the given key (or all programs if --all is used); automatically builds remote programs by default, but this behavior can be disabled with --no-build
+        )} = uploads the code contents of the program with the given key (or all programs if --all is used); it automatically compiles the remote programs by default, but this behavior can be disabled with --no-build
 
       ${chalk.green(
         "pull"
@@ -64,7 +68,7 @@ async function run() {
 
       ${chalk.green(
         "push"
-      )} = overwrites remote programs listed in .gtconfig with their corresponding local file contents; automatically builds remote programs by default, but this behavior can be disabled with --no-build
+      )} = overwrites remote programs listed in .gtconfig with their corresponding local file contents; it automatically compiles the remote programs by default, but this behavior can be disabled with --no-build
 
       ${chalk.green("request")}
       
@@ -371,6 +375,49 @@ async function run() {
       }
 
       return
+    }
+
+    if (subcommand === "download") {
+      if (params.length === 0) {
+        throw new GTError(
+          "You must specify the ID or key of the program to download! See `gt help` for more info."
+        )
+      }
+
+      const response1 = await inquirer.prompt([
+        {
+          type: "list",
+          choices: [
+            { name: "Save the contents to a file", value: "save" },
+            { name: "Print the contents to the console", value: "print" },
+          ],
+          name: "answer",
+          message:
+            "Would you like to save the contents of the program to a file, or just print them out to the console?",
+        },
+      ])
+
+      const idOrKey = params[0]
+
+      if (response1.answer === "save") {
+        const response2 = await inquirer.prompt([
+          {
+            type: "input",
+            name: "answer",
+            message: "Where would you like to save the file?",
+          },
+        ])
+
+        const file = path.resolve(response2.answer)
+        const contents = await gt.program.download(idOrKey)
+        fs.writeFileSync(file, contents, "utf8")
+        console.log(`Saved to "${file}"!`)
+      } else if (response1.answer === "print") {
+        const contents = await gt.program.download(idOrKey)
+        console.log(contents)
+      } else {
+        process.exit()
+      }
     }
 
     if (subcommand === "filter") {
