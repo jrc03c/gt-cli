@@ -68,9 +68,10 @@ async function run() {
 
       ${chalk.green("request")}
       
-        ${chalk.yellow("send")} = sends an HTTP request to an API endpoint
-          --path [path]
-          --method [method]
+        ${chalk.yellow(
+          "send [options] [path]"
+        )} = sends an HTTP request to an API endpoint; options are:
+          --method [method] (default is "GET")
           --headers [headers as JSON]
           --body [body as JSON]
           --query [query as JSON]
@@ -120,10 +121,10 @@ async function run() {
 
       ${chalk.dim("# send a custom API request")}
       gt request send \\
-        --path "/some/api/endpoint" \\
         --method "POST" \\
         --headers { "Content-Type": "application/json" } \\
-        --body { hello: "world" }
+        --body { "hello": "world" } \\
+        /some/api/endpoint
   `)
 
   const args = process.argv.slice(2)
@@ -401,7 +402,7 @@ async function run() {
         program.name.includes(query)
       )
 
-      return console.log(prettify(util.inspect(results, { colors: true })))
+      console.log(prettify(util.inspect(results, { colors: true })))
     }
 
     if (subcommand === "get") {
@@ -420,7 +421,7 @@ async function run() {
         results = await gt.program.get(idOrKey)
       }
 
-      return console.log(prettify(util.inspect(results, { colors: true })))
+      console.log(prettify(util.inspect(results, { colors: true })))
     }
 
     if (subcommand === "upload") {
@@ -483,8 +484,6 @@ async function run() {
           console.log(info.status)
         )
       }
-
-      return
     }
   }
 
@@ -509,8 +508,6 @@ async function run() {
       const contents = await gt.program.getContents(key)
       fs.writeFileSync(file, contents, "utf8")
     }
-
-    return
   }
 
   // ==========================================================================
@@ -536,8 +533,6 @@ async function run() {
         console.log(info.status)
       })
     }
-
-    return
   }
 
   // ==========================================================================
@@ -545,6 +540,84 @@ async function run() {
   // ==========================================================================
 
   if (command === "request") {
+    if (subcommand === "send") {
+      if (params.length === 0) {
+        throw new GTError(
+          `For requests, you must specify a path! See \`gt help\` for more info.`
+        )
+      }
+
+      const path = params.pop()
+
+      const method = (() => {
+        const index = params.indexOf("--method")
+
+        if (index > -1) {
+          return params[index + 1]
+        } else {
+          return "GET"
+        }
+      })()
+
+      const headers = (() => {
+        const index = params.indexOf("--headers")
+
+        if (index > -1) {
+          try {
+            return JSON.parse(params[index + 1])
+          } catch (e) {
+            throw new GTError(
+              "The value you provided for the `--headers` option doesn't appear to be valid JSON!"
+            )
+          }
+        } else {
+          return null
+        }
+      })()
+
+      const body = (() => {
+        const index = params.indexOf("--body")
+
+        if (index > -1) {
+          try {
+            return JSON.parse(params[index + 1])
+          } catch (e) {
+            throw new GTError(
+              "The value you provided for the `--body` option doesn't appear to be valid JSON!"
+            )
+          }
+        } else {
+          return null
+        }
+      })()
+
+      const query = (() => {
+        const index = params.indexOf("--query")
+
+        if (index > -1) {
+          try {
+            return JSON.parse(params[index + 1])
+          } catch (e) {
+            throw new GTError(
+              "The value you provided for the `--query` option doesn't appear to be valid JSON!"
+            )
+          }
+        } else {
+          return null
+        }
+      })()
+
+      const response = await gt.request.send({
+        path,
+        method,
+        headers,
+        body,
+        query,
+      })
+
+      const data = await response.json()
+      console.log(data)
+    }
   }
 }
 
