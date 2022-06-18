@@ -61,7 +61,7 @@ async function run() {
         )} = retrieves the metadata of a program with the given ID or key, or gets all programs if --all is used
 
         ${chalk.yellow(
-          "upload [key]"
+          "upload [id or key]"
         )} = uploads the code contents of the program with the given key (or all programs if --all is used); it automatically compiles the remote programs by default, but this behavior can be disabled with --no-build
 
       ${chalk.green(
