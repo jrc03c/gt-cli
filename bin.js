@@ -39,8 +39,11 @@ async function run() {
         )} = compiles a program given an ID or key
 
         ${chalk.yellow(
-          "create [name]"
-        )} = creates a new program with the given name
+          "create [options] [name]"
+        )} = creates a new program with the given name; options are:
+          
+          --update-config
+          --file [path]
 
         ${chalk.yellow(
           "delete [options] [id or key]"
@@ -275,8 +278,9 @@ async function run() {
         )
       }
 
-      const name = params[0]
+      const name = params.pop()
       const data = await gt.program.create(name)
+      let shouldUpdateConfig, file
 
       console.log(
         prettify(`
@@ -314,53 +318,47 @@ async function run() {
           .join("\n")
       )
 
-      const response1 = await inquirer.prompt([
-        {
-          type: "list",
-          choices: [
-            { name: "Yes", value: true },
-            { name: "No", value: false },
-          ],
-          message: prettify(
-            `Would you like for us to add this program to your .gtconfig file?`
-          ),
-          name: "answer",
-        },
-      ])
-
-      if (response1.answer) {
-        const response2 = await inquirer.prompt([
+      if (params.indexOf("--update-config") > -1) {
+        shouldUpdateConfig = true
+      } else {
+        const response = await inquirer.prompt([
           {
             type: "list",
             choices: [
               { name: "Yes", value: true },
               { name: "No", value: false },
             ],
-            message: prettify(
-              `Do you already have a program file (i.e., a .gt or .guidedtrack file) that contains the contents of this program?`
-            ),
             name: "answer",
+            message: prettify(
+              "Would you like for us to add this program to your .gtconfig file?"
+            ),
           },
         ])
 
-        let file
-        let specifiedAPath = false
+        shouldUpdateConfig = response.answer
+      }
 
-        if (response2.answer) {
-          const response3 = await inquirer.prompt([
-            {
-              type: "input",
-              name: "answer",
-              message: prettify("What is the path to the program file?"),
-            },
-          ])
+      if (params.indexOf("--file") > -1) {
+        file = path.resolve(params[params.indexOf("--file") + 1])
+      } else {
+        const response = await inquirer.prompt([
+          {
+            type: "input",
+            name: "answer",
+            message: prettify(
+              "If the program file already exists locally, then what is the path to it? Or, if it doesn't exist locally, then where should it be placed?"
+            ),
+          },
+        ])
 
-          file = response3.answer
-          specifiedAPath = true
+        if (response.answer.trim().length > 0) {
+          file = path.resolve(response.answer.trim())
         } else {
-          file = `placeholder/path/to/${data.key}.gt`
+          file = `path/to/${data.key}.gt`
         }
+      }
 
+      if (shouldUpdateConfig) {
         if (!config.programs) {
           config.programs = {}
         }
@@ -372,25 +370,12 @@ async function run() {
           JSON.stringify(config, null, 2),
           "utf8"
         )
-
-        if (specifiedAPath) {
-          console.log(
-            prettify(
-              `Your .gtconfig file was updated with the path you provided!`
-            )
-          )
-        } else {
-          console.log(
-            prettify(
-              `Since you don't already have a file for this program, your .gtconfig file was updated to include a placeholder path for this program. You'll need to change that placeholder path before running any other program operations.`
-            )
-          )
-        }
-      } else {
-        console.log(prettify("Your configuration file was not updated."))
       }
 
-      return
+      const parts = file.split("/")
+      const dir = parts.slice(0, parts.length - 1).join("/")
+      fs.mkdirSync(dir, { recursive: true })
+      fs.writeFileSync(file, "", "utf8")
     }
 
     if (subcommand === "delete") {
