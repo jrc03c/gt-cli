@@ -88,7 +88,7 @@ async function build(idOrKey, callback) {
 
   if (errors && errors.length > 0) {
     throw new GTError(
-      [`The update succeeded, but there were some syntax errors:`]
+      [`The upload succeeded, but there were some syntax errors:`]
         .concat(errors.map((e, i) => `(${i + 1}) ${e}`))
         .join("\n")
     )

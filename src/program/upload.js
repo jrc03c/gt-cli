@@ -8,19 +8,19 @@ const request = require("../request")
 module.exports = async function (idOrKey, contents, shouldBuild, callback) {
   if (isUndefined(idOrKey)) {
     throw new GTError(
-      `The first value passed into the \`gt.program.update\` function must be a string (i.e., a program key) or a number (i.e., a program ID)!`
+      `The first value passed into the \`gt.program.upload\` function must be a string (i.e., a program key) or a number (i.e., a program ID)!`
     )
   }
 
   if (isUndefined(contents) || typeof contents !== "string") {
     throw new GTError(
-      `The second value passed into the \`gt.program.update\` function must be a string (i.e., the code contents of the program).`
+      `The second value passed into the \`gt.program.upload\` function must be a string (i.e., the code contents of the program).`
     )
   }
 
   if (!isUndefined(callback) && typeof callback !== "function") {
     throw new GTError(
-      `The fourth value passed into the \`gt.program.update\` function must be a function!`
+      `The fourth value passed into the \`gt.program.upload\` function must be a function!`
     )
   }
 
@@ -36,7 +36,7 @@ module.exports = async function (idOrKey, contents, shouldBuild, callback) {
 
   callback({
     finished: false,
-    status: "Updating program contents...",
+    status: "Uploading program contents...",
     progress: 2 / 5,
   })
 
@@ -54,7 +54,7 @@ module.exports = async function (idOrKey, contents, shouldBuild, callback) {
   while (status === "running") {
     callback({
       finished: false,
-      status: "Waiting for update job to finish...",
+      status: "Waiting for upload job to finish...",
       progress: 3 / 5,
     })
 
@@ -66,7 +66,7 @@ module.exports = async function (idOrKey, contents, shouldBuild, callback) {
   if (shouldBuild) {
     callback({
       finished: true,
-      status: "Update succeeded! Now rebuilding the program...",
+      status: "Upload succeeded! Now rebuilding the program...",
       progress: 4 / 5,
     })
 
@@ -75,7 +75,7 @@ module.exports = async function (idOrKey, contents, shouldBuild, callback) {
 
   callback({
     finished: true,
-    status: "Update and build finished successfully!",
+    status: "Upload and build finished successfully!",
     progress: 5 / 5,
   })
 

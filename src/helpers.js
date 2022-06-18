@@ -54,7 +54,7 @@ function pause(ms) {
 }
 
 function prettify(text) {
-  return wrap(indent(unindent(text), "  "), null, "  ")
+  return wrap(unindent(text), null, "  ")
 }
 
 module.exports = { btoa, findUpward, isUndefined, pause, prettify }

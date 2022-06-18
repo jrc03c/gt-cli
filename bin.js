@@ -55,8 +55,8 @@ async function run() {
         )} = retrieves the metadata of a program with the given ID or key, or gets all programs if --all is used
 
         ${chalk.yellow(
-          "update [key]"
-        )} = updates the code contents of the program with the given key (or all programs if --all is used); automatically builds remote programs by default, but this behavior can be disabled with --no-build
+          "upload [key]"
+        )} = uploads the code contents of the program with the given key (or all programs if --all is used); automatically builds remote programs by default, but this behavior can be disabled with --no-build
 
       ${chalk.green(
         "pull"
@@ -102,11 +102,11 @@ async function run() {
       )}
       gt program get --all
 
-      ${chalk.dim("# update the remote program with the local contents")}
-      gt program update "abcd123"
+      ${chalk.dim("# upload the local contents of a program")}
+      gt program upload "abcd123"
 
-      ${chalk.dim("# update all remote programs with all local contents")}
-      gt program update --all
+      ${chalk.dim("# upload all local contents of all programs")}
+      gt program upload --all
 
       ${chalk.dim(
         "# fetch all remote programs and overwrite their local counterparts"
@@ -429,7 +429,7 @@ async function run() {
       return console.log("")
     }
 
-    if (subcommand === "update") {
+    if (subcommand === "upload") {
       if (params.length === 0) {
         throw new GTError(
           "You must specify at least one program ID or key! Multiple IDs and/or keys should be separated by spaces. See `gt-help` for more info."
@@ -437,13 +437,13 @@ async function run() {
       }
 
       const shouldBuild = params.indexOf("--no-build") < 0
-      const shouldUpdateAll = params.indexOf("--all") > -1
+      const shouldUploadAll = params.indexOf("--all") > -1
 
-      const keys = shouldUpdateAll
+      const keys = shouldUploadAll
         ? Object.keys(config.programs)
         : params.filter(p => p !== "--no-build" && p !== "--all")
 
-      for (let i = 0; i < keys; i++) {
+      for (let i = 0; i < keys.length; i++) {
         const key = keys[i]
         let file
 
@@ -474,6 +474,7 @@ async function run() {
 
           if (response2.answer) {
             config.programs[key] = response1.answer
+
             fs.writeFileSync(
               configFilePath,
               JSON.stringify(config, null, 2),
@@ -483,10 +484,9 @@ async function run() {
         }
 
         const raw = fs.readFileSync(file, "utf8")
-        console.log(prettify("---"))
 
-        await gt.program.update(key, raw, shouldBuild, info =>
-          console.log(prettify(info.status))
+        await gt.program.upload(key, raw, shouldBuild, info =>
+          console.log(info.status)
         )
       }
 
@@ -522,6 +522,13 @@ async function run() {
   // ==========================================================================
 
   if (command === "push") {
+    const keys = Object.keys(config.programs || {})
+
+    if (keys.length === 0) {
+      throw new GTError(
+        "There are no programs listed in your .gtconfig file! Please add some programs first and then run `gt push` again."
+      )
+    }
   }
 
   // ==========================================================================
