@@ -499,6 +499,22 @@ async function run() {
   // ==========================================================================
 
   if (command === "pull") {
+    const keys = Object.keys(config.programs || {})
+
+    if (keys.length === 0) {
+      throw new GTError(
+        "There are no programs listed in your .gtconfig file! Please add some programs first and then run `gt pull` again."
+      )
+    }
+
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i]
+      console.log(`Fetching the contents of program "${key}" ...`)
+
+      const file = path.resolve(config.programs[key])
+      const contents = await gt.program.getContents(key)
+      fs.writeFileSync(file, contents, "utf8")
+    }
   }
 
   // ==========================================================================

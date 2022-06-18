@@ -4,5 +4,6 @@ module.exports = {
   filter: require("./filter.js"),
   find: require("./find.js"),
   get: require("./get.js"),
+  getContents: require("./get-contents.js"),
   update: require("./update.js"),
 }
