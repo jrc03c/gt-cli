@@ -43,8 +43,10 @@ async function run() {
         )} = creates a new program with the given name
 
         ${chalk.yellow(
-          "download [id or key]"
-        )} = fetches the contents of the remote program with the given ID or key
+          "download [options] [id or key]"
+        )} = fetches the contents of the remote program with the given ID or key; options are:
+          --save [path]
+          --print
 
         ${chalk.yellow(
           "filter [query]"
@@ -384,39 +386,52 @@ async function run() {
         )
       }
 
-      const response1 = await inquirer.prompt([
-        {
-          type: "list",
-          choices: [
-            { name: "Save the contents to a file", value: "save" },
-            { name: "Print the contents to the console", value: "print" },
-          ],
-          name: "answer",
-          message:
-            "Would you like to save the contents of the program to a file, or just print them out to the console?",
-        },
-      ])
+      const idOrKey = params.pop()
+      let shouldSave, shouldPrint, file
 
-      const idOrKey = params[0]
+      if (params.indexOf("--print") < 0) {
+        if (params.indexOf("--save") > -1) {
+          shouldSave = true
+          file = params[params.indexOf("--save") + 1]
+        } else {
+          const response = await inquirer.prompt([
+            {
+              type: "list",
+              choices: [
+                { name: "Yes", value: true },
+                { name: "No", value: false },
+              ],
+              name: "answer",
+              message:
+                "Would you like to save the contents of the program to a file?",
+            },
+          ])
 
-      if (response1.answer === "save") {
-        const response2 = await inquirer.prompt([
-          {
-            type: "input",
-            name: "answer",
-            message: "Where would you like to save the file?",
-          },
-        ])
+          shouldSave = response.answer
 
-        const file = path.resolve(response2.answer)
-        const contents = await gt.program.download(idOrKey)
+          if (shouldSave) {
+            const response = await inquirer.prompt([
+              {
+                type: "input",
+                name: "answer",
+                message: "Path for the new file:",
+              },
+            ])
+
+            file = path.resolve(response.answer)
+          }
+        }
+      }
+
+      shouldPrint = params.indexOf("--save") < 0 && !shouldSave
+      const contents = await gt.program.download(idOrKey)
+
+      if (shouldSave) {
         fs.writeFileSync(file, contents, "utf8")
-        console.log(`Saved to "${file}"!`)
-      } else if (response1.answer === "print") {
-        const contents = await gt.program.download(idOrKey)
+      }
+
+      if (shouldPrint) {
         console.log(contents)
-      } else {
-        process.exit()
       }
     }
 
