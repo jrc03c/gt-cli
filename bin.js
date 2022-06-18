@@ -30,7 +30,9 @@ async function run() {
 
       ${chalk.green("help")} = Shows this help message
 
-      ${chalk.green("init")} = Creates a new .gtconfig file
+      ${chalk.green(
+        "init"
+      )} = Creates a new .gtconfig file in the current directory and searches the directory and its subdirectories for any GuidedTrack program files (i.e., files with .gt or .guidedtrack extensions)
 
       ${chalk.green("program")}
 
@@ -84,7 +86,9 @@ async function run() {
 
       ${chalk.green(
         "push"
-      )} = overwrites remote programs listed in .gtconfig with their corresponding local file contents; it automatically compiles the remote programs by default, but this behavior can be disabled with --no-build
+      )} = overwrites remote programs listed in .gtconfig with their corresponding local file contents; it automatically compiles the remote programs by default, but this behavior can be disabled with --no-build; options are:
+
+        --no-build
 
       ${chalk.green("request")}
       
