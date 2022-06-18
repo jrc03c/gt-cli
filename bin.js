@@ -170,7 +170,7 @@ async function run() {
       template.programs = {}
     }
 
-    console.log(prettify(`\nSearching for GT program files...`))
+    console.log(prettify(`Searching for GT program files...`))
 
     const gtFiles = fsx.findSync(cwd, file => {
       const lowerFile = file.toLowerCase()
@@ -178,7 +178,7 @@ async function run() {
     })
 
     if (gtFiles && gtFiles.length > 0) {
-      console.log(prettify("\nFound these files:\n"))
+      console.log(prettify("Found these files:"))
 
       gtFiles.forEach((file, i) => {
         const hasAlreadyBeenAdded = Object.keys(template.programs).some(key => {
@@ -199,7 +199,7 @@ async function run() {
 
       console.log(
         prettify(
-          `\nNote that while the above files will be inserted into the configuration file, you'll still need to get their actual keys from each program's "Publish" settings and replace the keys called "id0", "id1", etc. in the configuration file. (The key is usually a 7-character string of numbers and letters.)`
+          `Note that while the above files will be inserted into the configuration file, you'll still need to get their actual keys from each program's "Publish" settings and replace the keys called "id0", "id1", etc. in the configuration file. (The key is usually a 7-character string of numbers and letters.)`
         )
       )
     }
@@ -385,9 +385,7 @@ async function run() {
         program.name.includes(query)
       )
 
-      console.log("")
-      console.log(prettify(util.inspect(results, { colors: true })))
-      return console.log("")
+      return console.log(prettify(util.inspect(results, { colors: true })))
     }
 
     if (subcommand === "find") {
@@ -403,9 +401,7 @@ async function run() {
         program.name.includes(query)
       )
 
-      console.log("")
-      console.log(prettify(util.inspect(results, { colors: true })))
-      return console.log("")
+      return console.log(prettify(util.inspect(results, { colors: true })))
     }
 
     if (subcommand === "get") {
@@ -415,18 +411,16 @@ async function run() {
         )
       }
 
-      const results = await (async () => {
-        if (params[0] === "--all") {
-          return await gt.program.get()
-        } else {
-          const idOrKey = params[0]
-          return await gt.program.get(idOrKey)
-        }
-      })
+      let results
 
-      console.log("")
-      console.log(prettify(util.inspect(results, { colors: true })))
-      return console.log("")
+      if (params[0] === "--all") {
+        results = await gt.program.get()
+      } else {
+        const idOrKey = params[0]
+        results = await gt.program.get(idOrKey)
+      }
+
+      return console.log(prettify(util.inspect(results, { colors: true })))
     }
 
     if (subcommand === "upload") {
@@ -515,6 +509,8 @@ async function run() {
       const contents = await gt.program.getContents(key)
       fs.writeFileSync(file, contents, "utf8")
     }
+
+    return
   }
 
   // ==========================================================================
@@ -529,6 +525,19 @@ async function run() {
         "There are no programs listed in your .gtconfig file! Please add some programs first and then run `gt push` again."
       )
     }
+
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i]
+      const file = path.resolve(config.programs[key])
+      const contents = fs.readFileSync(file, "utf8")
+      const shouldBuild = true
+
+      gt.program.upload(key, contents, shouldBuild, info => {
+        console.log(info.status)
+      })
+    }
+
+    return
   }
 
   // ==========================================================================
