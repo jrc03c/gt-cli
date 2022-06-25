@@ -169,7 +169,10 @@ class Config {
 
     self.username = username ? username : await self.username
     self.password = password ? password : await self.password
-    self.host = host ? host : await self.host
+
+    if (!self._host) {
+      self.host = host ? host : await self.host
+    }
 
     self.hasBeenLoaded = true
     return self
