@@ -1,4 +1,4 @@
-const { GTError } = require("../common.js")
+const { GTError } = require("../common")
 const { isUndefined, pause } = require("../helpers.js")
 const { poll } = require("../job")
 const get = require("./get.js")
@@ -35,7 +35,7 @@ async function build(idOrKey, callback) {
   callback({
     finished: false,
     status: `Fetching program ${idOrKey}...`,
-    progress: 1 / 6,
+    progress: 1 / 5,
   })
 
   const program = await get(idOrKey)
@@ -45,7 +45,7 @@ async function build(idOrKey, callback) {
   callback({
     finished: false,
     status: `Getting program contents...`,
-    progress: 2 / 6,
+    progress: 2 / 5,
   })
 
   const contents = await getProgramContents(key)
@@ -55,7 +55,7 @@ async function build(idOrKey, callback) {
     callback({
       finished: true,
       status: "No changes were made, so building was not initiated.",
-      progress: 3 / 6,
+      progress: 5 / 5,
     })
 
     return undefined
@@ -68,7 +68,7 @@ async function build(idOrKey, callback) {
     callback({
       finished: false,
       status: "Waiting for build job to finish...",
-      progress: 4 / 6,
+      progress: 3 / 5,
     })
 
     status = (await poll(job)).status
@@ -79,7 +79,7 @@ async function build(idOrKey, callback) {
   callback({
     finished: false,
     status: "Checking for compilation errors...",
-    progress: 5 / 6,
+    progress: 4 / 5,
   })
 
   const updatedContents = await getProgramContents(key)
@@ -97,7 +97,7 @@ async function build(idOrKey, callback) {
   callback({
     finished: true,
     status: "Build finished successfully!",
-    progress: 6 / 6,
+    progress: 5 / 5,
   })
 
   return true
