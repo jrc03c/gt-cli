@@ -19,8 +19,10 @@ if (require.main === module) {
   async function run() {
     const secrets = require("./secrets.json")
     const config = await gt.common.config.load(secrets)
-    const data = await gt.program.create(makeKey(32))
-    console.log(data)
+    const program = await gt.program.find(p => p.name.includes("Hello"))
+    const contents = "I've changed it again!"
+    await gt.program.upload(program.id, contents, false, console.log)
+    await gt.program.build(program.id, console.log)
   }
 
   run()

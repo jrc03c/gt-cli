@@ -2,7 +2,7 @@
 
 async function run() {
   const { Chalk } = await import("chalk")
-  const { GTError } = require("./src/common.js")
+  const { GTError } = require("./src/common")
   const { prettify } = require("./src/helpers.js")
   const fs = require("fs")
   const fsx = require("@jrc03c/fs-extras")
@@ -172,83 +172,58 @@ async function run() {
   // ==========================================================================
 
   if (command === "init") {
-    const template = (() => {
-      try {
-        return JSON.parse(fs.readFileSync(configFilePath, "utf8"))
-      } catch (e) {
-        return {}
-      }
-    })()
-
-    if (!template.username) {
-      template.username = "YOUR_GT_USERNAME_OR_EMAIL"
-    }
-
-    if (!template.password) {
-      template.password = "YOUR_GT_PASSWORD"
-    }
-
-    if (!template.environment) {
-      template.environment = "production"
-    }
-
-    if (!template.programs) {
-      template.programs = {}
-    }
-
-    console.log(prettify(`Searching for GT program files...`) + "\n")
-
-    const gtFiles = fsx.findSync(cwd, file => {
-      const lowerFile = file.toLowerCase()
-      return lowerFile.endsWith(".gt") || lowerFile.endsWith(".guidedtrack")
+    const config = await gt.common.config.load({
+      username: "username",
+      password: "password",
     })
 
-    if (gtFiles && gtFiles.length > 0) {
-      console.log(prettify("Found these files:"))
+    const response = await inquirer.prompt([
+      {
+        type: "list",
+        name: "shouldSearchForPrograms",
+        message: prettify(
+          "Would you like for us to search for GT program files (i.e., files with .gt or .guidedtrack extensions) in the current folder and its subfolders so that we can automatically include them in your new .gtconfig file?"
+        ),
+        choices: [
+          { name: "Yes", value: true },
+          { name: "No", value: false },
+        ],
+      },
+    ])
 
-      gtFiles.forEach((file, i) => {
-        const hasAlreadyBeenAdded = Object.keys(template.programs).some(key => {
-          const previous = template.programs[key].replace(cwd, "")
-          const current = file.replace(cwd, "")
-          return previous === current
+    if (response.shouldSearchForPrograms) {
+      const files = fsx
+        .getFilesDeepSync(process.cwd())
+        .filter(
+          f =>
+            f.toLowerCase().endsWith(".gt") ||
+            f.toLowerCase().endsWith(".guidedtrack")
+        )
+
+      if (files && files.length > 0) {
+        console.log("\n" + prettify("We found these programs:") + "\n")
+
+        files.forEach((file, i) => {
+          const relativePath = file.replace(process.cwd(), "")
+          config["key" + i] = relativePath
+          console.log(relativePath)
         })
 
-        if (hasAlreadyBeenAdded) {
-          console.log(
-            chalk.dim(prettify(`➔ ${file.replace(cwd, "")} (already added)`))
-          )
-        } else {
-          console.log(chalk.green(prettify(`➔ ${file.replace(cwd, "")}`)))
-          template.programs["id" + i] = file
-        }
-      })
-
-      console.log(
-        prettify(
-          `Note that while the above files will be inserted into the configuration file, you'll still need to get their actual keys from each program's "Publish" settings and replace the keys called "id0", "id1", etc. in the configuration file. (The key is usually a 7-character string of numbers and letters.)`
+        console.log(
+          "\n" +
+            prettify(
+              "Note that even though these programs were added automatically to your .gtconfig file, you'll still need to replace their keys with the actual program key values!"
+            ) +
+            "\n"
         )
-      )
+      }
     }
 
-    fs.writeFileSync(configFilePath, JSON.stringify(template, null, 2), "utf8")
+    const configFilePath = path.join(process.cwd(), ".gtconfig")
+    gt.common.config.save(configFilePath)
 
-    return console.log(
-      prettify(`
-        The configuration has been stored in .gtconfig!
-        
-        Note that the \`environment\` property is set by default to 'production' but can be changed to 'development' or 'staging' as needed (though 'development' only makes sense if you're running a local version of the GT server, which you probably aren't doing unless you're a GT engineer).
-
-        Also note that you'll need to update the \`username\` and \`password\` fields in .gtconfig with their actual values!
-
-        Run ${chalk.magenta(
-          "`gt help`"
-        )} to show the help menu if you get stuck!
-      `)
-        .replace(".gtconfig", chalk.yellow.bold(".gtconfig"))
-        .replaceAll("`environment`", chalk.blue("`environment`"))
-        .replaceAll("'production'", chalk.blue("'production'"))
-        .replaceAll("`username`", chalk.blue("`username`"))
-        .replaceAll("`password`", chalk.blue("`password`"))
+    console.log(
+      prettify(`Your new config file was saved to ${configFilePath}!`)
     )
   }
 

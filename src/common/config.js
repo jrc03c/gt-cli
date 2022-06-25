@@ -1,4 +1,4 @@
-const { btoa, findUpward } = require("../helpers.js")
+const { btoa, findUpward, prettify } = require("../helpers.js")
 const Environment = require("./environment.js")
 const fs = require("fs")
 const GTError = require("./gt-error.js")
@@ -27,7 +27,7 @@ class Config {
             {
               type: "input",
               name: "username",
-              message: "GT username / email:",
+              message: prettify("GT username / email:"),
             },
           ])
 
@@ -52,7 +52,7 @@ class Config {
             {
               type: "password",
               name: "password",
-              message: "GT password:",
+              message: prettify("GT password:"),
             },
           ])
 
@@ -110,7 +110,9 @@ class Config {
             {
               type: "list",
               name: "host",
-              message: "Which environment / host would you like to use?",
+              message: prettify(
+                "Which environment / host would you like to use?"
+              ),
               choices: Object.keys(Host)
                 .map(key => {
                   return { name: `${key} = ${Host[key]}`, value: key }
@@ -126,7 +128,9 @@ class Config {
               {
                 type: "input",
                 name: "host",
-                message: "Custom host address (e.g., https://example.com):",
+                message: prettify(
+                  "Custom host address (e.g., https://example.com):"
+                ),
               },
             ])
 
@@ -183,6 +187,7 @@ class Config {
 
     if (configFilePath) {
       const out = {
+        host: self.host,
         programs: self.programs,
       }
 
