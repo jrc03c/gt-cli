@@ -33,7 +33,7 @@ function findUpward(pattern, startingDirectory) {
   const file = files.find(f => match(f, pattern))
 
   if (file) {
-    return "/" + file
+    return path.join("/", file)
   }
 
   return null

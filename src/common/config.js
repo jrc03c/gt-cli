@@ -154,7 +154,7 @@ class Config {
 
     options = options || {}
     const configFilePath = options.file
-    const { username, password, host } = options
+    const { username, password, host, credentialsFile } = options
 
     if (configFilePath) {
       const temp = JSON.parse(fs.readFileSync(configFilePath))
@@ -169,6 +169,12 @@ class Config {
         options.file = file
         return await self.load(options)
       }
+    }
+
+    if (credentialsFile) {
+      const temp = JSON.parse(fs.readFileSync(credentialsFile, "utf8"))
+      self.username = temp.username
+      self.password = temp.password
     }
 
     if (!self._username) {
@@ -199,6 +205,64 @@ class Config {
       configFilePath = path.resolve(configFilePath)
       const parts = configFilePath.split("/")
       const dir = parts.slice(0, parts.length - 1).join("/")
+
+      const response = await inquirer.prompt([
+        {
+          type: "list",
+          name: "shouldCreateCredentialsFile",
+          message: prettify(
+            "We recommend storing your credentials in a file that's NOT checked into version control but that is referenced in the `credentialsFile` property of your .gtconfig. If you don't store your credentials this way, then we'll ask you for your username and password each time. Would you like for us to create a credentials file for you and add it to the .gtconfig file?"
+          ),
+          choices: [
+            { name: "Yes", value: true },
+            { name: "No", value: false },
+          ],
+        },
+      ])
+
+      if (response.shouldCreateCredentialsFile) {
+        const credentialsFile = path.join(dir, "credentials.json")
+        self.credentialsFile = credentialsFile.replace(dir + "/", "")
+        out.credentialsFile = self.credentialsFile
+
+        fs.writeFileSync(
+          credentialsFile,
+          JSON.stringify(await self.credentials, null, 2),
+          "utf8"
+        )
+
+        console.log(
+          prettify(`Your credentials were saved into ${credentialsFile}!`)
+        )
+
+        const gitignore = path.join(dir, ".gitignore")
+        let wasJustCreated = false
+
+        if (!fs.existsSync(gitignore)) {
+          fs.writeFileSync(gitignore, "", "utf8")
+          wasJustCreated = true
+        }
+
+        const raw = fs.readFileSync(gitignore, "utf8")
+        const lines = raw.split("\n")
+
+        if (raw.trim().length === 0) {
+          lines.splice(0, lines.length)
+        }
+
+        lines.push("credentials.json")
+        fs.writeFileSync(gitignore, lines.join("\n"), "utf8")
+
+        console.log(
+          prettify(
+            `Also, we took the liberty of adding "config.json" to ${
+              wasJustCreated ? "a newly-created" : "your existing"
+            } .gitignore file (located at ${gitignore}) since it's generally a bad idea to check sensitive information like credentials into version control. However, you're welcome to remove that ${
+              wasJustCreated ? "file" : "line"
+            } if you don't want it there!`
+          )
+        )
+      }
 
       if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true })
