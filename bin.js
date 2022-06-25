@@ -172,55 +172,15 @@ async function run() {
   // ==========================================================================
 
   if (command === "init") {
-    const config = await gt.common.config.load({
+    const { config } = gt.common
+
+    await config.load({
       username: "username",
       password: "password",
     })
 
-    const response = await inquirer.prompt([
-      {
-        type: "list",
-        name: "shouldSearchForPrograms",
-        message: prettify(
-          "Would you like for us to search for GT program files (i.e., files with .gt or .guidedtrack extensions) in the current folder and its subfolders so that we can automatically include them in your new .gtconfig file?"
-        ),
-        choices: [
-          { name: "Yes", value: true },
-          { name: "No", value: false },
-        ],
-      },
-    ])
-
-    if (response.shouldSearchForPrograms) {
-      const files = fsx
-        .getFilesDeepSync(process.cwd())
-        .filter(
-          f =>
-            f.toLowerCase().endsWith(".gt") ||
-            f.toLowerCase().endsWith(".guidedtrack")
-        )
-
-      if (files && files.length > 0) {
-        console.log("\n" + prettify("We found these programs:") + "\n")
-
-        files.forEach((file, i) => {
-          const relativePath = file.replace(process.cwd(), "")
-          config["key" + i] = relativePath
-          console.log(relativePath)
-        })
-
-        console.log(
-          "\n" +
-            prettify(
-              "Note that even though these programs were added automatically to your .gtconfig file, you'll still need to replace their keys with the actual program key values!"
-            ) +
-            "\n"
-        )
-      }
-    }
-
     const configFilePath = path.join(process.cwd(), ".gtconfig")
-    gt.common.config.save(configFilePath)
+    await config.save(configFilePath)
 
     console.log(
       prettify(`Your new config file was saved to ${configFilePath}!`)

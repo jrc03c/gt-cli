@@ -111,7 +111,7 @@ class Config {
               type: "list",
               name: "host",
               message: prettify(
-                "Which environment / host would you like to use?"
+                "Which environment / host would you like to use by default? (Note that this can still be overridden on individual pushes or pulls.)"
               ),
               choices: Object.keys(Host)
                 .map(key => {
@@ -171,8 +171,13 @@ class Config {
       }
     }
 
-    self.username = username ? username : await self.username
-    self.password = password ? password : await self.password
+    if (!self._username) {
+      self.username = username ? username : await self.username
+    }
+
+    if (!self._password) {
+      self.password = password ? password : await self.password
+    }
 
     if (!self._host) {
       self.host = host ? host : await self.host
@@ -187,7 +192,7 @@ class Config {
 
     if (configFilePath) {
       const out = {
-        host: self.host,
+        host: await self.host,
         programs: self.programs,
       }
 
