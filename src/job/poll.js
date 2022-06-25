@@ -1,4 +1,4 @@
-const { GTError } = require("../common.js")
+const { GTError } = require("../common")
 const { isUndefined } = require("../helpers.js")
 const request = require("../request")
 

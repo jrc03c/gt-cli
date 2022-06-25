@@ -1,4 +1,4 @@
-const common = require("../common.js")
+const common = require("../common")
 const fetch = require("node-fetch")
 const Queue = require("@jrc03c/queue")
 
@@ -35,8 +35,8 @@ module.exports = async function (options) {
     )
   }
 
-  const credentials = config.credentialsBase64
-  const host = config.host
+  const credentials = await config.credentialsBase64
+  const host = await config.host
   let url = `${host}${options.path}`
 
   if (options.query) {
