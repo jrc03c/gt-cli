@@ -1,4 +1,4 @@
-const { GTError } = require("../common.js")
+const { GTError } = require("../common")
 const get = require("./get.js")
 
 module.exports = async function (fn) {
