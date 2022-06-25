@@ -1,5 +1,4 @@
 node_modules
-config.json
-programs.json
 .gtconfig*
+secrets.json
 temp*
