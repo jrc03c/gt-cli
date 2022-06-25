@@ -1,4 +1,4 @@
-const { GTError } = require("../common.js")
+const { GTError } = require("../common")
 const { isUndefined } = require("../helpers.js")
 const { poll } = require("../job")
 const get = require("./get.js")
@@ -36,7 +36,4 @@ module.exports = async function (name) {
   }
 
   return await get(id)
-
-  // note: we should ask if people want to add the newly-created files to the
-  // configuration file (and provide an equivalent parameter)!
 }
