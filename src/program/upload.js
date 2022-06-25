@@ -1,4 +1,4 @@
-const { GTError } = require("../common.js")
+const { GTError } = require("../common")
 const { isUndefined } = require("../helpers.js")
 const { poll } = require("../job")
 const build = require("./build.js")
@@ -65,12 +65,18 @@ module.exports = async function (idOrKey, contents, shouldBuild, callback) {
 
   if (shouldBuild) {
     callback({
-      finished: true,
+      finished: false,
       status: "Upload succeeded! Now rebuilding the program...",
       progress: 4 / 5,
     })
 
-    await build(id, callback)
+    await build(id, info => {
+      callback({
+        finished: false,
+        status: info.status,
+        progress: 4 / 5,
+      })
+    })
   }
 
   callback({
