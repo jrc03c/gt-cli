@@ -61,10 +61,8 @@ async function run() {
           --unsafe
 
         ${chalk.yellow(
-          "download [options] [id or key]"
-        )} = fetches the contents of the remote program with the given ID or key; options are:
-
-          --save [path]
+          "download [id or key]"
+        )} = fetches the contents of the remote program with the given ID or key
 
         ${chalk.yellow(
           "filter [query]"
@@ -124,6 +122,9 @@ async function run() {
       ${chalk.dim("# create a new program")}
       gt program create "My cool program"
 
+      ${chalk.dim("# download a program's source code and save it to a file")}
+      gt program download abcd123 > path/to/my_program.gt
+
       ${chalk.dim("# search for a program by name")}
       gt program find "Some query"
 
@@ -136,7 +137,7 @@ async function run() {
       gt program get --all
 
       ${chalk.dim("# upload the local contents of a program")}
-      gt program upload "abcd123"
+      gt program upload abcd123
 
       ${chalk.dim("# upload all local contents of all programs")}
       gt program upload --all
@@ -415,48 +416,8 @@ async function run() {
       }
 
       const idOrKey = params.pop()
-      let shouldSave, file
-
-      if (params.indexOf("--save") > -1) {
-        shouldSave = true
-        file = params[params.indexOf("--save") + 1]
-      } else {
-        const response = await inquirer.prompt([
-          {
-            type: "list",
-            choices: [
-              { name: "Yes", value: true },
-              { name: "No", value: false },
-            ],
-            name: "answer",
-            message: prettify(
-              "Would you like to save the contents of the program to a file?"
-            ),
-          },
-        ])
-
-        shouldSave = response.answer
-
-        if (shouldSave) {
-          const response = await inquirer.prompt([
-            {
-              type: "input",
-              name: "answer",
-              message: prettify("Path for the new file:"),
-            },
-          ])
-
-          file = path.resolve(response.answer)
-        }
-      }
-
       const contents = await gt.program.download(idOrKey)
-
-      if (shouldSave) {
-        writeFileSafe(file, contents)
-      } else {
-        console.log(contents)
-      }
+      console.log(contents)
     }
 
     if (subcommand === "filter") {
