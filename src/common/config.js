@@ -210,6 +210,7 @@ class Config {
   }
 
   async save(configFilePath) {
+    console.log("saving config to:", configFilePath)
     const self = this
 
     if (configFilePath) {

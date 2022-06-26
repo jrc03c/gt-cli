@@ -74,9 +74,13 @@ async function run() {
 
         ${chalk.yellow(
           "get [id or key]"
-        )} = retrieves the metadata of a program with the given ID or key, or gets all programs if --all is used; options are:
+        )} = retrieves the metadata of a program with the given ID or key, or gets all programs if --all is used (same as \`gt program list\`); options are:
 
           --all
+
+        ${chalk.yellow(
+          "list"
+        )} = lists all programs (same as \`gt program get --all\`)
 
         ${chalk.yellow(
           "upload [id or key]"
@@ -471,6 +475,10 @@ async function run() {
       console.log(prettify(util.inspect(results, { colors: true })))
     }
 
+    if (subcommand === "list") {
+      console.log(await gt.program.get())
+    }
+
     if (subcommand === "upload") {
       if (params.length === 0) {
         throw new GTError(
@@ -489,42 +497,13 @@ async function run() {
         const key = keys[i]
         let file
 
-        if (config.programs[key]) {
-          file = path.resolve(config.programs[key])
-        } else {
-          const response1 = await inquirer.prompt([
-            {
-              type: "input",
-              name: "answer",
-              message: prettify(
-                `The program with key "${key}" is not listed in your .gtconfig file. What is the path to the GT program file (i.e., the file with a .gt or .guidedtrack extension) for this program?`
-              ),
-            },
-          ])
-
-          file = path.resolve(response1.answer)
-
-          const response2 = await inquirer.prompt([
-            {
-              type: "list",
-              choices: [
-                { name: "Yes", value: true },
-                { name: "No", value: false },
-              ],
-              message: prettify(
-                `Would you like for us to add program "${key}" to your .gtconfig file so that you don't need to answer these questions next time?`
-              ),
-              name: "answer",
-            },
-          ])
-
-          if (response2.answer) {
-            config.programs[key] = response1.answer
-            const configFilePath = findUpward(".gtconfig")
-            writeFileSafe(configFilePath, JSON.stringify(config, null, 2))
-          }
+        if (!config.programs[key]) {
+          throw new GTError(
+            `The program "${key}" isn't listed in your .gtconfig file! First add it using \`gt program add ${key}\`!`
+          )
         }
 
+        file = path.resolve(config.programs[key])
         const raw = fs.readFileSync(file, "utf8")
 
         await gt.program.upload(key, raw, shouldBuild, info =>
@@ -552,7 +531,7 @@ async function run() {
       console.log(`Fetching the contents of program "${key}" ...`)
 
       const file = path.resolve(config.programs[key])
-      const contents = await gt.program.getContents(key)
+      const contents = await gt.program.download(key)
       writeFileSafe(file, contents)
     }
   }
