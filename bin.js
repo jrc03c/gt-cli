@@ -123,7 +123,9 @@ async function run() {
       ${chalk.dim("# opens the docs website")}
       gt docs
 
-      ${chalk.dim("# opens the docs website and searches for the given query")}
+      ${chalk.dim(
+        "# opens the docs website and searches for the *email keyword"
+      )}
       gt docs search *email
 
       ${chalk.dim("# print this help message again")}
