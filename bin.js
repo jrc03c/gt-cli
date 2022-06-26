@@ -3,7 +3,7 @@
 async function run() {
   const { Chalk } = await import("chalk")
   const { GTError } = require("./src/common")
-  const { prettify } = require("./src/helpers.js")
+  const { findUpward, prettify, writeFileSafe } = require("./src/helpers.js")
   const fs = require("fs")
   const fsx = require("@jrc03c/fs-extras")
   const gt = require(".")
@@ -35,6 +35,12 @@ async function run() {
       )} = Creates a new .gtconfig file in the current directory and searches the directory and its subdirectories for any GuidedTrack program files (i.e., files with .gt or .guidedtrack extensions)
 
       ${chalk.green("program")}
+
+        ${chalk.yellow(
+          "add [options] [title, id, or key]"
+        )} = downloads a program's source code and adds the program to the .gtconfig file; options are:
+
+          --file [path]
 
         ${chalk.yellow(
           "build [id or key]"
@@ -156,8 +162,6 @@ async function run() {
   const command = args[0]
   const subcommand = args[1]
   const params = args.slice(2)
-  const cwd = process.cwd()
-  const configFilePath = path.join(cwd, ".gtconfig")
 
   // ==========================================================================
   // HELP
@@ -173,12 +177,7 @@ async function run() {
 
   if (command === "init") {
     const { config } = gt.common
-
-    await config.load({
-      username: "username",
-      password: "password",
-    })
-
+    await config.load()
     const configFilePath = path.join(process.cwd(), ".gtconfig")
     await config.save(configFilePath)
 
@@ -194,6 +193,55 @@ async function run() {
   const config = await gt.common.config.load()
 
   if (command === "program") {
+    if (subcommand === "add") {
+      const file = await (async () => {
+        if (params.indexOf("--file") > -1) {
+          return path.resolve(params[params.indexOf("--file") + 1])
+        } else {
+          const response = await inquirer.prompt([
+            {
+              type: "input",
+              name: "path",
+              message: prettify(
+                "Where should the downloaded program file be stored? Please specify a path:"
+              ),
+            },
+          ])
+
+          return path.resolve(response.path)
+        }
+      })()
+
+      const titleIdOrKey = params[params.length - 1].trim()
+
+      const program = await gt.program.find(program => {
+        return (
+          program.name === titleIdOrKey ||
+          program.id === parseInt(titleIdOrKey) ||
+          program.key === titleIdOrKey
+        )
+      })
+
+      if (program) {
+        const configFilePath = findUpward(".gtconfig")
+        const parts = configFilePath.split("/")
+        const dir = parts.slice(0, parts.length - 1).join("/")
+        gt.common.config.programs[program.key] = file.replace(dir + "/", "")
+        await gt.common.config.save()
+
+        const code = await gt.program.download(program.key)
+        writeFileSafe(file, code)
+
+        console.log(
+          prettify(
+            `The program "${titleIdOrKey}" was added to your .gtconfig file, and its source code was saved to "${file}"!`
+          )
+        )
+      } else {
+        throw new GTError("No such program found!")
+      }
+    }
+
     if (subcommand === "build") {
       const idOrKey = params[0]
 
@@ -303,18 +351,11 @@ async function run() {
         }
 
         config.programs[data.key] = file
-
-        fs.writeFileSync(
-          configFilePath,
-          JSON.stringify(config, null, 2),
-          "utf8"
-        )
+        const configFilePath = findUpward(".gtconfig")
+        writeFileSafe(configFilePath, JSON.stringify(config, null, 2))
       }
 
-      const parts = file.split("/")
-      const dir = parts.slice(0, parts.length - 1).join("/")
-      fs.mkdirSync(dir, { recursive: true })
-      fs.writeFileSync(file, "", "utf8")
+      writeFileSafe(file, "")
     }
 
     if (subcommand === "delete") {
@@ -425,7 +466,7 @@ async function run() {
       const contents = await gt.program.download(idOrKey)
 
       if (shouldSave) {
-        fs.writeFileSync(file, contents, "utf8")
+        writeFileSafe(file, contents)
       } else {
         console.log(contents)
       }
@@ -531,12 +572,8 @@ async function run() {
 
           if (response2.answer) {
             config.programs[key] = response1.answer
-
-            fs.writeFileSync(
-              configFilePath,
-              JSON.stringify(config, null, 2),
-              "utf8"
-            )
+            const configFilePath = findUpward(".gtconfig")
+            writeFileSafe(configFilePath, JSON.stringify(config, null, 2))
           }
         }
 
@@ -568,7 +605,7 @@ async function run() {
 
       const file = path.resolve(config.programs[key])
       const contents = await gt.program.getContents(key)
-      fs.writeFileSync(file, contents, "utf8")
+      writeFileSafe(file, contents)
     }
   }
 

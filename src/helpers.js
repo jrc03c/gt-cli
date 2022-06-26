@@ -57,4 +57,24 @@ function prettify(text) {
   return wrap(unindent(text).trim(), null, "  ")
 }
 
-module.exports = { btoa, findUpward, isUndefined, pause, prettify }
+function writeFileSafe(file, contents) {
+  file = path.resolve(file)
+  const parts = file.split("/")
+  const dir = parts.slice(0, parts.length - 1).join("/")
+
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true })
+  }
+
+  fs.writeFileSync(file, contents, "utf8")
+  return file
+}
+
+module.exports = {
+  btoa,
+  findUpward,
+  isUndefined,
+  pause,
+  prettify,
+  writeFileSafe,
+}
