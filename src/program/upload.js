@@ -5,8 +5,13 @@ const build = require("./build.js")
 const get = require("./get.js")
 const request = require("../request")
 
-module.exports = async function (idOrKey, contents, shouldBuild, callback) {
-  if (isUndefined(idOrKey)) {
+module.exports = async function (
+  titleIdOrKey,
+  contents,
+  shouldBuild,
+  callback
+) {
+  if (isUndefined(titleIdOrKey)) {
     throw new GTError(
       `The first value passed into the \`gt.program.upload\` function must be a string (i.e., a program key) or a number (i.e., a program ID)!`
     )
@@ -28,11 +33,11 @@ module.exports = async function (idOrKey, contents, shouldBuild, callback) {
 
   callback({
     finished: false,
-    status: `Fetching program ${idOrKey}...`,
+    status: `Fetching program ${titleIdOrKey}...`,
     progress: 1 / 5,
   })
 
-  const id = (await get(idOrKey)).id
+  const id = (await get(titleIdOrKey)).id
 
   callback({
     finished: false,

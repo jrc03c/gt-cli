@@ -2,14 +2,14 @@ const { GTError } = require("../common")
 const { isUndefined } = require("../helpers.js")
 const request = require("../request")
 
-module.exports = async function (idOrKey) {
+module.exports = async function (titleIdOrKey) {
   if (
-    !isUndefined(idOrKey) &&
-    typeof idOrKey !== "string" &&
-    typeof idOrKey !== "number"
+    !isUndefined(titleIdOrKey) &&
+    typeof titleIdOrKey !== "string" &&
+    typeof titleIdOrKey !== "number"
   ) {
     throw new GTError(
-      `The value passed into the \`gt.program.get\` function must be a string (i.e., a program key), a number (i.e., a program ID), or null / undefined (to fetch all programs)!`
+      `The value passed into the \`gt.program.get\` function must be a string (i.e., a program key or title), a number (i.e., a program ID), or null / undefined (to fetch all programs)!`
     )
   }
 
@@ -20,12 +20,14 @@ module.exports = async function (idOrKey) {
 
   const results = await response.json()
 
-  if (isUndefined(idOrKey)) {
+  if (isUndefined(titleIdOrKey)) {
     return results
   } else {
     const out = results.find(
       program =>
-        program.id === parseInt(idOrKey) || program.key === idOrKey.toString()
+        program.id === parseInt(titleIdOrKey) ||
+        program.key === titleIdOrKey.toString() ||
+        program.name === titleIdOrKey.toString()
     )
 
     if (!out) {

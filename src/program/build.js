@@ -22,7 +22,7 @@ async function getProgramContents(key) {
   return await response.json()
 }
 
-async function build(idOrKey, callback) {
+async function build(titleIdOrKey, callback) {
   if (!isUndefined(callback) && typeof callback !== "function") {
     throw new GTError(
       `The second argument to the \`gt.program.build\` function (if used) must be a function!`
@@ -34,11 +34,11 @@ async function build(idOrKey, callback) {
   // fetch the program
   callback({
     finished: false,
-    status: `Fetching program ${idOrKey}...`,
+    status: `Fetching program ${titleIdOrKey}...`,
     progress: 1 / 5,
   })
 
-  const program = await get(idOrKey)
+  const program = await get(titleIdOrKey)
   const key = program.key
 
   // get the program's contents

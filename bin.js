@@ -49,8 +49,8 @@ async function run() {
           --file [path]
 
         ${chalk.yellow(
-          "build [id or key]"
-        )} = compiles a program given an ID or key
+          "build [title, ID, or key]"
+        )} = compiles a program given an title, ID, or key
 
         ${chalk.yellow(
           "create [options] [name]"
@@ -60,14 +60,14 @@ async function run() {
           --file [path]
 
         ${chalk.yellow(
-          "delete [options] [id or key]"
-        )} = deletes the program with the given ID or key; by default, you'll be prompted to confirm the deletion before the request is sent, but this behavior can be disabled by using --unsafe; options are:
+          "delete [options] [title, ID, or key]"
+        )} = deletes the program with the given title, ID, or key; by default, you'll be prompted to confirm the deletion before the request is sent, but this behavior can be disabled by using --unsafe; options are:
 
           --unsafe
 
         ${chalk.yellow(
-          "download [id or key]"
-        )} = fetches the contents of the remote program with the given ID or key
+          "download [title, ID, or key]"
+        )} = fetches the contents of the remote program with the given title, ID, or key
 
         ${chalk.yellow(
           "filter [query]"
@@ -78,8 +78,8 @@ async function run() {
         )} = searches for and returns the first program with a name that includes the query
 
         ${chalk.yellow(
-          "get [id or key]"
-        )} = retrieves the metadata of a program with the given ID or key, or gets all programs if --all is used (same as \`gt program list\`); options are:
+          "get [title, ID, or key]"
+        )} = retrieves the metadata of a program with the given title, ID, or key, or gets all programs if --all is used (same as \`gt program list\`); options are:
 
           --all
 
@@ -88,7 +88,7 @@ async function run() {
         )} = lists all programs (same as \`gt program get --all\`)
 
         ${chalk.yellow(
-          "upload [id or key]"
+          "upload [title, ID, or key]"
         )} = uploads the code contents of the program with the given key (or all programs if --all is used); it automatically compiles the remote program by default, but this behavior can be disabled with --no-build; options are:
 
           --all
@@ -280,16 +280,18 @@ async function run() {
     }
 
     if (subcommand === "build") {
-      const idOrKey = params[0]
+      const titleIdOrKey = params[0]
 
-      await gt.program.build(idOrKey, info =>
+      await gt.program.build(titleIdOrKey, info =>
         console.log(prettify(info.status))
       )
 
       return console.log(
         prettify(
           `Program ${
-            typeof idOrKey === "string" ? `"${idOrKey}"` : idOrKey
+            typeof titleIdOrKey === "string"
+              ? `"${titleIdOrKey}"`
+              : titleIdOrKey
           } was built successfully!`
         )
       )
@@ -382,12 +384,12 @@ async function run() {
     if (subcommand === "delete") {
       if (params.length === 0) {
         throw new GTError(
-          "You must specify the ID or key of the program to delete! See `gt help` for more info."
+          "You must specify the title, ID, or key of the program to delete! See `gt help` for more info."
         )
       }
 
-      const idOrKey = params.pop()
-      const program = await gt.program.get(idOrKey)
+      const titleIdOrKey = params.pop()
+      const program = await gt.program.get(titleIdOrKey)
       const isUnsafe = params.indexOf("--unsafe") > -1
       let shouldDelete = false
 
@@ -434,7 +436,7 @@ async function run() {
       }
 
       if (shouldDelete) {
-        await gt.program.delete(idOrKey)
+        await gt.program.delete(titleIdOrKey)
         delete gt.common.config.programs[program.key]
         await gt.common.config.save()
         console.log(prettify(`The program was deleted!`))
@@ -446,12 +448,12 @@ async function run() {
     if (subcommand === "download") {
       if (params.length === 0) {
         throw new GTError(
-          "You must specify the ID or key of the program to download! See `gt help` for more info."
+          "You must specify the title, ID, or key of the program to download! See `gt help` for more info."
         )
       }
 
-      const idOrKey = params.pop()
-      const contents = await gt.program.download(idOrKey)
+      const titleIdOrKey = params.pop()
+      const contents = await gt.program.download(titleIdOrKey)
       console.log(contents)
     }
 
@@ -490,7 +492,7 @@ async function run() {
     if (subcommand === "get") {
       if (params.length === 0) {
         throw new GTError(
-          "You must specify a program ID or key to retrieve a specific program, or use `--all` to retrieve all programs! See `gt help` for more info."
+          "You must specify a program title, ID, or key to retrieve a specific program, or use `--all` to retrieve all programs! See `gt help` for more info."
         )
       }
 
@@ -499,8 +501,8 @@ async function run() {
       if (params[0] === "--all") {
         results = await gt.program.get()
       } else {
-        const idOrKey = params[0]
-        results = await gt.program.get(idOrKey)
+        const titleIdOrKey = params[0]
+        results = await gt.program.get(titleIdOrKey)
       }
 
       console.log(prettify(util.inspect(results, { colors: true })))
@@ -513,7 +515,7 @@ async function run() {
     if (subcommand === "upload") {
       if (params.length === 0) {
         throw new GTError(
-          "You must specify at least one program ID or key! Multiple IDs and/or keys should be separated by spaces. See `gt-help` for more info."
+          "You must specify at least one program title, ID, or key! Multiple IDs and/or keys should be separated by spaces. See `gt-help` for more info."
         )
       }
 

@@ -2,8 +2,8 @@ const { JSDOM } = require("jsdom")
 const get = require("./get.js")
 const request = require("../request")
 
-async function getContents(idOrKey) {
-  const program = await get(idOrKey)
+async function getContents(titleIdOrKey) {
+  const program = await get(titleIdOrKey)
   const { id } = program
   const response = await request.send({ path: `/programs/${id}/edit` })
   const raw = await response.text()
