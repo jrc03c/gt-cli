@@ -29,6 +29,12 @@ async function run() {
     ${chalk.bold("Commands")}
     --------
 
+      ${chalk.green("docs")} = Opens the GuidedTrack docs website
+
+        ${chalk.yellow(
+          "search [query]"
+        )} = Opens the GuidedTrack docs website and searches for the given query
+
       ${chalk.green("help")} = Shows this help message
 
       ${chalk.green(
@@ -114,6 +120,12 @@ async function run() {
     ${chalk.bold("Examples")}
     --------
 
+      ${chalk.dim("# opens the docs website")}
+      gt docs
+
+      ${chalk.dim("# opens the docs website and searches for the given query")}
+      gt docs search *email
+
       ${chalk.dim("# print this help message again")}
       gt help
 
@@ -170,6 +182,24 @@ async function run() {
   const params = args.slice(2)
 
   // ==========================================================================
+  // DOCS
+  // ==========================================================================
+
+  if (command === "docs") {
+    if (subcommand && subcommand === "search") {
+      if (params.length === 0) {
+        throw new GTError(
+          "You didn't provide a search query! See `gt help` for more info."
+        )
+      }
+
+      exec(`xdg-open https://docs.guidedtrack.com/search/?query=${params[0]}`)
+    } else {
+      exec(`xdg-open https://docs.guidedtrack.com`)
+    }
+  }
+
+  // ==========================================================================
   // HELP
   // ==========================================================================
 
@@ -196,9 +226,9 @@ async function run() {
   // PROGRAM
   // ==========================================================================
 
-  const config = await gt.common.config.load()
-
   if (command === "program") {
+    const config = await gt.common.config.load()
+
     if (subcommand === "add") {
       const file = await (async () => {
         if (params.indexOf("--file") > -1) {
@@ -518,6 +548,7 @@ async function run() {
   // ==========================================================================
 
   if (command === "pull") {
+    const config = await gt.common.config.load()
     const keys = Object.keys(config.programs || {})
 
     if (keys.length === 0) {
@@ -541,6 +572,7 @@ async function run() {
   // ==========================================================================
 
   if (command === "push") {
+    const config = await gt.common.config.load()
     const keys = Object.keys(config.programs || {})
 
     if (keys.length === 0) {
@@ -566,6 +598,8 @@ async function run() {
   // ==========================================================================
 
   if (command === "request") {
+    const config = await gt.common.config.load()
+
     if (subcommand === "send") {
       if (params.length === 0) {
         throw new GTError(
