@@ -3,10 +3,10 @@
 async function run() {
   const { Chalk } = await import("chalk")
   const { exec } = require("child_process")
-  const { GTError } = require("./src/common")
-  const { findUpward, prettify, writeFileSafe } = require("./src/helpers.js")
+  const { GTError } = require("../src/common")
+  const { findUpward, prettify, writeFileSafe } = require("../src/helpers.js")
   const fs = require("fs")
-  const gt = require(".")
+  const gt = require("..")
   const inquirer = require("inquirer")
   const path = require("path")
   const util = require("util")

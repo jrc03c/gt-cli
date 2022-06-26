@@ -17,6 +17,6 @@
   "author": "",
   "license": "ISC",
   "bin": {
-    "gt": "./bin.js"
+    "gt": "./bin/index.js"
   }
 }
