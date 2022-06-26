@@ -1,4 +1,5 @@
 module.exports = async function (subcommand, params) {
+  const gt = require("../..")
   await gt.common.config.load()
 
   if (subcommand === "add") {
@@ -34,7 +35,7 @@ module.exports = async function (subcommand, params) {
   }
 
   if (subcommand === "list") {
-    return await require("./get.js")()
+    return await require("./get.js")(["--all"])
   }
 
   if (subcommand === "upload") {

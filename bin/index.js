@@ -33,6 +33,12 @@ async function run() {
   if (command === "request") {
     return await require("./request")(subcommand, params)
   }
+
+  const gt = require("..")
+
+  throw new gt.common.GTError(
+    `"${command}" is not a recognized command! See \`gt help\` for more info.`
+  )
 }
 
 run()

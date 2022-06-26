@@ -84,8 +84,8 @@ module.exports = async function () {
           --no-build
 
       ${chalk.green(
-        "pull"
-      )} = fetches the code contents of all remote programs listed in .gtconfig and overwrites their corresponding local files
+        "pull [title, id, or key]"
+      )} = fetches the code contents of a remote program if a title, ID, or key is given and overwrites the program's local file (assuming the program is listed in \`programs\` in the .gtconfig file); otherwise, fetches the code contents of all remote programs listed in .gtconfig and overwrites their corresponding local files
 
       ${chalk.green(
         "push [options] [title, id, or key]"

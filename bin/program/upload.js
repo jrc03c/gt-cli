@@ -14,13 +14,13 @@ module.exports = async function (params) {
   const titleIdOrKey = params[params.length - 1]
   const program = await gt.program.get(titleIdOrKey)
 
-  if (!config.programs[program.key]) {
+  if (!gt.common.config.programs[program.key]) {
     throw new gt.common.GTError(
       `The program "${titleIdOrKey}" (which has a key of "${program.key}") isn't listed in your .gtconfig file! First add it using \`gt program add [title, id, or key]\`!`
     )
   }
 
-  const file = path.resolve(config.programs[program.key])
+  const file = path.resolve(gt.common.config.programs[program.key])
   const raw = fs.readFileSync(file, "utf8")
 
   await gt.program.upload(program.key, raw, shouldBuild, info =>

@@ -1,5 +1,10 @@
 module.exports = async function (params) {
-  const { prettify, writeFileSafe } = require("../../src/helpers.js")
+  const {
+    findUpward,
+    prettify,
+    writeFileSafe,
+  } = require("../../src/helpers.js")
+
   const gt = require("../..")
   const inquirer = require("inquirer")
   const path = require("path")
