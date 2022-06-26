@@ -6,7 +6,6 @@ async function run() {
   const { GTError } = require("./src/common")
   const { findUpward, prettify, writeFileSafe } = require("./src/helpers.js")
   const fs = require("fs")
-  const fsx = require("@jrc03c/fs-extras")
   const gt = require(".")
   const inquirer = require("inquirer")
   const path = require("path")
