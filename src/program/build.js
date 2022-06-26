@@ -84,6 +84,13 @@ async function build(idOrKey, callback) {
 
   const updatedContents = await getProgramContents(key)
   const name = updatedContents.starting_program
+
+  if (!updatedContents[name] || !updatedContents[name].metadata) {
+    throw new GTError(
+      "We seem to have received an unexpected response from the server. Please try your request again."
+    )
+  }
+
   const errors = updatedContents[name].metadata.errors
 
   if (errors && errors.length > 0) {
