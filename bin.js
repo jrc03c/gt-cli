@@ -88,10 +88,9 @@ async function run() {
         )} = lists all programs (same as \`gt program get --all\`)
 
         ${chalk.yellow(
-          "upload [title, ID, or key]"
-        )} = uploads the code contents of the program with the given key (or all programs if --all is used); it automatically compiles the remote program by default, but this behavior can be disabled with --no-build; options are:
+          "upload [options] [title, ID, or key]"
+        )} = uploads the code contents of the program with the given title, ID, or key (same as \`gt push [title, ID, or key]\`); it automatically compiles the remote program by default, but this behavior can be disabled with --no-build; options are:
 
-          --all
           --no-build
 
       ${chalk.green(
@@ -99,8 +98,8 @@ async function run() {
       )} = fetches the code contents of all remote programs listed in .gtconfig and overwrites their corresponding local files
 
       ${chalk.green(
-        "push"
-      )} = overwrites remote programs listed in .gtconfig with their corresponding local file contents; it automatically compiles the remote programs by default, but this behavior can be disabled with --no-build; options are:
+        "push [options] [title, id, or key]"
+      )} = overwrites a remote program with its local copy if a title, ID, or key is given; otherwise, overwrites all remote programs listed in .gtconfig with their corresponding local file contents; it automatically compiles the remote programs by default, but this behavior can be disabled with --no-build; options are:
 
         --no-build
 
@@ -156,9 +155,6 @@ async function run() {
       ${chalk.dim("# upload the local contents of a program")}
       gt program upload abcd123
 
-      ${chalk.dim("# upload all local contents of all programs")}
-      gt program upload --all
-
       ${chalk.dim(
         "# fetch all remote programs and overwrite their local counterparts"
       )}
@@ -168,6 +164,9 @@ async function run() {
         "# overwrite all remote programs with their local counterparts"
       )}
       gt push
+
+      ${chalk.dim("# overwrite a particular program with its local copy")}
+      gt push abcd123
 
       ${chalk.dim("# send a custom API request")}
       gt request send \\
@@ -275,7 +274,7 @@ async function run() {
           )
         )
       } else {
-        throw new GTError("No such program found!")
+        throw new GTError("No such program was found!")
       }
     }
 
@@ -515,34 +514,26 @@ async function run() {
     if (subcommand === "upload") {
       if (params.length === 0) {
         throw new GTError(
-          "You must specify at least one program title, ID, or key! Multiple IDs and/or keys should be separated by spaces. See `gt-help` for more info."
+          "You must specify at least one program title, ID, or key! Multiple IDs and/or keys should be separated by spaces. See `gt help` for more info."
         )
       }
 
       const shouldBuild = params.indexOf("--no-build") < 0
-      const shouldUploadAll = params.indexOf("--all") > -1
+      const titleIdOrKey = params[params.length - 1]
+      const program = await gt.program.get(titleIdOrKey)
 
-      const keys = shouldUploadAll
-        ? Object.keys(config.programs)
-        : params.filter(p => p !== "--no-build" && p !== "--all")
-
-      for (let i = 0; i < keys.length; i++) {
-        const key = keys[i]
-        let file
-
-        if (!config.programs[key]) {
-          throw new GTError(
-            `The program "${key}" isn't listed in your .gtconfig file! First add it using \`gt program add ${key}\`!`
-          )
-        }
-
-        file = path.resolve(config.programs[key])
-        const raw = fs.readFileSync(file, "utf8")
-
-        await gt.program.upload(key, raw, shouldBuild, info =>
-          console.log(info.status)
+      if (!config.programs[program.key]) {
+        throw new GTError(
+          `The program "${titleIdOrKey}" (which has a key of "${program.key}") isn't listed in your .gtconfig file! First add it using \`gt program add [title, id, or key]\`!`
         )
       }
+
+      const file = path.resolve(config.programs[program.key])
+      const raw = fs.readFileSync(file, "utf8")
+
+      await gt.program.upload(program.key, raw, shouldBuild, info =>
+        console.log(info.status)
+      )
     }
   }
 
@@ -556,7 +547,7 @@ async function run() {
 
     if (keys.length === 0) {
       throw new GTError(
-        "There are no programs listed in your .gtconfig file! Please add some programs first and then run `gt pull` again."
+        "There are no programs listed in your .gtconfig file! Please add some programs first using `gt program add [title, id, or key]` and then run `gt pull` again. See `gt help` for more info."
       )
     }
 
@@ -576,11 +567,11 @@ async function run() {
 
   if (command === "push") {
     const config = await gt.common.config.load()
-    const keys = Object.keys(config.programs || {})
+    const keys = subcommand ? [subcommand] : Object.keys(config.programs || {})
 
     if (keys.length === 0) {
       throw new GTError(
-        "There are no programs listed in your .gtconfig file! Please add some programs first and then run `gt push` again."
+        "There are no programs listed in your .gtconfig file! Please add some programs first using `gt program add [title, id, or key]` and then run `gt push` again. See `gt help` for more info."
       )
     }
 
@@ -606,7 +597,7 @@ async function run() {
     if (subcommand === "send") {
       if (params.length === 0) {
         throw new GTError(
-          `For requests, you must specify a path! See \`gt help\` for more info.`
+          "For requests, you must specify a path! See `gt help` for more info."
         )
       }
 
@@ -630,7 +621,7 @@ async function run() {
             return JSON.parse(params[index + 1])
           } catch (e) {
             throw new GTError(
-              "The value you provided for the `--headers` option doesn't appear to be valid JSON!"
+              "The value you provided for the `--headers` option doesn't appear to be valid JSON! See `gt help` for more info."
             )
           }
         } else {
@@ -646,7 +637,7 @@ async function run() {
             return JSON.parse(params[index + 1])
           } catch (e) {
             throw new GTError(
-              "The value you provided for the `--body` option doesn't appear to be valid JSON!"
+              "The value you provided for the `--body` option doesn't appear to be valid JSON! See `gt help` for more info."
             )
           }
         } else {
@@ -662,7 +653,7 @@ async function run() {
             return JSON.parse(params[index + 1])
           } catch (e) {
             throw new GTError(
-              "The value you provided for the `--query` option doesn't appear to be valid JSON!"
+              "The value you provided for the `--query` option doesn't appear to be valid JSON! See `gt help` for more info."
             )
           }
         } else {

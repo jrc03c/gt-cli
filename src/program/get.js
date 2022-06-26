@@ -31,7 +31,9 @@ module.exports = async function (titleIdOrKey) {
     )
 
     if (!out) {
-      throw new GTError(`No such program exists!`)
+      throw new GTError(
+        `Either the target program doesn't exist or you don't have permission to access it!`
+      )
     }
 
     return out
