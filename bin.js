@@ -2,6 +2,7 @@
 
 async function run() {
   const { Chalk } = await import("chalk")
+  const { exec } = require("child_process")
   const { GTError } = require("./src/common")
   const { findUpward, prettify, writeFileSafe } = require("./src/helpers.js")
   const fs = require("fs")
@@ -50,7 +51,7 @@ async function run() {
           "create [options] [name]"
         )} = creates a new program with the given name; options are:
           
-          --update-config
+          --add
           --file [path]
 
         ${chalk.yellow(
@@ -305,7 +306,7 @@ async function run() {
           .join("\n")
       )
 
-      if (params.indexOf("--update-config") > -1) {
+      if (params.indexOf("--add") > -1) {
         shouldUpdateConfig = true
       } else {
         const response = await inquirer.prompt([
@@ -325,37 +326,21 @@ async function run() {
         shouldUpdateConfig = response.answer
       }
 
-      if (params.indexOf("--file") > -1) {
-        file = path.resolve(params[params.indexOf("--file") + 1])
-      } else {
+      if (shouldUpdateConfig) {
         const response = await inquirer.prompt([
           {
             type: "input",
-            name: "answer",
+            name: "path",
             message: prettify(
-              "If the program file already exists locally, then what is the path to it? Or, if it doesn't exist locally, then where should it be placed?"
+              "Where should we store this program's file? Please specify a path:"
             ),
           },
         ])
 
-        if (response.answer.trim().length > 0) {
-          file = path.resolve(response.answer.trim())
-        } else {
-          file = `path/to/${data.key}.gt`
-        }
+        gt.common.config.programs[data.key] = response.path
+        writeFileSafe(response.path, "")
+        await gt.common.config.save()
       }
-
-      if (shouldUpdateConfig) {
-        if (!config.programs) {
-          config.programs = {}
-        }
-
-        config.programs[data.key] = file
-        const configFilePath = findUpward(".gtconfig")
-        writeFileSafe(configFilePath, JSON.stringify(config, null, 2))
-      }
-
-      writeFileSafe(file, "")
     }
 
     if (subcommand === "delete") {
@@ -414,6 +399,8 @@ async function run() {
 
       if (shouldDelete) {
         await gt.program.delete(idOrKey)
+        delete gt.common.config.programs[program.key]
+        await gt.common.config.save()
         console.log(prettify(`The program was deleted!`))
       } else {
         console.log(prettify("The program was not deleted."))

@@ -252,6 +252,12 @@ class Config {
             },
           ])
 
+          console.log(
+            prettify(
+              `Please add "${response.path}" to your .gitignore file if you're using git!`
+            )
+          )
+
           self.credentialsFile = response.path
           return await self.save(configFilePath)
         }
