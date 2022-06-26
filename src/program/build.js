@@ -1,5 +1,5 @@
 const { GTError } = require("../common")
-const { isUndefined, pause } = require("../helpers.js")
+const { isUndefined } = require("../helpers.js")
 const { poll } = require("../job")
 const get = require("./get.js")
 const request = require("../request")
