@@ -2,3 +2,4 @@ node_modules
 .gtconfig*
 secrets.json
 temp*
+todo.md
