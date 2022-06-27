@@ -38,6 +38,18 @@ module.exports = async function (subcommand, params) {
     return await require("./get.js")(["--all"])
   }
 
+  if (subcommand === "preview") {
+    return await require("./preview.js")(params)
+  }
+
+  if (subcommand === "run") {
+    return await require("./run.js")(params)
+  }
+
+  if (subcommand === "test") {
+    return await require("./test.js")(params)
+  }
+
   if (subcommand === "upload") {
     return await require("./upload.js")(params)
   }

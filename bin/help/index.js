@@ -78,6 +78,20 @@ module.exports = async function () {
         )} = lists all programs (same as \`gt program get --all\`)
 
         ${chalk.yellow(
+          "gt program preview [title, id, or key]"
+        )} = Opens the default browser to the public preview page of the program with the given title, ID, or key
+
+        ${chalk.yellow(
+          "gt program run [title, id, or key]"
+        )} = Opens the default browser to the public run page of the program with the given title, ID, or key
+
+        ${chalk.yellow(
+          "gt program [options] test [title, id, or key]"
+        )} = Opens the default browser to the automated testing page for the program with the given title, ID, or key; see https://github.com/jrc03c/gt-tester for more info; options include:
+
+          --mode [run or preview]
+
+        ${chalk.yellow(
           "upload [options] [title, ID, or key]"
         )} = uploads the code contents of the program with the given title, ID, or key (same as \`gt push [title, ID, or key]\`); it automatically compiles the remote program by default, but this behavior can be disabled with --no-build; options are:
 
