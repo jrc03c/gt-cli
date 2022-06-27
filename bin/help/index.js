@@ -78,16 +78,16 @@ module.exports = async function () {
         )} = lists all programs (same as \`gt program get --all\`)
 
         ${chalk.yellow(
-          "gt program preview [title, id, or key]"
+          "preview [title, id, or key]"
         )} = Opens the default browser to the public preview page of the program with the given title, ID, or key
 
         ${chalk.yellow(
-          "gt program run [title, id, or key]"
+          "run [title, id, or key]"
         )} = Opens the default browser to the public run page of the program with the given title, ID, or key
 
         ${chalk.yellow(
-          "gt program [options] test [title, id, or key]"
-        )} = Opens the default browser to the automated testing page for the program with the given title, ID, or key; see https://github.com/jrc03c/gt-tester for more info; options include:
+          "test [options] [title, id, or key]"
+        )} = Opens the default browser to the automated testing page for the program with the given title, ID, or key; see https://github.com/jrc03c/gt-tester for more info; options are:
 
           --mode [run or preview]
 
