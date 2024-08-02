@@ -180,5 +180,7 @@ module.exports = async function () {
         /some/api/endpoint
   `)
 
+  console.log("")
   console.log(help)
+  console.log("")
 }

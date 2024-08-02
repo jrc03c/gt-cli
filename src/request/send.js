@@ -1,5 +1,4 @@
 const common = require("../common")
-const fetch = require("node-fetch")
 const Queue = require("@jrc03c/queue")
 
 const { GTError } = common
