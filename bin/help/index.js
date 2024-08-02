@@ -51,7 +51,7 @@ module.exports = async function help() {
           --add
           --file [path]
 
-        ${chalk.yellow("csv [title, ID, or key]")} = (see the \`data\` command)
+        ${chalk.yellow("csv [title, ID, or key]")} = (see the \`data\` subcommand)
 
         ${chalk.yellow("data [title, ID, or key]")} = retrieves the data CSV of a program with the given title, ID, or key, or gets all programs' CSVs if --all is used (same as \`gt program list\`); options are:
 
