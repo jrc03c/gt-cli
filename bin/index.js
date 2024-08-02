@@ -6,6 +6,10 @@ async function run() {
   const subcommand = args[1]
   const params = args.slice(2)
 
+  if (command === "config") {
+    return await require("./config")()
+  }
+
   if (command === "docs") {
     return await require("./docs")(subcommand, params)
   }

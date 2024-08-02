@@ -57,4 +57,8 @@ module.exports = async function (subcommand, params) {
   if (subcommand === "upload") {
     return await require("./upload.js")(params)
   }
+
+  if (subcommand === "view") {
+    return await require("./view.js")(params)
+  }
 }

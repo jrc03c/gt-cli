@@ -4,14 +4,16 @@ const GTError = require("./gt-error.js")
 const Host = require("./host.js")
 const inquirer = require("inquirer")
 const path = require("path")
+const util = require("node:util")
 
 class Config {
-  hasBeenLoaded = false
-  programs = {}
-
   _username = null
   _password = null
   _host = null
+
+  credentialsFile = null
+  hasBeenLoaded = false
+  programs = {}
 
   constructor() {
     Object.defineProperty(this, "username", {
@@ -202,6 +204,25 @@ class Config {
 
     this.hasBeenLoaded = true
     return this
+  }
+
+  async print() {
+    console.log(
+      util.inspect(
+        {
+          credentialsFile: this.credentialsFile,
+          username: await this.username,
+          hasBeenLoaded: this.hasBeenLoaded,
+          host: await this.host,
+          programs: this.programs,
+        },
+        {
+          colors: true,
+          compact: false,
+          depth: Infinity,
+        },
+      ),
+    )
   }
 
   async save(configFilePath) {
