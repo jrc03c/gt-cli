@@ -1,5 +1,4 @@
 const { btoa, findUpward, prettify, writeFileSafe } = require("../helpers.js")
-const Environment = require("./environment.js")
 const fs = require("fs")
 const GTError = require("./gt-error.js")
 const Host = require("./host.js")
@@ -15,14 +14,12 @@ class Config {
   _host = null
 
   constructor() {
-    const self = this
-
-    Object.defineProperty(self, "username", {
+    Object.defineProperty(this, "username", {
       enumerable: true,
       configurable: false,
 
       async get() {
-        if (!self._username) {
+        if (!this._username) {
           const response = await inquirer.prompt([
             {
               type: "input",
@@ -31,23 +28,23 @@ class Config {
             },
           ])
 
-          self._username = response.username
+          this._username = response.username
         }
 
-        return self._username
+        return this._username
       },
 
       set(value) {
-        self._username = value
+        this._username = value
       },
     })
 
-    Object.defineProperty(self, "password", {
+    Object.defineProperty(this, "password", {
       enumerable: true,
       configurable: false,
 
       async get() {
-        if (!self._password) {
+        if (!this._password) {
           const response = await inquirer.prompt([
             {
               type: "password",
@@ -56,62 +53,62 @@ class Config {
             },
           ])
 
-          self._password = response.password
+          this._password = response.password
         }
 
-        return self._password
+        return this._password
       },
 
       set(value) {
-        self._password = value
+        this._password = value
       },
     })
 
-    Object.defineProperty(self, "credentials", {
+    Object.defineProperty(this, "credentials", {
       enumerable: true,
       configurable: false,
 
       async get() {
         return {
-          username: await self.username,
-          password: await self.password,
+          username: await this.username,
+          password: await this.password,
         }
       },
 
       set() {
         throw new GTError(
-          "The `credentials` property is a computed property and cannot be set directly! Please only set the `username` and `password` properties directly."
+          "The `credentials` property is a computed property and cannot be set directly! Please only set the `username` and `password` properties directly.",
         )
       },
     })
 
-    Object.defineProperty(self, "credentialsBase64", {
+    Object.defineProperty(this, "credentialsBase64", {
       enumerable: true,
       configurable: false,
 
       async get() {
-        return btoa(`${await self.username}:${await self.password}`)
+        return btoa(`${await this.username}:${await this.password}`)
       },
 
       set() {
         throw new GTError(
-          "The `credentialsBase64` property is a computed property and cannot be set directly! Please only set the `username` and `password` properties directly."
+          "The `credentialsBase64` property is a computed property and cannot be set directly! Please only set the `username` and `password` properties directly.",
         )
       },
     })
 
-    Object.defineProperty(self, "host", {
+    Object.defineProperty(this, "host", {
       enumerable: true,
       configurable: false,
 
       async get() {
-        if (!self._host) {
+        if (!this._host) {
           const response = await inquirer.prompt([
             {
               type: "list",
               name: "host",
               message: prettify(
-                "Which environment / host would you like to use by default? (Note that this can still be overridden on individual pushes or pulls.)"
+                "Which environment / host would you like to use by default? (Note that this can still be overridden on individual pushes or pulls.)",
               ),
               choices: Object.keys(Host)
                 .map(key => {
@@ -129,31 +126,29 @@ class Config {
                 type: "input",
                 name: "host",
                 message: prettify(
-                  "Custom host address (e.g., https://example.com):"
+                  "Custom host address (e.g., https://example.com):",
                 ),
               },
             ])
 
-            self._host = response.host
+            this._host = response.host
           } else {
-            self._host = Host[response.host]
+            this._host = Host[response.host]
           }
         }
 
-        return self._host
+        return this._host
       },
 
       set(value) {
-        self._host = value
+        this._host = value
       },
     })
   }
 
   async load(options) {
-    const self = this
-
-    if (self.hasBeenLoaded) {
-      return self
+    if (this.hasBeenLoaded) {
+      return this
     }
 
     options = options || {}
@@ -164,67 +159,65 @@ class Config {
       const temp = JSON.parse(fs.readFileSync(configFilePath))
 
       Object.keys(temp).forEach(key => {
-        self[key] = temp[key]
+        this[key] = temp[key]
       })
     } else {
       const file = findUpward(".gtconfig")
 
       if (file) {
         options.file = file
-        return await self.load(options)
+        return await this.load(options)
       }
     }
 
     if (credentialsFile) {
-      self.credentialsFile = credentialsFile
+      this.credentialsFile = credentialsFile
     }
 
-    if (self.credentialsFile) {
-      if (!fs.existsSync(self.credentialsFile)) {
+    if (this.credentialsFile) {
+      if (!fs.existsSync(this.credentialsFile)) {
         throw new GTError(
           `The credentials file listed in your .gtconfig file doesn't exist! ("${path.resolve(
-            self.credentialsFile
-          )}")`
+            this.credentialsFile,
+          )}")`,
         )
       }
 
-      const temp = JSON.parse(fs.readFileSync(self.credentialsFile, "utf8"))
-      self.username = temp.username
-      self.password = temp.password
+      const temp = JSON.parse(fs.readFileSync(this.credentialsFile, "utf8"))
+      this.username = temp.username
+      this.password = temp.password
     }
 
-    if (!self._username) {
-      self.username = username ? username : await self.username
+    if (!this._username) {
+      this.username = username ? username : await this.username
     }
 
-    if (!self._password) {
-      self.password = password ? password : await self.password
+    if (!this._password) {
+      this.password = password ? password : await this.password
     }
 
-    if (!self._host) {
-      self.host = host ? host : await self.host
+    if (!this._host) {
+      this.host = host ? host : await this.host
     }
 
-    self.hasBeenLoaded = true
-    return self
+    this.hasBeenLoaded = true
+    return this
   }
 
   async save(configFilePath) {
-    const self = this
-
     if (configFilePath) {
       const out = {
-        host: await self.host,
-        programs: self.programs,
-        credentialsFile: self.credentialsFile,
+        host: await this.host,
+        programs: this.programs,
+        credentialsFile: this.credentialsFile,
       }
 
       configFilePath = path.resolve(configFilePath)
 
-      if (self.credentialsFile) {
+      if (this.credentialsFile) {
         writeFileSafe(
-          self.credentialsFile,
-          JSON.stringify(await self.credentials, null, 2)
+          this.credentialsFile,
+          JSON.stringify(await this.credentials, null, 2),
         )
       } else {
         const response = await inquirer.prompt([
@@ -232,7 +225,7 @@ class Config {
             type: "list",
             name: "shouldCreateCredentialsFile",
             message: prettify(
-              "We recommend storing your credentials in a file that's NOT checked into version control but that is referenced in the `credentialsFile` property of your .gtconfig. If you don't store your credentials this way, then we'll ask you for your username and password each time. Would you like for us to create a credentials file for you and add it to the .gtconfig file?"
+              "We recommend storing your credentials in a file that's NOT checked into version control but that is referenced in the `credentialsFile` property of your .gtconfig. If you don't store your credentials this way, then we'll ask you for your username and password each time. Would you like for us to create a credentials file for you and add it to the .gtconfig file?",
             ),
             choices: [
               { name: "Yes", value: true },
@@ -247,19 +240,19 @@ class Config {
               type: "input",
               name: "path",
               message: prettify(
-                "Where should we store the credentials file? Please specify a path:"
+                "Where should we store the credentials file? Please specify a path:",
               ),
             },
           ])
 
           console.log(
             prettify(
-              `Please add "${response.path}" to your .gitignore file if you're using git!`
-            )
+              `Please add "${response.path}" to your .gitignore file if you're using git!`,
+            ),
           )
 
-          self.credentialsFile = response.path
-          return await self.save(configFilePath)
+          this.credentialsFile = response.path
+          return await this.save(configFilePath)
         }
       }
 
@@ -268,15 +261,15 @@ class Config {
       const file = findUpward(".gtconfig")
 
       if (file) {
-        return await self.save(file)
+        return await this.save(file)
       } else {
         throw new GTError(
-          "A .gtconfig file was neither specified nor found! Please either create a .gtconfig file along the path to your program or pass a .gtconfig file path into the `gt.common.config.save` function!"
+          "A .gtconfig file was neither specified nor found! Please either create a .gtconfig file along the path to your program or pass a .gtconfig file path into the `gt.common.config.save` function!",
         )
       }
     }
 
-    return self
+    return this
   }
 }
 

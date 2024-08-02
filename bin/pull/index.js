@@ -1,4 +1,4 @@
-module.exports = async function (subcommand, params) {
+module.exports = async function () {
   const { prettify, writeFileSafe } = require("../../src/helpers.js")
   const gt = require("../..")
   const path = require("path")
@@ -8,7 +8,7 @@ module.exports = async function (subcommand, params) {
 
   if (keys.length === 0) {
     throw new gt.common.GTError(
-      "There are no programs listed in your .gtconfig file! Please add some programs first using `gt program add [title, id, or key]` and then run `gt pull` again. See `gt help` for more info."
+      "There are no programs listed in your .gtconfig file! Please add some programs first using `gt program add [title, id, or key]` and then run `gt pull` again. See `gt help` for more info.",
     )
   }
 

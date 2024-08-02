@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
-    "@jrc03c/fs-extras": "github:jrc03c/fs-extras",
-    "@jrc03c/js-text-tools": "github:jrc03c/js-text-tools",
-    "@jrc03c/queue": "github:jrc03c/queue",
+    "@jrc03c/fs-extras": "^0.0.17",
+    "@jrc03c/js-text-tools": "^0.0.37",
+    "@jrc03c/queue": "^0.0.6",
     "chalk": "^5.0.1",
     "express": "^4.18.1",
     "inquirer": "^7.3.3",
@@ -18,5 +18,11 @@
   "license": "ISC",
   "bin": {
     "gt": "./bin/index.js"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.8.0",
+    "eslint": "^9.8.0",
+    "globals": "^15.9.0",
+    "prettier": "^3.3.3"
   }
 }

@@ -5,7 +5,7 @@ module.exports = async function (params) {
 
   if (params.length === 0) {
     throw new gt.common.GTError(
-      "You must specify a string pattern to match! See `gt help` for more info."
+      "You must specify a string pattern to match! See `gt help` for more info.",
     )
   }
 

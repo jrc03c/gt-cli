@@ -3,7 +3,7 @@ module.exports = async function (params) {
 
   if (params.length === 0) {
     throw new gt.common.GTError(
-      "You must specify the title, ID, or key of the program to download! See `gt help` for more info."
+      "You must specify the title, ID, or key of the program to download! See `gt help` for more info.",
     )
   }
 

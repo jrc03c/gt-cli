@@ -8,7 +8,7 @@ module.exports = async function (params) {
 
   if (params.length === 0) {
     throw new gt.common.GTError(
-      "You must specify the title, ID, or key of the program to delete! See `gt help` for more info."
+      "You must specify the title, ID, or key of the program to delete! See `gt help` for more info.",
     )
   }
 
@@ -30,8 +30,8 @@ module.exports = async function (params) {
         name: "answer",
         message: chalk.red.bold(
           prettify(
-            `You are about to delete the program called "${program.name}" from the GuidedTrack servers. (No local copies will be deleted, but the program will be removed from the \`programs\` list in your .gtconfig file.) This action cannot be undone! Are you sure you want to delete this program?`
-          )
+            `You are about to delete the program called "${program.name}" from the GuidedTrack servers. (No local copies will be deleted, but the program will be removed from the \`programs\` list in your .gtconfig file.) This action cannot be undone! Are you sure you want to delete this program?`,
+          ),
         ),
       },
     ])
@@ -43,15 +43,15 @@ module.exports = async function (params) {
           name: "answer",
           message: chalk.yellow.bold(
             prettify(
-              `To initiate deletion of the program called "${program.name}", please type the program's name here:`
-            )
+              `To initiate deletion of the program called "${program.name}", please type the program's name here:`,
+            ),
           ),
         },
       ])
 
       if (response2.answer.trim() !== program.name.trim()) {
         throw new gt.common.GTError(
-          "The name you typed doesn't match the name of the program!"
+          "The name you typed doesn't match the name of the program!",
         )
       }
 

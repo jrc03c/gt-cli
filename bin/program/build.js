@@ -5,14 +5,14 @@ module.exports = async function (params) {
   const titleIdOrKey = params[0]
 
   await gt.program.build(titleIdOrKey, info =>
-    console.log(prettify(info.status))
+    console.log(prettify(info.status)),
   )
 
   console.log(
     prettify(
       `Program ${
         typeof titleIdOrKey === "string" ? `"${titleIdOrKey}"` : titleIdOrKey
-      } was built successfully!`
-    )
+      } was built successfully!`,
+    ),
   )
 }

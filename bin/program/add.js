@@ -18,7 +18,7 @@ module.exports = async function (params) {
           type: "input",
           name: "path",
           message: prettify(
-            "Where should the downloaded program file be stored? Please specify a path:"
+            "Where should the downloaded program file be stored? Please specify a path:",
           ),
         },
       ])
@@ -49,8 +49,8 @@ module.exports = async function (params) {
 
     console.log(
       prettify(
-        `The program "${titleIdOrKey}" was added to your .gtconfig file, and its source code was saved to "${file}"!`
-      )
+        `The program "${titleIdOrKey}" was added to your .gtconfig file, and its source code was saved to "${file}"!`,
+      ),
     )
   } else {
     throw new gt.common.GTError("No such program was found!")

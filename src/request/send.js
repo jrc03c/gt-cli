@@ -25,13 +25,13 @@ module.exports = async function (options) {
 
   if (typeof options !== "object") {
     throw new GTError(
-      `The value passed into the \`gt.request.send\` function must be a string (i.e., an API endpoint path) or an object with a \`path\` property!`
+      `The value passed into the \`gt.request.send\` function must be a string (i.e., an API endpoint path) or an object with a \`path\` property!`,
     )
   }
 
   if (!options.path) {
     throw new GTError(
-      `The \`options\` object passed into the \`gt.request.send\` function must have a \`path\` property!`
+      `The \`options\` object passed into the \`gt.request.send\` function must have a \`path\` property!`,
     )
   }
 

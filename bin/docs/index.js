@@ -6,14 +6,14 @@ module.exports = async function (subcommand, params) {
     if (subcommand === "search") {
       if (params.length === 0) {
         throw new gt.common.GTError(
-          "You didn't provide a search query! See `gt help` for more info."
+          "You didn't provide a search query! See `gt help` for more info.",
         )
       }
 
       exec(`xdg-open https://docs.guidedtrack.com/search/?query=${params[0]}`)
     } else {
       throw new gt.common.GTError(
-        `"${subcommand}" is an unrecognized subcommand for \`gt docs\`! See \`gt help\` for more info.`
+        `"${subcommand}" is an unrecognized subcommand for \`gt docs\`! See \`gt help\` for more info.`,
       )
     }
   } else {

@@ -37,7 +37,7 @@ async function run() {
   const gt = require("..")
 
   throw new gt.common.GTError(
-    `"${command}" is not a recognized command! See \`gt help\` for more info.`
+    `"${command}" is not a recognized command! See \`gt help\` for more info.`,
   )
 }
 

@@ -7,7 +7,7 @@ const request = require("../request")
 module.exports = async function (name) {
   if (isUndefined(name)) {
     throw new GTError(
-      `The value passed into the \`gt.program.create\` function must be a string representing the name of the new program!`
+      `The value passed into the \`gt.program.create\` function must be a string representing the name of the new program!`,
     )
   }
 

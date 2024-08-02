@@ -8,7 +8,7 @@ module.exports = async function (params) {
 
   if (params.length === 0) {
     throw new gt.common.GTError(
-      "You must specify a program name! See `gt help` for more info."
+      "You must specify a program name! See `gt help` for more info.",
     )
   }
 
@@ -30,7 +30,7 @@ module.exports = async function (params) {
       .map(line => {
         const indentation = line.slice(
           0,
-          line.split("").findIndex(s => !s.match(/\s/g))
+          line.split("").findIndex(s => !s.match(/\s/g)),
         )
 
         if (line.match(/Program.*?!/g)) {
@@ -49,7 +49,7 @@ module.exports = async function (params) {
 
         return line
       })
-      .join("\n")
+      .join("\n"),
   )
 
   if (params.indexOf("--add") > -1) {
@@ -64,7 +64,7 @@ module.exports = async function (params) {
         ],
         name: "answer",
         message: prettify(
-          "Would you like for us to add this program to your .gtconfig file?"
+          "Would you like for us to add this program to your .gtconfig file?",
         ),
       },
     ])
@@ -78,7 +78,7 @@ module.exports = async function (params) {
         type: "input",
         name: "path",
         message: prettify(
-          "Where should we store this program's file? Please specify a path:"
+          "Where should we store this program's file? Please specify a path:",
         ),
       },
     ])

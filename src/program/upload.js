@@ -9,23 +9,23 @@ module.exports = async function (
   titleIdOrKey,
   contents,
   shouldBuild,
-  callback
+  callback,
 ) {
   if (isUndefined(titleIdOrKey)) {
     throw new GTError(
-      `The first value passed into the \`gt.program.upload\` function must be a string (i.e., a program key) or a number (i.e., a program ID)!`
+      `The first value passed into the \`gt.program.upload\` function must be a string (i.e., a program key) or a number (i.e., a program ID)!`,
     )
   }
 
   if (isUndefined(contents) || typeof contents !== "string") {
     throw new GTError(
-      `The second value passed into the \`gt.program.upload\` function must be a string (i.e., the code contents of the program).`
+      `The second value passed into the \`gt.program.upload\` function must be a string (i.e., the code contents of the program).`,
     )
   }
 
   if (!isUndefined(callback) && typeof callback !== "function") {
     throw new GTError(
-      `The fourth value passed into the \`gt.program.upload\` function must be a function!`
+      `The fourth value passed into the \`gt.program.upload\` function must be a function!`,
     )
   }
 

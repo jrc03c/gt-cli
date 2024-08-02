@@ -6,7 +6,7 @@ module.exports = async function (params) {
 
   if (params.length === 0) {
     throw new gt.common.GTError(
-      "You must specify at least one program title, ID, or key! Multiple IDs and/or keys should be separated by spaces. See `gt help` for more info."
+      "You must specify at least one program title, ID, or key! Multiple IDs and/or keys should be separated by spaces. See `gt help` for more info.",
     )
   }
 
@@ -16,7 +16,7 @@ module.exports = async function (params) {
 
   if (!gt.common.config.programs[program.key]) {
     throw new gt.common.GTError(
-      `The program "${titleIdOrKey}" (which has a key of "${program.key}") isn't listed in your .gtconfig file! First add it using \`gt program add [title, id, or key]\`!`
+      `The program "${titleIdOrKey}" (which has a key of "${program.key}") isn't listed in your .gtconfig file! First add it using \`gt program add [title, id, or key]\`!`,
     )
   }
 
@@ -24,6 +24,6 @@ module.exports = async function (params) {
   const raw = fs.readFileSync(file, "utf8")
 
   await gt.program.upload(program.key, raw, shouldBuild, info =>
-    console.log(prettify(info.status))
+    console.log(prettify(info.status)),
   )
 }

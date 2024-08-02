@@ -5,7 +5,7 @@ module.exports = async function (subcommand, params) {
   if (subcommand === "send") {
     if (params.length === 0) {
       throw new gt.common.GTError(
-        "For requests, you must specify a path! See `gt help` for more info."
+        "For requests, you must specify a path! See `gt help` for more info.",
       )
     }
 
@@ -27,9 +27,9 @@ module.exports = async function (subcommand, params) {
       if (index > -1) {
         try {
           return JSON.parse(params[index + 1])
-        } catch (e) {
+        } catch {
           throw new gt.common.GTError(
-            "The value you provided for the `--headers` option doesn't appear to be valid JSON! See `gt help` for more info."
+            "The value you provided for the `--headers` option doesn't appear to be valid JSON! See `gt help` for more info.",
           )
         }
       } else {
@@ -43,9 +43,9 @@ module.exports = async function (subcommand, params) {
       if (index > -1) {
         try {
           return JSON.parse(params[index + 1])
-        } catch (e) {
+        } catch {
           throw new gt.common.GTError(
-            "The value you provided for the `--body` option doesn't appear to be valid JSON! See `gt help` for more info."
+            "The value you provided for the `--body` option doesn't appear to be valid JSON! See `gt help` for more info.",
           )
         }
       } else {
@@ -59,9 +59,9 @@ module.exports = async function (subcommand, params) {
       if (index > -1) {
         try {
           return JSON.parse(params[index + 1])
-        } catch (e) {
+        } catch {
           throw new gt.common.GTError(
-            "The value you provided for the `--query` option doesn't appear to be valid JSON! See `gt help` for more info."
+            "The value you provided for the `--query` option doesn't appear to be valid JSON! See `gt help` for more info.",
           )
         }
       } else {

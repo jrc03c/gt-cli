@@ -5,7 +5,7 @@ module.exports = async function (params) {
 
   if (params.length === 0) {
     throw new gt.common.GTError(
-      "You must specify a program title, ID, or key to retrieve a specific program, or use `--all` to retrieve all programs! See `gt help` for more info."
+      "You must specify a program title, ID, or key to retrieve a specific program, or use `--all` to retrieve all programs! See `gt help` for more info.",
     )
   }
 

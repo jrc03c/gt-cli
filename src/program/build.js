@@ -25,7 +25,7 @@ async function getProgramContents(key) {
 async function build(titleIdOrKey, callback) {
   if (!isUndefined(callback) && typeof callback !== "function") {
     throw new GTError(
-      `The second argument to the \`gt.program.build\` function (if used) must be a function!`
+      `The second argument to the \`gt.program.build\` function (if used) must be a function!`,
     )
   }
 
@@ -87,7 +87,7 @@ async function build(titleIdOrKey, callback) {
 
   if (!updatedContents[name] || !updatedContents[name].metadata) {
     throw new GTError(
-      "We seem to have received an unexpected response from the server. Please try your request again."
+      "We seem to have received an unexpected response from the server. Please try your request again.",
     )
   }
 
@@ -97,7 +97,7 @@ async function build(titleIdOrKey, callback) {
     throw new GTError(
       [`The upload succeeded, but there were some syntax errors:`]
         .concat(errors.map((e, i) => `(${i + 1}) ${e}`))
-        .join("\n")
+        .join("\n"),
     )
   }
 
