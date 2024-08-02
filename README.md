@@ -78,31 +78,86 @@ creates a new .gtconfig file in the current directory and searches the directory
 
 Subcommands:
 
-- `add [options] [title, id, or key]` = downloads a program's source code and adds the program to the `.gtconfig` file; options are:
-  - `--file [path]`
-- `build [title, ID, or key]` = compiles a program given an title, ID, or key
-- `create [options] [name]` = creates a new program with the given name; options are:
-  - `--add`
-  - `--file [path]`
-- `csv [title, ID, or key]` = (see the `data` subcommand)
-- `data [title, ID, or key]` = retrieves the data CSV of a program with the given title, ID, or key, or gets all programs' CSVs if `--all` is used (same as `gt program list`); options are:
-  - `--all`
-- `delete [options] [title, ID, or key]` = deletes the program with the given title, ID, or key; by default, you'll be prompted to confirm the deletion before the request is sent, but this behavior can be disabled by using `--unsafe`; options are:
-  - `--unsafe`
-- `filter [query]` = searches for and returns all programs with names that include the query
-- `find [query]` = searches for and returns the first program with a name that includes the query
-- `get [title, ID, or key]` = retrieves the metadata of a program with the given title, ID, or key, or gets all programs if `--all` is used (same as `gt program list`); options are:
-  - `--all`
-- `list` = lists all programs (same as `gt program get --all`)
-- `preview [title, id, or key]` = opens the default browser to the public preview page of the program with the given title, ID, or key
-- `run [title, id, or key]` = opens the default browser to the public run page of the program with the given title, ID, or key
-- `source [title, ID, or key]` = fetches the source code of the remote program with the given title, ID, or key
-- `test [options] [title, id, or key]` = opens the default browser to the automated testing page for the program with the given title, ID, or key; see https://github.com/jrc03c/gt-tester for more info; options are:
-  - `--mode [run or preview]`
-- `upload [options] [title, ID, or key]` = uploads the code contents of the program with the given title, ID, or key (same as `gt push [title, ID, or key]`); it automatically compiles the remote program by default, but this behavior can be disabled with `--no-build`; options are:
-  - `--no-build`
-- `view [title, ID, or key]` = opens the default browser to the editing page for the program with the given title, ID, or key; or opens the default browser to the editing pages for all programs if `--all` is used (same as `gt  program list`); options are:
-  - `--all`
+##### `add [options] [title, id, or key]`
+
+downloads a program's source code and adds the program to the `.gtconfig` file; options are:
+
+- `--file [path]`
+
+##### `build [title, ID, or key]`
+
+compiles a program given an title, ID, or key
+
+##### `create [options] [name]`
+
+creates a new program with the given name; options are:
+
+- `--add`
+- `--file [path]`
+
+##### `csv [title, ID, or key]`
+
+(see the `data` subcommand)
+
+##### `data [title, ID, or key]`
+
+retrieves the data CSV of a program with the given title, ID, or key, or gets all programs' CSVs if `--all` is used (same as `gt program list`); options are:
+
+- `--all`
+
+##### `delete [options] [title, ID, or key]`
+
+deletes the program with the given title, ID, or key; by default, you'll be prompted to confirm the deletion before the request is sent, but this behavior can be disabled by using `--unsafe`; options are:
+
+- `--unsafe`
+
+##### `filter [query]`
+
+searches for and returns all programs with names that include the query
+
+##### `find [query]`
+
+searches for and returns the first program with a name that includes the query
+
+##### `get [title, ID, or key]`
+
+retrieves the metadata of a program with the given title, ID, or key, or gets all programs if `--all` is used (same as `gt program list`); options are:
+
+- `--all`
+
+##### `list`
+
+lists all programs (same as `gt program get --all`)
+
+##### `preview [title, id, or key]`
+
+opens the default browser to the public preview page of the program with the given title, ID, or key
+
+##### `run [title, id, or key]`
+
+opens the default browser to the public run page of the program with the given title, ID, or key
+
+##### `source [title, ID, or key]`
+
+fetches the source code of the remote program with the given title, ID, or key
+
+##### `test [options] [title, id, or key]`
+
+opens the default browser to the automated testing page for the program with the given title, ID, or key; see https://github.com/jrc03c/gt-tester for more info; options are:
+
+- `--mode [run or preview]`
+
+##### `upload [options] [title, ID, or key]`
+
+uploads the code contents of the program with the given title, ID, or key (same as `gt push [title, ID, or key]`); it automatically compiles the remote program by default, but this behavior can be disabled with `--no-build`; options are:
+
+- `--no-build`
+
+##### `view [title, ID, or key]`
+
+opens the default browser to the editing page for the program with the given title, ID, or key; or opens the default browser to the editing pages for all programs if `--all` is used (same as `gt  program list`); options are:
+
+- `--all`
 
 #### `pull [title, id, or key]`
 
