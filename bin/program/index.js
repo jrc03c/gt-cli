@@ -14,6 +14,10 @@ module.exports = async function (subcommand, params) {
     return await require("./create.js")(params)
   }
 
+  if (subcommand === "data") {
+    return await require("./data.js")(params)
+  }
+
   if (subcommand === "delete") {
     return await require("./delete.js")(params)
   }
