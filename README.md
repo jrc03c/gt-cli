@@ -1,6 +1,6 @@
 # Intro
 
-This tool makes it easy to communicate with the GuidedTrack API from the command line and/or Node.
+This tool makes it easy to communicate with the [GuidedTrack](https://guidedtrack.com) API from the command line.
 
 # Installation
 
@@ -18,33 +18,15 @@ npm link
 
 # Usage
 
-## Node
+A quick note about terminology: In this documentation, I frequently refer to the "ID" or "key" of a GuidedTrack program. I define those terms like this:
 
-```js
-const gt = require("gt-cli")
+A program's **ID** is the numerical value that appears in the program's edit page URL immediately after `/programs/`. For example, the edit page for the public program called "gad7 anxiety scale - public" has this URL: https://www.guidedtrack.com/programs/9197. Therefore, the program's ID is `9197`.
 
-gt.program.find("My program").then(program => {
-  // ...
-})
-```
+A program's **key** is the 7-character string identifier in the program's public run page URL. For example, the public run page for the program mentioned above ("gad7 anxiety scale - public") has this URL: https://www.guidedtrack.com/programs/i1qsozk/run. Therefore, the program's key is `i1qsozk`.
 
-See the full Node API below.
-
-## Command line
-
-```bash
-gt program source "My program" > program.gt
-```
-
-See the full command line API below and/or run `gt help`.
+In the context of this tool, the ID `9197` and the key `i1qsozk` are just two different ways to refer to the same program.
 
 # API
-
-## Node
-
-[coming soon...]
-
-## Command line
 
 Syntax:
 
@@ -52,120 +34,120 @@ Syntax:
 gt [command] [sub-command] [parameters]
 ```
 
-### Commands
+## Commands
 
 <hr>
 
-#### `config`
+### `config`
 
 prints the current project's configuration (i.e., from the project's `.gtconfig` file)
 
 <hr>
 
-#### `docs`
+### `docs`
 
 opens the GuidedTrack docs website
 
 <hr>
 
-#### `search [query]`
+### `search [query]`
 
 opens the GuidedTrack docs website and searches for the given query
 
 <hr>
 
-#### `help`
+### `help`
 
 shows a help message
 
 <hr>
 
-#### `init`
+### `init`
 
 creates a new .gtconfig file in the current directory and searches the directory and its subdirectories for any GuidedTrack program files (i.e., files with .gt or .guidedtrack extensions)
 
 <hr>
 
-#### `program`
+### `program`
 
 Subcommands:
 
-##### `add [options] [title, ID, or key]`
+#### `add [options] [title, ID, or key]`
 
 downloads a program's source code and adds the program to the `.gtconfig` file; options are:
 
 - `--file [path]`
 
-##### `build [title, ID, or key]`
+#### `build [title, ID, or key]`
 
 compiles a program given an title, ID, or key
 
-##### `create [options] [name]`
+#### `create [options] [name]`
 
 creates a new program with the given name; options are:
 
 - `--add`
 - `--file [path]`
 
-##### `csv [title, ID, or key]`
+#### `csv [title, ID, or key]`
 
 (see the `data` subcommand)
 
-##### `data [title, ID, or key]`
+#### `data [title, ID, or key]`
 
 retrieves the data CSV of a program with the given title, ID, or key, or gets all programs' CSVs if `--all` is used (same as `gt program list`); options are:
 
 - `--all`
 
-##### `delete [options] [title, ID, or key]`
+#### `delete [options] [title, ID, or key]`
 
 deletes the program with the given title, ID, or key; by default, you'll be prompted to confirm the deletion before the request is sent, but this behavior can be disabled by using `--unsafe`; options are:
 
 - `--unsafe`
 
-##### `filter [query]`
+#### `filter [query]`
 
 searches for and returns all programs with names that include the query
 
-##### `find [query]`
+#### `find [query]`
 
 searches for and returns the first program with a name that includes the query
 
-##### `get [title, ID, or key]`
+#### `get [title, ID, or key]`
 
 retrieves the metadata of a program with the given title, ID, or key, or gets all programs if `--all` is used (same as `gt program list`); options are:
 
 - `--all`
 
-##### `list`
+#### `list`
 
 lists all programs (same as `gt program get --all`)
 
-##### `preview [title, ID, or key]`
+#### `preview [title, ID, or key]`
 
 opens the default browser to the public preview page of the program with the given title, ID, or key
 
-##### `run [title, ID, or key]`
+#### `run [title, ID, or key]`
 
 opens the default browser to the public run page of the program with the given title, ID, or key
 
-##### `source [title, ID, or key]`
+#### `source [title, ID, or key]`
 
 fetches the source code of the remote program with the given title, ID, or key
 
-##### `test [options] [title, ID, or key]`
+#### `test [options] [title, ID, or key]`
 
 opens the default browser to the automated testing page for the program with the given title, ID, or key; see https://github.com/jrc03c/gt-tester for more info; options are:
 
 - `--mode [run or preview]`
 
-##### `upload [options] [title, ID, or key]`
+#### `upload [options] [title, ID, or key]`
 
 uploads the code contents of the program with the given title, ID, or key (same as `gt push [title, ID, or key]`); it automatically compiles the remote program by default, but this behavior can be disabled with `--no-build`; options are:
 
 - `--no-build`
 
-##### `view [title, ID, or key]`
+#### `view [title, ID, or key]`
 
 opens the default browser to the editing page for the program with the given title, ID, or key; or opens the default browser to the editing pages for all programs if `--all` is used (same as `gt  program list`); options are:
 
@@ -173,13 +155,13 @@ opens the default browser to the editing page for the program with the given tit
 
 <hr>
 
-#### `pull [title, ID, or key]`
+### `pull [title, ID, or key]`
 
 fetches the code contents of a remote program if a title, ID, or key is given and overwrites the program's local file (assuming the program is listed in `programs` in the `.gtconfig` file); otherwise, fetches the code contents of all remote programs listed in `.gtconfig` and overwrites their corresponding local files
 
 <hr>
 
-#### `push [options] [title, ID, or key]`
+### `push [options] [title, ID, or key]`
 
 overwrites a remote program with its local copy if a title, ID, or key is given; otherwise, overwrites all remote programs listed in .gtconfig with their corresponding local file contents; it automatically compiles the remote programs by default, but this behavior can be disabled with `--no-build`; options are:
 
@@ -187,7 +169,7 @@ overwrites a remote program with its local copy if a title, ID, or key is given;
 
 <hr>
 
-#### `request`
+### `request`
 
 Subcommands:
 
@@ -199,7 +181,7 @@ Subcommands:
 
 <hr>
 
-### Examples
+## Examples
 
 ```bash
 # print the current project's config
