@@ -16,7 +16,7 @@
   "author": "",
   "license": "ISC",
   "bin": {
-    "gt": "./bin/index.js"
+    "gt": "./bin/bin.js"
   },
   "devDependencies": {
     "@eslint/js": "^9.8.0",
