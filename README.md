@@ -54,25 +54,37 @@ gt [command] [sub-command] [parameters]
 
 ### Commands
 
+<hr>
+
 #### `config`
 
 prints the current project's configuration (i.e., from the project's `.gtconfig` file)
+
+<hr>
 
 #### `docs`
 
 opens the GuidedTrack docs website
 
+<hr>
+
 #### `search [query]`
 
 opens the GuidedTrack docs website and searches for the given query
+
+<hr>
 
 #### `help`
 
 shows a help message
 
+<hr>
+
 #### `init`
 
 creates a new .gtconfig file in the current directory and searches the directory and its subdirectories for any GuidedTrack program files (i.e., files with .gt or .guidedtrack extensions)
+
+<hr>
 
 #### `program`
 
@@ -159,15 +171,21 @@ opens the default browser to the editing page for the program with the given tit
 
 - `--all`
 
+<hr>
+
 #### `pull [title, id, or key]`
 
 fetches the code contents of a remote program if a title, ID, or key is given and overwrites the program's local file (assuming the program is listed in `programs` in the `.gtconfig` file); otherwise, fetches the code contents of all remote programs listed in `.gtconfig` and overwrites their corresponding local files
+
+<hr>
 
 #### `push [options] [title, id, or key]`
 
 overwrites a remote program with its local copy if a title, ID, or key is given; otherwise, overwrites all remote programs listed in .gtconfig with their corresponding local file contents; it automatically compiles the remote programs by default, but this behavior can be disabled with `--no-build`; options are:
 
 - `--no-build`
+
+<hr>
 
 #### `request`
 
@@ -179,9 +197,9 @@ Subcommands:
   - `--body [body as JSON]`
   - `--query [query as JSON]`
 
----
+<hr>
 
-## Examples
+### Examples
 
 ```bash
 # print the current project's config
