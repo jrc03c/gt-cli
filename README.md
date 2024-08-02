@@ -208,8 +208,8 @@ gt config
 # open the docs website
 gt docs
 
-# open the docs website and search for the \*email keyword
-gt docs search \*email
+# open the docs website and search for the *email keyword
+gt docs search *email
 
 # print this help message again
 gt help
