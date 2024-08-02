@@ -218,7 +218,6 @@ gt help
 gt init
 
 # fetch the metadata of all programs and print them to `stdout`
-
 # (same as `gt program get --all`)
 gt program list
 
