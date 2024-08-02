@@ -90,7 +90,7 @@ creates a new .gtconfig file in the current directory and searches the directory
 
 Subcommands:
 
-##### `add [options] [title, id, or key]`
+##### `add [options] [title, ID, or key]`
 
 downloads a program's source code and adds the program to the `.gtconfig` file; options are:
 
@@ -141,11 +141,11 @@ retrieves the metadata of a program with the given title, ID, or key, or gets al
 
 lists all programs (same as `gt program get --all`)
 
-##### `preview [title, id, or key]`
+##### `preview [title, ID, or key]`
 
 opens the default browser to the public preview page of the program with the given title, ID, or key
 
-##### `run [title, id, or key]`
+##### `run [title, ID, or key]`
 
 opens the default browser to the public run page of the program with the given title, ID, or key
 
@@ -153,7 +153,7 @@ opens the default browser to the public run page of the program with the given t
 
 fetches the source code of the remote program with the given title, ID, or key
 
-##### `test [options] [title, id, or key]`
+##### `test [options] [title, ID, or key]`
 
 opens the default browser to the automated testing page for the program with the given title, ID, or key; see https://github.com/jrc03c/gt-tester for more info; options are:
 
@@ -173,13 +173,13 @@ opens the default browser to the editing page for the program with the given tit
 
 <hr>
 
-#### `pull [title, id, or key]`
+#### `pull [title, ID, or key]`
 
 fetches the code contents of a remote program if a title, ID, or key is given and overwrites the program's local file (assuming the program is listed in `programs` in the `.gtconfig` file); otherwise, fetches the code contents of all remote programs listed in `.gtconfig` and overwrites their corresponding local files
 
 <hr>
 
-#### `push [options] [title, id, or key]`
+#### `push [options] [title, ID, or key]`
 
 overwrites a remote program with its local copy if a title, ID, or key is given; otherwise, overwrites all remote programs listed in .gtconfig with their corresponding local file contents; it automatically compiles the remote programs by default, but this behavior can be disabled with `--no-build`; options are:
 
