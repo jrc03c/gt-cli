@@ -22,7 +22,7 @@ async function getProgramContents(key) {
   return await response.json()
 }
 
-async function build(titleIdOrKey, callback) {
+module.exports = async function build(titleIdOrKey, callback) {
   if (!isUndefined(callback) && typeof callback !== "function") {
     throw new GTError(
       `The second argument to the \`gt.program.build\` function (if used) must be a function!`,
@@ -109,5 +109,3 @@ async function build(titleIdOrKey, callback) {
 
   return true
 }
-
-module.exports = build

@@ -1,4 +1,4 @@
-module.exports = async function (subcommand) {
+module.exports = async function push(subcommand) {
   const { prettify } = require("../../src/helpers.js")
   const fs = require("fs")
   const gt = require("../..")

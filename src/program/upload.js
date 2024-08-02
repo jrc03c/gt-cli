@@ -5,7 +5,7 @@ const build = require("./build.js")
 const get = require("./get.js")
 const request = require("../request")
 
-module.exports = async function (
+module.exports = async function upload(
   titleIdOrKey,
   contents,
   shouldBuild,

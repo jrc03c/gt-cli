@@ -2,7 +2,7 @@ const { GTError } = require("../common")
 const { isUndefined } = require("../helpers.js")
 const request = require("../request")
 
-module.exports = async function (titleIdOrKey) {
+module.exports = async function getInfo(titleIdOrKey) {
   if (
     !isUndefined(titleIdOrKey) &&
     typeof titleIdOrKey !== "string" &&

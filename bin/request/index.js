@@ -1,4 +1,4 @@
-module.exports = async function (subcommand, params) {
+module.exports = async function request(subcommand, params) {
   const gt = require("../..")
   await gt.common.config.load()
 

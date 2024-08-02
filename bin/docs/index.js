@@ -1,4 +1,4 @@
-module.exports = async function (subcommand, params) {
+module.exports = async function docs(subcommand, params) {
   const { exec } = require("child_process")
   const gt = require("../..")
 

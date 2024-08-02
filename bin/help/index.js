@@ -1,4 +1,4 @@
-module.exports = async function () {
+module.exports = async function help() {
   const { Chalk } = await import("chalk")
   const { prettify } = require("../../src/helpers.js")
   const chalk = new Chalk()

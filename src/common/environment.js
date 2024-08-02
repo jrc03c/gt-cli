@@ -1,7 +1,5 @@
-const Environment = {
+module.exports = {
   DEVELOPMENT: "development",
   STAGING: "staging",
   PRODUCTION: "production",
 }
-
-module.exports = Environment

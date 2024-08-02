@@ -14,16 +14,12 @@ module.exports = async function (subcommand, params) {
     return await require("./create.js")(params)
   }
 
-  if (subcommand === "data") {
+  if (subcommand === "csv" || subcommand === "data") {
     return await require("./data.js")(params)
   }
 
   if (subcommand === "delete") {
     return await require("./delete.js")(params)
-  }
-
-  if (subcommand === "download") {
-    return await require("./download.js")(params)
   }
 
   if (subcommand === "filter") {
@@ -48,6 +44,10 @@ module.exports = async function (subcommand, params) {
 
   if (subcommand === "run") {
     return await require("./run.js")(params)
+  }
+
+  if (subcommand === "source") {
+    return await require("./source.js")(params)
   }
 
   if (subcommand === "test") {

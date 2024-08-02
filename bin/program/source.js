@@ -1,4 +1,4 @@
-module.exports = async function (params) {
+module.exports = async function source(params) {
   const gt = require("../..")
 
   if (params.length === 0) {
@@ -8,6 +8,6 @@ module.exports = async function (params) {
   }
 
   const titleIdOrKey = params[params.length - 1]
-  const contents = await gt.program.download(titleIdOrKey)
+  const contents = await gt.program.source(titleIdOrKey)
   console.log(contents)
 }

@@ -2,7 +2,7 @@ const { GTError } = require("../common")
 const { isUndefined } = require("../helpers.js")
 const request = require("../request")
 
-module.exports = async function (jobID) {
+module.exports = async function poll(jobID) {
   if (isUndefined(jobID)) {
     throw new GTError(
       `The value passed into the \`gt.job.poll\` function must be a number representing a job ID number!`,

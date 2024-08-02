@@ -1,4 +1,4 @@
-module.exports = async function (params) {
+module.exports = async function filter(params) {
   const { prettify } = require("../../src/helpers.js")
   const gt = require("../..")
   const util = require("util")

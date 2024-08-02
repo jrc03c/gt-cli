@@ -4,7 +4,7 @@ const { poll } = require("../job")
 const get = require("./get.js")
 const request = require("../request")
 
-module.exports = async function (name) {
+module.exports = async function create(name) {
   if (isUndefined(name)) {
     throw new GTError(
       `The value passed into the \`gt.program.create\` function must be a string representing the name of the new program!`,

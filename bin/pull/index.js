@@ -1,4 +1,4 @@
-module.exports = async function () {
+module.exports = async function pull() {
   const { prettify, writeFileSafe } = require("../../src/helpers.js")
   const gt = require("../..")
   const path = require("path")
@@ -17,7 +17,7 @@ module.exports = async function () {
     console.log(prettify(`Fetching the contents of program "${key}" ...`))
 
     const file = path.resolve(config.programs[key])
-    const contents = await gt.program.download(key)
+    const contents = await gt.program.source(key)
     writeFileSafe(file, contents)
   }
 }

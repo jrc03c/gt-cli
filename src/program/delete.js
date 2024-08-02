@@ -1,7 +1,7 @@
 const get = require("./get.js")
 const request = require("../request")
 
-module.exports = async function (titleIdOrKey) {
+module.exports = async function deleet(titleIdOrKey) {
   const program = await get(titleIdOrKey)
 
   await request.send({

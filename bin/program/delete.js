@@ -1,4 +1,4 @@
-module.exports = async function (params) {
+module.exports = async function deleet(params) {
   const { Chalk } = await import("chalk")
   const { prettify } = require("../../src/helpers.js")
   const gt = require("../..")

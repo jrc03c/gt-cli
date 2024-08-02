@@ -5,7 +5,7 @@ const { GTError } = common
 const timeBetweenJobs = 1000
 const queue = new Queue(timeBetweenJobs)
 
-module.exports = async function (options) {
+module.exports = async function send(options) {
   // options = {
   //   path: "/foo/bar",
   //   method: "GET",

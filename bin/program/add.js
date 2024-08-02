@@ -1,4 +1,4 @@
-module.exports = async function (params) {
+module.exports = async function add(params) {
   const {
     findUpward,
     prettify,
@@ -44,7 +44,7 @@ module.exports = async function (params) {
     gt.common.config.programs[program.key] = file.replace(dir + "/", "")
     await gt.common.config.save()
 
-    const code = await gt.program.download(program.key)
+    const code = await gt.program.source(program.key)
     writeFileSafe(file, code)
 
     console.log(

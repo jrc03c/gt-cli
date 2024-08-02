@@ -1,6 +1,6 @@
 const { exec } = require("child_process")
 
-module.exports = async function (params) {
+module.exports = async function preview(params) {
   const gt = require("../..")
 
   if (params.length === 0) {

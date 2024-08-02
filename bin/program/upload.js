@@ -1,4 +1,4 @@
-module.exports = async function (params) {
+module.exports = async function upload(params) {
   const { prettify } = require("../../src/helpers.js")
   const fs = require("fs")
   const gt = require("../..")

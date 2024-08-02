@@ -1,4 +1,4 @@
-module.exports = async function () {
+module.exports = async function init() {
   const { prettify } = require("../../src/helpers.js")
   const gt = require("../..")
   const path = require("path")

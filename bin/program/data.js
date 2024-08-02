@@ -1,4 +1,4 @@
-module.exports = async function (params) {
+module.exports = async function data(params) {
   const fs = require("node:fs")
   const gt = require("../..")
   const path = require("node:path")
