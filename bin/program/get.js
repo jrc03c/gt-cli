@@ -1,7 +1,5 @@
 module.exports = async function getInfo(params) {
-  const { prettify } = require("../../src/helpers.js")
   const gt = require("../..")
-  const util = require("util")
 
   if (params.length === 0) {
     throw new gt.common.GTError(
@@ -18,5 +16,5 @@ module.exports = async function getInfo(params) {
     results = await gt.program.get(titleIdOrKey)
   }
 
-  console.log(prettify(util.inspect(results, { colors: true })))
+  console.log(JSON.stringify(results, null, 2))
 }

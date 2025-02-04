@@ -1,7 +1,5 @@
 module.exports = async function filter(params) {
-  const { prettify } = require("../../src/helpers.js")
   const gt = require("../..")
-  const util = require("util")
 
   if (params.length === 0) {
     throw new gt.common.GTError(
@@ -15,5 +13,5 @@ module.exports = async function filter(params) {
     program.name.includes(query),
   )
 
-  return console.log(prettify(util.inspect(results, { colors: true })))
+  return console.log(JSON.stringify(results, null, 2))
 }
