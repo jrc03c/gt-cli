@@ -5,7 +5,7 @@
   "main": "index.js",
   "dependencies": {
     "@jrc03c/fs-extras": "^0.0.17",
-    "@jrc03c/js-text-tools": "^0.0.37",
+    "@jrc03c/js-text-tools": "^0.0.57",
     "@jrc03c/queue": "^0.0.6",
     "chalk": "^5.0.1",
     "express": "^4.18.1",
