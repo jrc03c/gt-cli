@@ -1,8 +1,9 @@
-import { readFile, readdir } from "node:fs/promises"
+import { readFile } from "node:fs/promises"
 import { resolve } from "node:path"
 import type { Command } from "commander"
 import { apiRequest, findProgram, getEnvironment } from "../lib/api.js"
 import { resolveCredentials } from "../lib/auth.js"
+import { getLocalFiles } from "../lib/files.js"
 
 export function registerPush(program: Command): void {
   program
@@ -54,7 +55,3 @@ export function registerPush(program: Command): void {
     })
 }
 
-async function getLocalFiles(dir: string): Promise<string[]> {
-  const entries = await readdir(dir, { withFileTypes: true })
-  return entries.filter(e => e.isFile()).map(e => e.name)
-}

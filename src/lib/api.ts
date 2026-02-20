@@ -60,6 +60,52 @@ export async function findProgram(
   return programs.find(p => p.name === name) ?? null
 }
 
+export async function listPrograms(
+  credentials: Credentials,
+  environment?: GtEnvironment
+): Promise<Program[]> {
+  const response = await apiRequest("/programs.json", {
+    credentials,
+    environment,
+  })
+  return (await response.json()) as Program[]
+}
+
+export async function fetchProgramSource(
+  programId: number,
+  credentials: Credentials,
+  environment?: GtEnvironment
+): Promise<string> {
+  const env = environment ?? getEnvironment()
+  const host = ENVIRONMENT_HOSTS[env]
+  const response = await fetch(`${host}/programs/${programId}/edit`, {
+    headers: { Authorization: buildAuthHeader(credentials) },
+  })
+
+  if (!response.ok) {
+    throw new Error(
+      `Failed to fetch program source: ${response.status} ${response.statusText}`
+    )
+  }
+
+  const html = await response.text()
+  const match = html.match(
+    /<textarea[^>]*name="contents"[^>]*>([\s\S]*?)<\/textarea>/
+  )
+
+  if (!match) {
+    throw new Error("Could not extract program source from edit page")
+  }
+
+  // Decode HTML entities
+  return match[1]
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+}
+
 export function getEnvironment(): GtEnvironment {
   const env = process.env.GT_ENV ?? "development"
   if (env !== "development" && env !== "stage" && env !== "production") {

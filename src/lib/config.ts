@@ -1,8 +1,8 @@
-import { readFile } from "node:fs/promises"
+import { readFile, writeFile } from "node:fs/promises"
 import { resolve } from "node:path"
 import type { GtConfig } from "../types.js"
 
-const CONFIG_FILENAME = "gt.config.json"
+export const CONFIG_FILENAME = "gt.config.json"
 
 export async function loadConfig(dir?: string): Promise<GtConfig> {
   const configPath = resolve(dir ?? process.cwd(), CONFIG_FILENAME)
@@ -16,4 +16,12 @@ export async function loadConfig(dir?: string): Promise<GtConfig> {
     }
     throw new Error(`Failed to read ${CONFIG_FILENAME}: ${err}`)
   }
+}
+
+export async function saveConfig(
+  config: GtConfig,
+  dir?: string
+): Promise<void> {
+  const configPath = resolve(dir ?? process.cwd(), CONFIG_FILENAME)
+  await writeFile(configPath, JSON.stringify(config, null, 2) + "\n")
 }
