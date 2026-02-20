@@ -1,3 +1,4 @@
+.env
 .gtconfig*
 dist
 node_modules
