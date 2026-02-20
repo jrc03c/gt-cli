@@ -1,4 +1,4 @@
-import type { Credentials, GtEnvironment } from "../types.js"
+import type { Credentials, GtEnvironment, Program } from "../types.js"
 import { ENVIRONMENT_HOSTS } from "../types.js"
 
 export function buildAuthHeader(credentials: Credentials): string {
@@ -44,6 +44,20 @@ export async function apiRequest(
   }
 
   return response
+}
+
+export async function findProgram(
+  name: string,
+  credentials: Credentials,
+  environment?: GtEnvironment
+): Promise<Program | null> {
+  const query = encodeURIComponent(name)
+  const response = await apiRequest(`/programs.json?query=${query}`, {
+    credentials,
+    environment,
+  })
+  const programs = (await response.json()) as Program[]
+  return programs.find(p => p.name === name) ?? null
 }
 
 export function getEnvironment(): GtEnvironment {
