@@ -4,6 +4,7 @@ import globals from "globals"
 import js from "@eslint/js"
 import json from "@eslint/json"
 import markdown from "@eslint/markdown"
+import tseslint from "typescript-eslint"
 
 export default defineConfig([
   {
@@ -15,6 +16,11 @@ export default defineConfig([
       "no-empty": ["error", { allowEmptyCatch: true }],
       "no-unused-vars": ["error", { caughtErrors: "none" }],
     },
+  },
+  {
+    files: ["**/*.{ts,mts,cts}"],
+    extends: [tseslint.configs.recommended],
+    languageOptions: { globals: { ...globals.node } },
   },
   {
     files: ["**/*.json"],

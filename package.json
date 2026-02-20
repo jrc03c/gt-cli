@@ -1,18 +1,40 @@
 {
+  "name": "gt-cli",
+  "version": "0.1.0",
+  "description": "CLI for the GuidedTrack web API",
+  "type": "module",
+  "bin": {
+    "gt": "dist/index.js"
+  },
+  "files": ["dist"],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsup && chmod +x dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint .",
+    "format": "prettier --write ."
+  },
+  "dependencies": {
+    "commander": "^13.1.0"
+  },
   "devDependencies": {
     "@eslint/css": "^0.14.1",
     "@eslint/js": "^9.12.0",
     "@eslint/json": "^0.14.0",
     "@eslint/markdown": "^7.5.1",
+    "@types/node": "^22.15.0",
     "eslint": "^9.39.1",
     "eslint-plugin-html": "^7.1.0",
     "globals": "^15.11.0",
-    "prettier": "^3.7.1"
-  },
-  "scripts": {
-    "build": "node build.mjs",
-    "serve": "python3 -m http.server",
-    "watch": "node build.mjs --watch"
-  },
-  "type": "module"
+    "prettier": "^3.7.1",
+    "tsup": "^8.4.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.8.0",
+    "typescript-eslint": "^8.31.0",
+    "vitest": "^3.1.0"
+  }
 }
