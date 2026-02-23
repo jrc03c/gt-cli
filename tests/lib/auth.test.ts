@@ -55,6 +55,18 @@ describe("resolveCredentials", () => {
     Object.defineProperty(process.stdin, "isTTY", { value: original, configurable: true })
   })
 
+  it("skips config file when only password is present", async () => {
+    delete process.env.GT_EMAIL
+    delete process.env.GT_PASSWORD
+    vi.mocked(loadConfig).mockResolvedValue({ password: "config-secret" })
+    const original = process.stdin.isTTY
+    Object.defineProperty(process.stdin, "isTTY", { value: false, configurable: true })
+
+    await expect(resolveCredentials()).rejects.toThrow("No credentials found")
+
+    Object.defineProperty(process.stdin, "isTTY", { value: original, configurable: true })
+  })
+
   it("env vars take priority over config file", async () => {
     vi.stubEnv("GT_EMAIL", "env@example.com")
     vi.stubEnv("GT_PASSWORD", "env-secret")
