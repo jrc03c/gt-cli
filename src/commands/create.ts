@@ -9,7 +9,7 @@ export function registerCreate(program: Command): void {
     .description("Create new programs on the server")
     .argument("[names...]", "Program names to create (defaults to all files in cwd)")
     .action(async (names: string[]) => {
-      const credentials = resolveCredentials()
+      const credentials = await resolveCredentials()
       const environment = getEnvironment()
 
       const filenames =

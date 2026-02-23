@@ -26,7 +26,7 @@ export function registerProgram(parent: Command): void {
     .command("list")
     .description("List all programs")
     .action(async () => {
-      const credentials = resolveCredentials()
+      const credentials = await resolveCredentials()
       const environment = getEnvironment()
 
       const programs = await listPrograms(credentials, environment)
@@ -46,7 +46,7 @@ export function registerProgram(parent: Command): void {
     .description("Fetch program metadata")
     .argument("<name>", "Program name")
     .action(async (name: string) => {
-      const credentials = resolveCredentials()
+      const credentials = await resolveCredentials()
       const environment = getEnvironment()
 
       const found = await findProgram(name, credentials, environment)
@@ -64,7 +64,7 @@ export function registerProgram(parent: Command): void {
     .description("Fetch program source code")
     .argument("<name>", "Program name")
     .action(async (name: string) => {
-      const credentials = resolveCredentials()
+      const credentials = await resolveCredentials()
       const environment = getEnvironment()
 
       const found = await findProgram(name, credentials, environment)
@@ -87,7 +87,7 @@ export function registerProgram(parent: Command): void {
     .description("Search programs by name")
     .argument("<query>", "Search query")
     .action(async (query: string) => {
-      const credentials = resolveCredentials()
+      const credentials = await resolveCredentials()
       const environment = getEnvironment()
 
       const encoded = encodeURIComponent(query)
@@ -118,7 +118,7 @@ export function registerProgram(parent: Command): void {
     .argument("<name>", "Program name")
     .option("-y, --yes", "Skip confirmation prompt")
     .action(async (name: string, options: { yes?: boolean }) => {
-      const credentials = resolveCredentials()
+      const credentials = await resolveCredentials()
       const environment = getEnvironment()
 
       const found = await findProgram(name, credentials, environment)
@@ -152,7 +152,7 @@ export function registerProgram(parent: Command): void {
     .description("Build a specific program")
     .argument("<name>", "Program name")
     .action(async (name: string) => {
-      const credentials = resolveCredentials()
+      const credentials = await resolveCredentials()
       const environment = getEnvironment()
 
       const found = await findProgram(name, credentials, environment)
@@ -206,7 +206,7 @@ export function registerProgram(parent: Command): void {
     .description("Open program edit page in browser")
     .argument("<name>", "Program name")
     .action(async (name: string) => {
-      const credentials = resolveCredentials()
+      const credentials = await resolveCredentials()
       const environment = getEnvironment()
       const found = await findProgram(name, credentials, environment)
 
@@ -224,7 +224,7 @@ export function registerProgram(parent: Command): void {
     .description("Open program preview in browser")
     .argument("<name>", "Program name")
     .action(async (name: string) => {
-      const credentials = resolveCredentials()
+      const credentials = await resolveCredentials()
       const environment = getEnvironment()
       const found = await findProgram(name, credentials, environment)
 
@@ -242,7 +242,7 @@ export function registerProgram(parent: Command): void {
     .description("Open program run page in browser")
     .argument("<name>", "Program name")
     .action(async (name: string) => {
-      const credentials = resolveCredentials()
+      const credentials = await resolveCredentials()
       const environment = getEnvironment()
       const found = await findProgram(name, credentials, environment)
 

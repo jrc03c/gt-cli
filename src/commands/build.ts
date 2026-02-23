@@ -17,7 +17,7 @@ export function registerBuild(program: Command): void {
     .command("build")
     .description("Compile programs and report errors")
     .action(async () => {
-      const credentials = resolveCredentials()
+      const credentials = await resolveCredentials()
       const environment = getEnvironment()
 
       const projects = await loadProjects()

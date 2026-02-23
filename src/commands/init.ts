@@ -10,7 +10,7 @@ export function registerInit(program: Command): void {
     .command("init")
     .description("Create gt.config.json by scanning for program files")
     .action(async () => {
-      const credentials = resolveCredentials()
+      const credentials = await resolveCredentials()
       const environment = getEnvironment()
 
       const existing = await loadConfig()

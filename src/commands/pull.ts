@@ -15,7 +15,7 @@ export function registerPull(program: Command): void {
     .description("Download program source from the server")
     .option("-o, --only <name>", "Pull only the specified program")
     .action(async options => {
-      const credentials = resolveCredentials()
+      const credentials = await resolveCredentials()
       const environment = getEnvironment()
 
       const filenames = options.only
