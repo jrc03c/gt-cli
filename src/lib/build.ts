@@ -1,5 +1,6 @@
 import type { Credentials, EmbedInfo, GtEnvironment } from "../types.js"
 import { apiRequest } from "./api.js"
+import { pollJob } from "./jobs.js"
 
 export async function getEmbedInfo(
   key: string,
@@ -58,4 +59,51 @@ export function extractErrors(contents: unknown): string[] {
     }
   }
   return errors
+}
+
+export async function buildProgram(
+  name: string,
+  key: string,
+  credentials: Credentials,
+  environment: GtEnvironment
+): Promise<void> {
+  console.log(`>> Building project "${name}" (key: ${key})`)
+
+  const embed = await getEmbedInfo(key, credentials, environment)
+
+  const contents = await getRunContents(
+    embed.run_id,
+    embed.access_key,
+    credentials,
+    environment
+  )
+
+  const jobId =
+    contents && typeof contents === "object" && !Array.isArray(contents)
+      ? (contents as Record<string, unknown>).job
+      : null
+
+  if (jobId && typeof jobId === "number") {
+    process.stdout.write(`>>>> Waiting for new build (job: ${jobId})... `)
+    await pollJob(jobId, credentials, { environment })
+    console.log("done")
+  } else {
+    console.log(">>>> No changes to build")
+  }
+
+  const result = await getRunContents(
+    embed.run_id,
+    embed.access_key,
+    credentials,
+    environment
+  )
+
+  const errors = extractErrors(result)
+
+  if (errors.length === 0) {
+    console.log(">>>> No errors")
+  } else {
+    console.log(">>>> Found compilation errors:")
+    console.log(errors.join("\n"))
+  }
 }

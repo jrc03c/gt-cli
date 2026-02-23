@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest"
-import { extractErrors, getEmbedInfo, getRunContents } from "../../src/lib/build.js"
+import { extractErrors, getEmbedInfo, getRunContents, buildProgram } from "../../src/lib/build.js"
 
 describe("extractErrors", () => {
   it("returns [] for null", () => {
@@ -98,9 +98,15 @@ vi.mock("../../src/lib/api.js", () => ({
   apiRequest: vi.fn(),
 }))
 
+vi.mock("../../src/lib/jobs.js", () => ({
+  pollJob: vi.fn(),
+}))
+
 import { apiRequest } from "../../src/lib/api.js"
+import { pollJob } from "../../src/lib/jobs.js"
 
 const mockApiRequest = vi.mocked(apiRequest)
+const mockPollJob = vi.mocked(pollJob)
 const creds = { email: "test@example.com", password: "pass" }
 
 describe("getEmbedInfo", () => {
@@ -135,5 +141,108 @@ describe("getRunContents", () => {
       headers: { "X-GuidedTrack-Access-Key": "ak_abc" },
     })
     expect(result).toEqual(contents)
+  })
+})
+
+describe("buildProgram", () => {
+  it("gets embed info, triggers build, polls job, and reports errors", async () => {
+    mockApiRequest
+      .mockResolvedValueOnce({
+        json: () => Promise.resolve({ run_id: 100, access_key: "ak_abc" }),
+      } as Response)
+      .mockResolvedValueOnce({
+        json: () => Promise.resolve({ job: 42 }),
+      } as Response)
+      .mockResolvedValueOnce({
+        json: () =>
+          Promise.resolve([{ metadata: { errors: ["line 1: syntax error"] } }]),
+      } as Response)
+
+    mockPollJob.mockResolvedValue({ id: 42, status: "completed" })
+
+    const logs: string[] = []
+    const origLog = console.log
+    const origWrite = process.stdout.write
+    console.log = (...args: unknown[]) => logs.push(args.join(" "))
+    process.stdout.write = ((msg: string) => {
+      logs.push(msg)
+      return true
+    }) as typeof process.stdout.write
+
+    await buildProgram("my-prog", "abc1234", creds, "development")
+
+    console.log = origLog
+    process.stdout.write = origWrite
+
+    expect(mockApiRequest).toHaveBeenCalledWith("/programs/abc1234/embed", {
+      credentials: creds,
+      environment: "development",
+    })
+    expect(mockPollJob).toHaveBeenCalledWith(42, creds, {
+      environment: "development",
+    })
+    expect(logs.some(l => l.includes("Building"))).toBe(true)
+    expect(logs.some(l => l.includes("syntax error"))).toBe(true)
+  })
+
+  it("reports no errors when build is clean", async () => {
+    mockApiRequest
+      .mockResolvedValueOnce({
+        json: () => Promise.resolve({ run_id: 200, access_key: "ak_def" }),
+      } as Response)
+      .mockResolvedValueOnce({
+        json: () => Promise.resolve({ job: 99 }),
+      } as Response)
+      .mockResolvedValueOnce({
+        json: () => Promise.resolve([{ metadata: {} }]),
+      } as Response)
+
+    mockPollJob.mockResolvedValue({ id: 99, status: "completed" })
+
+    const logs: string[] = []
+    const origLog = console.log
+    const origWrite = process.stdout.write
+    console.log = (...args: unknown[]) => logs.push(args.join(" "))
+    process.stdout.write = ((msg: string) => {
+      logs.push(msg)
+      return true
+    }) as typeof process.stdout.write
+
+    await buildProgram("clean-prog", "def5678", creds, "development")
+
+    console.log = origLog
+    process.stdout.write = origWrite
+
+    expect(logs.some(l => l.includes("No errors"))).toBe(true)
+  })
+
+  it("reports no changes when there is no job", async () => {
+    mockApiRequest
+      .mockResolvedValueOnce({
+        json: () => Promise.resolve({ run_id: 300, access_key: "ak_ghi" }),
+      } as Response)
+      .mockResolvedValueOnce({
+        json: () => Promise.resolve({}),
+      } as Response)
+      .mockResolvedValueOnce({
+        json: () => Promise.resolve({}),
+      } as Response)
+
+    const logs: string[] = []
+    const origLog = console.log
+    const origWrite = process.stdout.write
+    console.log = (...args: unknown[]) => logs.push(args.join(" "))
+    process.stdout.write = ((msg: string) => {
+      logs.push(msg)
+      return true
+    }) as typeof process.stdout.write
+
+    await buildProgram("no-changes", "ghi9012", creds, "development")
+
+    console.log = origLog
+    process.stdout.write = origWrite
+
+    expect(logs.some(l => l.includes("No changes"))).toBe(true)
+    expect(mockPollJob).not.toHaveBeenCalled()
   })
 })
