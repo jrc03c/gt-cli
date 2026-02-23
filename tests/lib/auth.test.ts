@@ -1,40 +1,27 @@
 import { describe, expect, it, vi } from "vitest"
 import { resolveCredentials } from "../../src/lib/auth.js"
 
+vi.mock("../../src/lib/config.js", () => ({
+  loadConfig: vi.fn().mockResolvedValue({}),
+}))
+
 describe("resolveCredentials", () => {
-  it("returns credentials when both env vars are set", () => {
+  it("returns credentials when both env vars are set", async () => {
     vi.stubEnv("GT_EMAIL", "user@example.com")
     vi.stubEnv("GT_PASSWORD", "secret")
 
-    const result = resolveCredentials()
+    const result = await resolveCredentials()
     expect(result).toEqual({ email: "user@example.com", password: "secret" })
   })
 
-  it("throws when GT_EMAIL is missing", () => {
-    vi.stubEnv("GT_PASSWORD", "secret")
-    delete process.env.GT_EMAIL
-
-    expect(() => resolveCredentials()).toThrow("GT_EMAIL")
-  })
-
-  it("throws when GT_PASSWORD is missing", () => {
-    vi.stubEnv("GT_EMAIL", "user@example.com")
-    delete process.env.GT_PASSWORD
-
-    expect(() => resolveCredentials()).toThrow("GT_PASSWORD")
-  })
-
-  it("throws when both env vars are missing", () => {
+  it("throws when no credentials are available and stdin is not a TTY", async () => {
     delete process.env.GT_EMAIL
     delete process.env.GT_PASSWORD
+    const original = process.stdin.isTTY
+    Object.defineProperty(process.stdin, "isTTY", { value: false, configurable: true })
 
-    expect(() => resolveCredentials()).toThrow()
-  })
+    await expect(resolveCredentials()).rejects.toThrow("No credentials found")
 
-  it("error message mentions the env var names", () => {
-    delete process.env.GT_EMAIL
-    delete process.env.GT_PASSWORD
-
-    expect(() => resolveCredentials()).toThrow(/GT_EMAIL.*GT_PASSWORD/)
+    Object.defineProperty(process.stdin, "isTTY", { value: original, configurable: true })
   })
 })
