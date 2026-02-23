@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises"
 import { resolve } from "node:path"
 import type { Command } from "commander"
 import { apiRequest, findProgram, getEnvironment } from "../lib/api.js"
+import { buildProgram } from "../lib/build.js"
 import { resolveCredentials } from "../lib/auth.js"
 import { getLocalFiles } from "../lib/files.js"
 
@@ -26,6 +27,8 @@ export function registerPush(program: Command): void {
 
       console.log(`Pushing to ${environment}...`)
 
+      const pushed: { name: string; key: string }[] = []
+
       for (const filename of filenames) {
         const found = await findProgram(filename, credentials, environment)
 
@@ -46,11 +49,14 @@ export function registerPush(program: Command): void {
         })
 
         console.log("done")
+        pushed.push({ name: filename, key: found.key })
       }
 
-      if (options.build) {
-        console.error("build after push: not yet implemented")
-        process.exit(1)
+      if (options.build && pushed.length > 0) {
+        console.log("\nBuilding pushed programs...")
+        for (const { name, key } of pushed) {
+          await buildProgram(name, key, credentials, environment)
+        }
       }
     })
 }
