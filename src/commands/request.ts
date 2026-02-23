@@ -18,7 +18,7 @@ export function registerRequest(program: Command): void {
         path: string,
         options: { method: string; data?: string; header?: string[] }
       ) => {
-        const credentials = resolveCredentials()
+        const credentials = await resolveCredentials()
         const environment = getEnvironment()
 
         const headers: Record<string, string> = {}

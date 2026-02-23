@@ -12,7 +12,7 @@ export function registerPush(program: Command): void {
     .option("-o, --only <name>", "Push only the specified program")
     .option("-b, --build", "Build after pushing")
     .action(async options => {
-      const credentials = resolveCredentials()
+      const credentials = await resolveCredentials()
       const environment = getEnvironment()
 
       const filenames = options.only
