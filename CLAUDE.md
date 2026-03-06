@@ -8,7 +8,7 @@ This project rewrites the existing `gt` bash script as a fully-featured TypeScri
 
 ### Current status
 
-The project is in early development. The bash script provides working implementations of 4 commands (push, create, build, compare). The TypeScript rewrite will start with these and expand toward the full command set from the previous Node.js version (see "Command roadmap" below).
+The TypeScript rewrite is feature-complete for Phases 1–3 of the command roadmap (with the exception of `program data`). All commands from the bash script have been ported and extended with additional commands from the previous Node.js version.
 
 ## Architecture
 
@@ -26,7 +26,7 @@ The project is in early development. The bash script provides working implementa
 
 ### Project structure
 
-```
+```text
 gt-cli/
 ├── src/
 │   ├── index.ts          # Entry point, Commander program setup
@@ -34,7 +34,9 @@ gt-cli/
 │   ├── lib/               # Shared utilities
 │   │   ├── api.ts         # HTTP client, request helpers
 │   │   ├── auth.ts        # Authentication (config, env vars, interactive)
+│   │   ├── build.ts       # Build/compile helpers
 │   │   ├── config.ts      # gt.config.json reading/writing
+│   │   ├── files.ts       # File reading utilities
 │   │   └── jobs.ts        # Job polling logic
 │   └── types.ts           # Shared type definitions
 ├── tests/                 # Vitest test files (*.test.ts)
@@ -186,28 +188,28 @@ All API requests use HTTP Basic Auth (`email:password`, base64-encoded).
 
 ### Phase 1 — Core (matching bash script)
 
-- [ ] `push` — Upload local program files to server
-- [ ] `create` — Create new programs
-- [ ] `build` — Compile programs and report errors
-- [ ] `compare` — Delegate to gt-compare tool
+- [x] `push` — Upload local program files to server (includes `--build` flag)
+- [x] `create` — Create new programs
+- [x] `build` — Compile programs and report errors
+- [x] `compare` — Delegate to gt-compare tool
 
 ### Phase 2 — Essential additions
 
-- [ ] `pull` — Download program source from server
-- [ ] `init` — Create gt.config.json, scan for program files
-- [ ] `config` — Print current project config
-- [ ] `program list` — List all programs
-- [ ] `program get` — Fetch program metadata
-- [ ] `program source` — Fetch program source code
-- [ ] `program find` / `program filter` — Search programs
+- [x] `pull` — Download program source from server
+- [x] `init` — Create gt.config.json, scan for program files
+- [x] `config` — Print current project config
+- [x] `program list` — List all programs
+- [x] `program get` — Fetch program metadata
+- [x] `program source` — Fetch program source code
+- [x] `program find` — Search programs by name
 
 ### Phase 3 — Full feature set
 
-- [ ] `program delete` — Delete a program (with confirmation)
+- [x] `program delete` — Delete a program (with confirmation + `-y` flag)
 - [ ] `program data` / `program csv` — Download program data
-- [ ] `program view` / `program preview` / `program run` — Open browser to program pages
-- [ ] `program build` — Build a specific program by name/ID/key
-- [ ] `request send` — Generic API request
+- [x] `program view` / `program preview` / `program run` — Open browser to program pages
+- [x] `program build` — Build a specific program by name/ID/key
+- [x] `request` — Generic API request
 
 ## Git workflow
 
