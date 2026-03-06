@@ -26,4 +26,7 @@ registerConfig(program)
 registerProgram(program)
 registerRequest(program)
 
-program.parse()
+program.parseAsync().catch((err: Error) => {
+  console.error(err.message)
+  process.exit(1)
+})
