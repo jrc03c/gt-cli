@@ -1,51 +1,56 @@
 import { writeFile } from "node:fs/promises"
 import { resolve } from "node:path"
 import type { Command } from "commander"
-import {
-  fetchProgramSource,
-  findProgram,
-  getEnvironment,
-} from "../lib/api.js"
+import { fetchProgramSource, getEnvironment } from "../lib/api.js"
 import { resolveCredentials } from "../lib/auth.js"
-import { getLocalFiles } from "../lib/files.js"
+import { loadConfig } from "../lib/config.js"
+import type { ProgramRef } from "../types.js"
 
 export function registerPull(program: Command): void {
   program
     .command("pull")
     .description("Download program source from the server")
-    .option("-o, --only <name>", "Pull only the specified program")
+    .option("-o, --only <key>", "Pull only the specified program (by key)")
     .action(async options => {
       const credentials = await resolveCredentials()
       const environment = getEnvironment()
+      const config = await loadConfig()
+      const programs = config.programs ?? {}
 
-      const filenames = options.only
-        ? [options.only]
-        : await getLocalFiles(process.cwd())
+      let entries: [string, ProgramRef][]
 
-      if (filenames.length === 0) {
-        console.error("No files to pull.")
+      if (options.only) {
+        const ref = programs[options.only]
+        if (!ref) {
+          console.error(
+            `Program with key "${options.only}" not found in config.`
+          )
+          process.exit(1)
+        }
+        entries = [[options.only, ref]]
+      } else {
+        entries = Object.entries(programs)
+      }
+
+      if (entries.length === 0) {
+        console.error("No programs in config. Run `gt init` first.")
         process.exit(1)
       }
 
       console.log(`Pulling from ${environment}...`)
 
-      for (const filename of filenames) {
-        const found = await findProgram(filename, credentials, environment)
-
-        if (!found) {
-          console.log(`>> Program named "${filename}" not found, skipping...`)
-          continue
-        }
-
-        process.stdout.write(`>> Downloading "${filename}" (id: ${found.id})... `)
+      for (const [, ref] of entries) {
+        process.stdout.write(
+          `>> Downloading "${ref.file}" (id: ${ref.id})... `
+        )
 
         const source = await fetchProgramSource(
-          found.id,
+          ref.id,
           credentials,
           environment
         )
 
-        await writeFile(resolve(process.cwd(), filename), source)
+        await writeFile(resolve(process.cwd(), ref.file), source)
         console.log("done")
       }
     })
