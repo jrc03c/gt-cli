@@ -8,7 +8,7 @@ This project rewrites the existing `gt` bash script as a fully-featured TypeScri
 
 ### Current status
 
-The TypeScript rewrite is feature-complete for Phases 1–3 of the command roadmap (with the exception of `program data`). All commands from the bash script have been ported and extended with additional commands from the previous Node.js version.
+The TypeScript rewrite is feature-complete for Phases 1–3 of the command roadmap. All commands from the bash script have been ported and extended with additional commands from the previous Node.js version.
 
 ## Architecture
 
