@@ -1,4 +1,6 @@
 import { exec } from "node:child_process"
+import { writeFile } from "node:fs/promises"
+import { resolve } from "node:path"
 import { createInterface } from "node:readline"
 import type { Command } from "commander"
 import {
@@ -253,6 +255,38 @@ export function registerProgram(parent: Command): void {
 
       const url = `${ENVIRONMENT_HOSTS[environment]}/programs/${found.key}/run`
       openBrowser(url)
+    })
+
+  program
+    .command("data")
+    .alias("csv")
+    .description("Download program data as CSV")
+    .argument("<name>", "Program name")
+    .option("-o, --output <file>", "Save to file instead of stdout")
+    .action(async (name: string, options: { output?: string }) => {
+      const credentials = await resolveCredentials()
+      const environment = getEnvironment()
+
+      const found = await findProgram(name, credentials, environment)
+
+      if (!found) {
+        console.error(`Program "${name}" not found.`)
+        process.exit(1)
+      }
+
+      const response = await apiRequest(`/programs/${found.id}/csv`, {
+        credentials,
+        environment,
+      })
+
+      const csv = await response.text()
+
+      if (options.output) {
+        await writeFile(resolve(process.cwd(), options.output), csv)
+        console.log(`Saved to ${options.output}`)
+      } else {
+        process.stdout.write(csv)
+      }
     })
 }
 
