@@ -128,8 +128,9 @@ export async function fetchProgramSource(
     throw new Error("Could not extract program source from edit page")
   }
 
-  // Decode HTML entities
+  // Decode HTML entities; strip leading newline from textarea content
   return match[1]
+    .replace(/^\n/, "")
     .replace(/&amp;/g, "&")
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")

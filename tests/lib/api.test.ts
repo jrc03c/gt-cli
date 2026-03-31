@@ -207,6 +207,14 @@ describe("fetchProgramSource", () => {
     expect(result).toBe("*question: Hello")
   })
 
+  it("strips leading newline from textarea content", async () => {
+    const html = `<textarea name="contents">\n*question: Hello</textarea>`
+    mockFetch.mockResolvedValue({ ok: true, text: () => Promise.resolve(html) })
+
+    const result = await fetchProgramSource(123, creds, "development")
+    expect(result).toBe("*question: Hello")
+  })
+
   it("decodes HTML entities", async () => {
     const html = `<textarea name="contents">&amp; &lt; &gt; &quot; &#39;</textarea>`
     mockFetch.mockResolvedValue({ ok: true, text: () => Promise.resolve(html) })
