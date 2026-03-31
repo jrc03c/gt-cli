@@ -176,6 +176,7 @@ All API requests use HTTP Basic Auth (`email:password`, base64-encoded).
 | `GET` | `/delayed_jobs/{job_id}` | Poll job status |
 | `GET` | `/programs/{key}/embed` | Get embed info (run_id, access_key) |
 | `GET` | `/runs/{run_id}/contents` | Get program contents (requires `X-GuidedTrack-Access-Key` header) |
+| `GET` | `/programs/{id}/csv` | Download program data as CSV |
 
 ### Key concepts
 
@@ -206,7 +207,7 @@ All API requests use HTTP Basic Auth (`email:password`, base64-encoded).
 ### Phase 3 — Full feature set
 
 - [x] `program delete` — Delete a program (with confirmation + `-y` flag)
-- [ ] `program data` / `program csv` — Download program data
+- [x] `program data` / `program csv` — Download program data
 - [x] `program view` / `program preview` / `program run` — Open browser to program pages
 - [x] `program build` — Build a specific program by name/ID/key
 - [x] `request` — Generic API request

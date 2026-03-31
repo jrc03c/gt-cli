@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+### Added
+
+- `program data` / `program csv` command to download program data as CSV (with optional `-o` flag to save to file)
+
 ### Fixed
 
 - Unhandled async errors now display clean error messages instead of stack traces
