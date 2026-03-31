@@ -5,32 +5,9 @@ vi.mock("node:fs/promises", () => ({
 }))
 
 import { readdir } from "node:fs/promises"
-import { getLocalFiles, getLocalGtFiles } from "../../src/lib/files.js"
+import { getLocalGtFiles } from "../../src/lib/files.js"
 
 const mockReaddir = vi.mocked(readdir)
-
-describe("getLocalFiles", () => {
-  it("returns file names, excludes directories", async () => {
-    mockReaddir.mockResolvedValue([
-      { name: "program.gt", isFile: () => true, isDirectory: () => false },
-      { name: "subdir", isFile: () => false, isDirectory: () => true },
-      { name: "notes.txt", isFile: () => true, isDirectory: () => false },
-    ] as unknown as Awaited<ReturnType<typeof readdir>>)
-
-    const result = await getLocalFiles("/some/dir")
-    expect(result).toEqual(["program.gt", "notes.txt"])
-    expect(mockReaddir).toHaveBeenCalledWith("/some/dir", { withFileTypes: true })
-  })
-
-  it("returns [] for empty directory", async () => {
-    mockReaddir.mockResolvedValue(
-      [] as unknown as Awaited<ReturnType<typeof readdir>>
-    )
-
-    const result = await getLocalFiles("/empty")
-    expect(result).toEqual([])
-  })
-})
 
 describe("getLocalGtFiles", () => {
   it("returns only .gt files with relative paths, sorted", async () => {
@@ -63,7 +40,6 @@ describe("getLocalGtFiles", () => {
 
     const result = await getLocalGtFiles("/project")
     expect(result).toEqual(["app.gt"])
-    // readdir should only have been called once (root), not for node_modules
     expect(mockReaddir).toHaveBeenCalledTimes(1)
   })
 

@@ -1,22 +1,25 @@
 import type { Command } from "commander"
 import { apiRequest, getEnvironment } from "../lib/api.js"
 import { resolveCredentials } from "../lib/auth.js"
-import { getLocalFiles } from "../lib/files.js"
+import { getLocalGtFiles } from "../lib/files.js"
 
 export function registerCreate(program: Command): void {
   program
     .command("create")
     .description("Create new programs on the server")
-    .argument("[names...]", "Program names to create (defaults to all files in cwd)")
+    .argument(
+      "[names...]",
+      "Program names to create (defaults to all .gt files in cwd)"
+    )
     .action(async (names: string[]) => {
       const credentials = await resolveCredentials()
       const environment = getEnvironment()
 
       const filenames =
-        names.length > 0 ? names : await getLocalFiles(process.cwd())
+        names.length > 0 ? names : await getLocalGtFiles(process.cwd())
 
       if (filenames.length === 0) {
-        console.error("No files to create.")
+        console.error("No .gt files to create.")
         process.exit(1)
       }
 
@@ -49,4 +52,3 @@ export function registerCreate(program: Command): void {
       }
     })
 }
-

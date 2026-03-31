@@ -1,47 +1,59 @@
 import { readFile } from "node:fs/promises"
 import { resolve } from "node:path"
 import type { Command } from "commander"
-import { apiRequest, findProgram, getEnvironment } from "../lib/api.js"
+import { apiRequest, getEnvironment } from "../lib/api.js"
 import { buildProgram } from "../lib/build.js"
 import { resolveCredentials } from "../lib/auth.js"
-import { getLocalFiles } from "../lib/files.js"
+import { loadConfig } from "../lib/config.js"
+import type { ProgramRef } from "../types.js"
 
 export function registerPush(program: Command): void {
   program
     .command("push")
     .description("Upload local program files to the server")
-    .option("-o, --only <name>", "Push only the specified program")
+    .option("-o, --only <key>", "Push only the specified program (by key)")
     .option("-b, --build", "Build after pushing")
     .action(async options => {
       const credentials = await resolveCredentials()
       const environment = getEnvironment()
+      const config = await loadConfig()
+      const programs = config.programs ?? {}
 
-      const filenames = options.only
-        ? [options.only]
-        : await getLocalFiles(process.cwd())
+      let entries: [string, ProgramRef][]
 
-      if (filenames.length === 0) {
-        console.error("No files to push.")
+      if (options.only) {
+        const ref = programs[options.only]
+        if (!ref) {
+          console.error(
+            `Program with key "${options.only}" not found in config.`
+          )
+          process.exit(1)
+        }
+        entries = [[options.only, ref]]
+      } else {
+        entries = Object.entries(programs)
+      }
+
+      if (entries.length === 0) {
+        console.error("No programs in config. Run `gt init` first.")
         process.exit(1)
       }
 
       console.log(`Pushing to ${environment}...`)
 
-      const pushed: { name: string; key: string }[] = []
+      const pushed: { file: string; key: string }[] = []
 
-      for (const filename of filenames) {
-        const found = await findProgram(filename, credentials, environment)
+      for (const [key, ref] of entries) {
+        process.stdout.write(
+          `>> Updating "${ref.file}" (id: ${ref.id})... `
+        )
 
-        if (!found) {
-          console.log(`>> Program named "${filename}" not found, skipping...`)
-          continue
-        }
+        const contents = await readFile(
+          resolve(process.cwd(), ref.file),
+          "utf-8"
+        )
 
-        process.stdout.write(`>> Updating "${filename}" (id: ${found.id})... `)
-
-        const contents = await readFile(resolve(process.cwd(), filename), "utf-8")
-
-        await apiRequest(`/programs/${found.id}.json`, {
+        await apiRequest(`/programs/${ref.id}.json`, {
           method: "PUT",
           credentials,
           environment,
@@ -49,15 +61,14 @@ export function registerPush(program: Command): void {
         })
 
         console.log("done")
-        pushed.push({ name: filename, key: found.key })
+        pushed.push({ file: ref.file, key })
       }
 
       if (options.build && pushed.length > 0) {
         console.log("\nBuilding pushed programs...")
-        for (const { name, key } of pushed) {
-          await buildProgram(name, key, credentials, environment)
+        for (const { file, key } of pushed) {
+          await buildProgram(file, key, credentials, environment)
         }
       }
     })
 }
-
