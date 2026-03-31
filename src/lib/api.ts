@@ -46,18 +46,49 @@ export async function apiRequest(
   return response
 }
 
-export async function findProgram(
-  name: string,
+export async function findProgramByTitle(
+  title: string,
   credentials: Credentials,
   environment?: GtEnvironment
 ): Promise<Program | null> {
-  const query = encodeURIComponent(name)
+  const query = encodeURIComponent(title)
   const response = await apiRequest(`/programs.json?query=${query}`, {
     credentials,
     environment,
   })
   const programs = (await response.json()) as Program[]
-  return programs.find(p => p.name === name) ?? null
+  return programs.find(p => p.name === title) ?? null
+}
+
+export { findProgramByTitle as findProgram }
+
+export async function getProgram(
+  id: number,
+  credentials: Credentials,
+  environment?: GtEnvironment
+): Promise<Program | null> {
+  try {
+    const response = await apiRequest(`/programs/${id}.json`, {
+      credentials,
+      environment,
+    })
+    return (await response.json()) as Program
+  } catch {
+    return null
+  }
+}
+
+export async function findProgramByKey(
+  key: string,
+  credentials: Credentials,
+  environment?: GtEnvironment
+): Promise<Program | null> {
+  const response = await apiRequest("/programs.json", {
+    credentials,
+    environment,
+  })
+  const programs = (await response.json()) as Program[]
+  return programs.find(p => p.key === key) ?? null
 }
 
 export async function listPrograms(
