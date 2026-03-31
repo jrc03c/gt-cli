@@ -12,8 +12,8 @@ export interface Credentials {
 }
 
 export interface ProgramRef {
+  file: string
   id: number
-  key: string
 }
 
 export interface GtConfig {
