@@ -78,9 +78,9 @@ gt program run <name>            # Open program run page
 ### Generic API access
 
 ```bash
-gt request <path>                        # GET any API endpoint
+gt request <path>                             # GET any API endpoint
 gt request <path> -X POST -d '{"key":"val"}'  # POST with JSON body
-gt request <path> -H "X-Custom:value"    # Add custom headers
+gt request <path> -H "X-Custom:value"         # Add custom headers
 ```
 
 ## Configuration
