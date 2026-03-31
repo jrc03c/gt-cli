@@ -23,9 +23,9 @@ afterEach(() => {
 })
 
 describe("getEnvironment", () => {
-  it("defaults to development when GT_ENV is unset", () => {
+  it("defaults to production when GT_ENV is unset", () => {
     delete process.env.GT_ENV
-    expect(getEnvironment()).toBe("development")
+    expect(getEnvironment()).toBe("production")
   })
 
   it("returns development when GT_ENV is development", () => {

@@ -151,9 +151,9 @@ Auth is resolved in this priority order:
 
 The target GuidedTrack environment is set via the `GT_ENV` environment variable:
 
-- `development` (default): `https://localhost:3000`
+- `development`: `https://localhost:3000`
 - `stage`: `https://guidedtrack-stage.herokuapp.com`
-- `production`: `https://www.guidedtrack.com`
+- `production` (default): `https://www.guidedtrack.com`
 
 Production requires interactive confirmation before destructive operations.
 

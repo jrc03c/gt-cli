@@ -26,9 +26,9 @@ Set `GT_ENV` to target different GuidedTrack environments:
 
 | Value | Host |
 |-------|------|
-| `development` (default) | `https://localhost:3000` |
+| `development` | `https://localhost:3000` |
 | `stage` | `https://guidedtrack-stage.herokuapp.com` |
-| `production` | `https://www.guidedtrack.com` |
+| `production` (default) | `https://www.guidedtrack.com` |
 
 ## Commands
 

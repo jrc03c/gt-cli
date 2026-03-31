@@ -107,7 +107,7 @@ export async function fetchProgramSource(
 }
 
 export function getEnvironment(): GtEnvironment {
-  const env = process.env.GT_ENV ?? "development"
+  const env = process.env.GT_ENV ?? "production"
   if (env !== "development" && env !== "stage" && env !== "production") {
     throw new Error(
       `Invalid GT_ENV: "${env}". Must be development, stage, or production.`
