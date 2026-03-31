@@ -1,5 +1,5 @@
 {
-  "name": "gt-cli",
+  "name": "@jrc03c/gt-cli",
   "version": "0.1.0",
   "description": "CLI for the GuidedTrack web API",
   "type": "module",
