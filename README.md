@@ -89,16 +89,20 @@ gt request <path> -H "X-Custom:value"         # Add custom headers
 
 ```json
 {
+  "email": "you@example.com",
+  "password": "your-password",
   "programs": {
-    "my-program": {
-      "id": 12345,
-      "key": "abc1234"
+    "abc1234": {
+      "file": "my-program.gt",
+      "id": 12345
     }
   }
 }
 ```
 
-This file is gitignored. It maps local program file names to their server-side IDs and keys.
+This file is gitignored. Programs are keyed by their 7-character program key, and each entry maps to a local `.gt` file and its server-side numeric ID.
+
+The `email` and `password` fields are optional — they provide an alternative to environment variables for authentication (see [Authentication](#authentication) above).
 
 ## Development
 
