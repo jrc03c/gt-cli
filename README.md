@@ -100,9 +100,11 @@ gt request <path> -H "X-Custom:value"         # Add custom headers
 }
 ```
 
-This file is gitignored. Programs are keyed by their 7-character program key, and each entry maps to a local `.gt` file and its server-side numeric ID.
+Programs are keyed by their 7-character program key, and each entry maps to a local `.gt` file and its server-side numeric ID.
 
 The `email` and `password` fields are optional — they provide an alternative to environment variables for authentication (see [Authentication](#authentication) above).
+
+> **NOTE:** 🚨 If storing `email` and `password` values in `gt.config.json`, then **DO NOT** commit that file to the repository history! Instead, add `gt.config.json` to your `.gitignore` file.
 
 ### Separate push and pull files
 
