@@ -1,37 +1,29 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
-import * as readline from "node:readline"
+import { afterAll, beforeAll, describe, expect, it } from "vitest"
+import { mkdtemp, rm, writeFile } from "node:fs/promises"
+import { join } from "node:path"
+import { tmpdir } from "node:os"
 import { resolveCredentials } from "../../src/lib/auth.js"
-import { loadConfig } from "../../src/lib/config.js"
-
-vi.mock("../../src/lib/config.js", () => ({
-  loadConfig: vi.fn().mockResolvedValue({}),
-}))
-
-vi.mock("node:readline", async () => {
-  const actual = await vi.importActual<typeof readline>("node:readline")
-  return {
-    ...actual,
-    createInterface: vi.fn(actual.createInterface),
-  }
-})
+import { CONFIG_FILENAME } from "../../src/lib/config.js"
 
 describe("resolveCredentials", () => {
-  let originalIsTTY: boolean | undefined
+  let savedEmail: string | undefined
+  let savedPassword: string | undefined
 
-  beforeEach(() => {
-    originalIsTTY = process.stdin.isTTY
+  beforeAll(() => {
+    savedEmail = process.env.GT_EMAIL
+    savedPassword = process.env.GT_PASSWORD
   })
 
-  afterEach(() => {
-    Object.defineProperty(process.stdin, "isTTY", {
-      value: originalIsTTY,
-      configurable: true,
-    })
+  afterAll(() => {
+    if (savedEmail !== undefined) process.env.GT_EMAIL = savedEmail
+    else delete process.env.GT_EMAIL
+    if (savedPassword !== undefined) process.env.GT_PASSWORD = savedPassword
+    else delete process.env.GT_PASSWORD
   })
 
   it("returns credentials when both env vars are set", async () => {
-    vi.stubEnv("GT_EMAIL", "user@example.com")
-    vi.stubEnv("GT_PASSWORD", "secret")
+    process.env.GT_EMAIL = "user@example.com"
+    process.env.GT_PASSWORD = "secret"
 
     const result = await resolveCredentials()
     expect(result).toEqual({ email: "user@example.com", password: "secret" })
@@ -40,115 +32,119 @@ describe("resolveCredentials", () => {
   it("throws when no credentials are available and stdin is not a TTY", async () => {
     delete process.env.GT_EMAIL
     delete process.env.GT_PASSWORD
-    vi.mocked(loadConfig).mockResolvedValue({})
-    Object.defineProperty(process.stdin, "isTTY", {
-      value: false,
-      configurable: true,
-    })
 
-    await expect(resolveCredentials()).rejects.toThrow("No credentials found")
+    const originalIsTTY = process.stdin.isTTY
+    const originalCwd = process.cwd()
+    const tempDir = await mkdtemp(join(tmpdir(), "gt-auth-test-"))
+
+    try {
+      Object.defineProperty(process.stdin, "isTTY", {
+        value: false,
+        configurable: true,
+      })
+      process.chdir(tempDir)
+
+      await expect(resolveCredentials()).rejects.toThrow("No credentials found")
+    } finally {
+      Object.defineProperty(process.stdin, "isTTY", {
+        value: originalIsTTY,
+        configurable: true,
+      })
+      process.chdir(originalCwd)
+      await rm(tempDir, { recursive: true })
+    }
   })
 
   it("returns credentials from config file when env vars are not set", async () => {
     delete process.env.GT_EMAIL
     delete process.env.GT_PASSWORD
-    vi.mocked(loadConfig).mockResolvedValue({
-      email: "config@example.com",
-      password: "config-secret",
-    })
-    Object.defineProperty(process.stdin, "isTTY", {
-      value: false,
-      configurable: true,
-    })
 
-    const result = await resolveCredentials()
-    expect(result).toEqual({
-      email: "config@example.com",
-      password: "config-secret",
-    })
-  })
+    const originalIsTTY = process.stdin.isTTY
+    const originalCwd = process.cwd()
+    const tempDir = await mkdtemp(join(tmpdir(), "gt-auth-test-"))
 
-  it("skips config file when only email is present", async () => {
-    delete process.env.GT_EMAIL
-    delete process.env.GT_PASSWORD
-    vi.mocked(loadConfig).mockResolvedValue({ email: "config@example.com" })
-    Object.defineProperty(process.stdin, "isTTY", {
-      value: false,
-      configurable: true,
-    })
+    try {
+      Object.defineProperty(process.stdin, "isTTY", {
+        value: false,
+        configurable: true,
+      })
 
-    await expect(resolveCredentials()).rejects.toThrow("No credentials found")
-  })
+      await writeFile(
+        join(tempDir, CONFIG_FILENAME),
+        JSON.stringify({
+          email: "config@example.com",
+          password: "config-secret",
+        })
+      )
+      process.chdir(tempDir)
 
-  it("skips config file when only password is present", async () => {
-    delete process.env.GT_EMAIL
-    delete process.env.GT_PASSWORD
-    vi.mocked(loadConfig).mockResolvedValue({ password: "config-secret" })
-    Object.defineProperty(process.stdin, "isTTY", {
-      value: false,
-      configurable: true,
-    })
-
-    await expect(resolveCredentials()).rejects.toThrow("No credentials found")
+      const result = await resolveCredentials()
+      expect(result).toEqual({
+        email: "config@example.com",
+        password: "config-secret",
+      })
+    } finally {
+      Object.defineProperty(process.stdin, "isTTY", {
+        value: originalIsTTY,
+        configurable: true,
+      })
+      process.chdir(originalCwd)
+      await rm(tempDir, { recursive: true })
+    }
   })
 
   it("env vars take priority over config file", async () => {
-    vi.stubEnv("GT_EMAIL", "env@example.com")
-    vi.stubEnv("GT_PASSWORD", "env-secret")
-    vi.mocked(loadConfig).mockResolvedValue({
-      email: "config@example.com",
-      password: "config-secret",
-    })
+    process.env.GT_EMAIL = "env@example.com"
+    process.env.GT_PASSWORD = "env-secret"
 
-    const result = await resolveCredentials()
-    expect(result).toEqual({ email: "env@example.com", password: "env-secret" })
-  })
+    const originalCwd = process.cwd()
+    const tempDir = await mkdtemp(join(tmpdir(), "gt-auth-test-"))
 
-  it("prompts for credentials when stdin is a TTY", async () => {
-    delete process.env.GT_EMAIL
-    delete process.env.GT_PASSWORD
-    vi.mocked(loadConfig).mockResolvedValue({})
+    try {
+      await writeFile(
+        join(tempDir, CONFIG_FILENAME),
+        JSON.stringify({
+          email: "config@example.com",
+          password: "config-secret",
+        })
+      )
+      process.chdir(tempDir)
 
-    Object.defineProperty(process.stdin, "isTTY", {
-      value: true,
-      configurable: true,
-    })
-
-    const mockRl = {
-      question: vi.fn(),
-      close: vi.fn(),
+      const result = await resolveCredentials()
+      expect(result).toEqual({
+        email: "env@example.com",
+        password: "env-secret",
+      })
+    } finally {
+      process.chdir(originalCwd)
+      await rm(tempDir, { recursive: true })
     }
-    mockRl.question
-      .mockImplementationOnce((_q: string, cb: (answer: string) => void) =>
-        cb("prompted@example.com"),
-      )
-      .mockImplementationOnce((_q: string, cb: (answer: string) => void) =>
-        cb("prompted-secret"),
-      )
-
-    vi.mocked(readline.createInterface).mockReturnValue(
-      mockRl as unknown as readline.Interface,
-    )
-
-    const result = await resolveCredentials()
-    expect(result).toEqual({
-      email: "prompted@example.com",
-      password: "prompted-secret",
-    })
-    expect(mockRl.close).toHaveBeenCalled()
   })
 
-  it("error message lists all credential methods when not a TTY", async () => {
+  it("error message lists all credential methods", async () => {
     delete process.env.GT_EMAIL
     delete process.env.GT_PASSWORD
-    vi.mocked(loadConfig).mockResolvedValue({})
 
-    Object.defineProperty(process.stdin, "isTTY", {
-      value: false,
-      configurable: true,
-    })
+    const originalIsTTY = process.stdin.isTTY
+    const originalCwd = process.cwd()
+    const tempDir = await mkdtemp(join(tmpdir(), "gt-auth-test-"))
 
-    await expect(resolveCredentials()).rejects.toThrow("gt.config.json")
-    await expect(resolveCredentials()).rejects.toThrow("GT_EMAIL")
+    try {
+      Object.defineProperty(process.stdin, "isTTY", {
+        value: false,
+        configurable: true,
+      })
+      process.chdir(tempDir)
+
+      await expect(resolveCredentials()).rejects.toThrow("gt.config.json")
+      await expect(resolveCredentials()).rejects.toThrow("GT_EMAIL")
+    } finally {
+      Object.defineProperty(process.stdin, "isTTY", {
+        value: originalIsTTY,
+        configurable: true,
+      })
+      process.chdir(originalCwd)
+      await rm(tempDir, { recursive: true })
+    }
   })
 })

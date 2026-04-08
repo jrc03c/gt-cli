@@ -4,5 +4,6 @@ export default defineConfig({
   test: {
     restoreMocks: true,
     unstubEnvs: true,
+    fileParallelism: false,
   },
 })

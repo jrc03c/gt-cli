@@ -1,55 +1,45 @@
-import { describe, expect, it, vi } from "vitest"
-
-vi.mock("node:fs/promises", () => ({
-  readdir: vi.fn(),
-}))
-
-import { readdir } from "node:fs/promises"
+import { afterEach, beforeEach, describe, expect, it } from "vitest"
+import { mkdtemp, rm, writeFile, mkdir } from "node:fs/promises"
+import { join } from "node:path"
+import { tmpdir } from "node:os"
 import { getLocalGtFiles } from "../../src/lib/files.js"
 
-const mockReaddir = vi.mocked(readdir)
+let tempDir: string
+
+beforeEach(async () => {
+  tempDir = await mkdtemp(join(tmpdir(), "gt-files-test-"))
+})
+
+afterEach(async () => {
+  await rm(tempDir, { recursive: true })
+})
 
 describe("getLocalGtFiles", () => {
   it("returns only .gt files with relative paths, sorted", async () => {
-    // Root dir
-    mockReaddir.mockResolvedValueOnce([
-      { name: "survey.gt", isFile: () => true, isDirectory: () => false },
-      { name: ".env", isFile: () => true, isDirectory: () => false },
-      { name: "sub", isFile: () => false, isDirectory: () => true },
-    ] as unknown as Awaited<ReturnType<typeof readdir>>)
+    await writeFile(join(tempDir, "survey.gt"), "")
+    await writeFile(join(tempDir, ".env"), "")
+    await mkdir(join(tempDir, "sub"))
+    await writeFile(join(tempDir, "sub", "nested.gt"), "")
+    await writeFile(join(tempDir, "sub", "readme.md"), "")
 
-    // sub/ dir
-    mockReaddir.mockResolvedValueOnce([
-      { name: "nested.gt", isFile: () => true, isDirectory: () => false },
-      { name: "readme.md", isFile: () => true, isDirectory: () => false },
-    ] as unknown as Awaited<ReturnType<typeof readdir>>)
-
-    const result = await getLocalGtFiles("/project")
+    const result = await getLocalGtFiles(tempDir)
     expect(result).toEqual(["sub/nested.gt", "survey.gt"])
   })
 
   it("skips node_modules", async () => {
-    mockReaddir.mockResolvedValueOnce([
-      {
-        name: "node_modules",
-        isFile: () => false,
-        isDirectory: () => true,
-      },
-      { name: "app.gt", isFile: () => true, isDirectory: () => false },
-    ] as unknown as Awaited<ReturnType<typeof readdir>>)
+    await mkdir(join(tempDir, "node_modules"))
+    await writeFile(join(tempDir, "node_modules", "hidden.gt"), "")
+    await writeFile(join(tempDir, "app.gt"), "")
 
-    const result = await getLocalGtFiles("/project")
+    const result = await getLocalGtFiles(tempDir)
     expect(result).toEqual(["app.gt"])
-    expect(mockReaddir).toHaveBeenCalledTimes(1)
   })
 
   it("returns [] when no .gt files exist", async () => {
-    mockReaddir.mockResolvedValueOnce([
-      { name: ".env", isFile: () => true, isDirectory: () => false },
-      { name: ".gitignore", isFile: () => true, isDirectory: () => false },
-    ] as unknown as Awaited<ReturnType<typeof readdir>>)
+    await writeFile(join(tempDir, ".env"), "")
+    await writeFile(join(tempDir, ".gitignore"), "")
 
-    const result = await getLocalGtFiles("/project")
+    const result = await getLocalGtFiles(tempDir)
     expect(result).toEqual([])
   })
 })
