@@ -1,6 +1,5 @@
 import { Command } from "commander"
 import { registerBuild } from "./commands/build.js"
-import { registerCompare } from "./commands/compare.js"
 import { registerConfig } from "./commands/config.js"
 import { registerCreate } from "./commands/create.js"
 import { registerInit } from "./commands/init.js"
@@ -20,7 +19,6 @@ registerPush(program)
 registerPull(program)
 registerCreate(program)
 registerBuild(program)
-registerCompare(program)
 registerInit(program)
 registerConfig(program)
 registerProgram(program)

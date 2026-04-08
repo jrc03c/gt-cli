@@ -37,14 +37,14 @@ Set `GT_ENV` to target different GuidedTrack environments:
 ```bash
 gt init                          # Create gt.config.json by scanning for program files
 gt config                        # Print current project configuration
-gt push                          # Upload all local program files to the server
-gt push --only <name>            # Push a single program
-gt push --build                  # Push and build
+gt push                          # Upload local programs and build
+gt push --only <key>             # Push a single program
+gt push --no-build               # Push without building
 gt pull                          # Download all program sources from the server
-gt pull --only <name>            # Pull a single program
-gt create [names...]             # Create new programs on the server
+gt pull --only <key>             # Pull a single program
+gt create [names...]             # Create new programs (updates gt.config.json)
 gt build                         # Compile programs and report errors
-gt compare [args...]             # Compare programs using gt-compare
+gt build --only <key>            # Build a single program
 ```
 
 ### Program management

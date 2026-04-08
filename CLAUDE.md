@@ -30,7 +30,7 @@ The TypeScript rewrite is feature-complete for Phases 1–3 of the command roadm
 gt-cli/
 ├── src/
 │   ├── index.ts          # Entry point, Commander program setup
-│   ├── commands/          # One file per command (push.ts, create.ts, etc.)
+│   ├── commands/          # One file per command (push.ts, pull.ts, create.ts, build.ts, etc.)
 │   ├── lib/               # Shared utilities
 │   │   ├── api.ts         # HTTP client, request helpers
 │   │   ├── auth.ts        # Authentication (config, env vars, interactive)
@@ -189,10 +189,9 @@ All API requests use HTTP Basic Auth (`email:password`, base64-encoded).
 
 ### Phase 1 — Core (matching bash script)
 
-- [x] `push` — Upload local program files to server (includes `--build` flag)
-- [x] `create` — Create new programs
-- [x] `build` — Compile programs and report errors
-- [x] `compare` — Delegate to gt-compare tool
+- [x] `push` — Upload local program files to server (builds by default; `--no-build` to skip)
+- [x] `create` — Create new programs (auto-registers in gt.config.json)
+- [x] `build` — Compile programs from gt.config.json (supports `--only <key>`)
 
 ### Phase 2 — Essential additions
 

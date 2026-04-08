@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+### Changed
+
+- `gt push` now builds by default after pushing; use `--no-build` to skip
+- `gt build` now reads programs from `gt.config.json` instead of `.gt_projects`; supports `--only <key>` to build a single program
+- `gt create` now auto-registers created programs in `gt.config.json`
+- Unit tests rewritten to run against the real GuidedTrack production API (no more mocks)
+
+### Removed
+
+- `gt compare` command (was a wrapper for external `gt-compare` tool)
+
 ### Added
 
 - `program data` / `program csv` command to download program data as CSV (with optional `-o` flag to save to file)

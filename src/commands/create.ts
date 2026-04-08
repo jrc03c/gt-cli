@@ -1,7 +1,9 @@
 import type { Command } from "commander"
-import { apiRequest, getEnvironment } from "../lib/api.js"
+import { apiRequest, findProgram, getEnvironment } from "../lib/api.js"
 import { resolveCredentials } from "../lib/auth.js"
 import { getLocalGtFiles } from "../lib/files.js"
+import { loadConfig, saveConfig } from "../lib/config.js"
+import { pollJob } from "../lib/jobs.js"
 
 export function registerCreate(program: Command): void {
   program
@@ -25,6 +27,10 @@ export function registerCreate(program: Command): void {
 
       console.log(`Creating programs in ${environment}...`)
 
+      const config = await loadConfig()
+      const programs = config.programs ?? {}
+      let configChanged = false
+
       for (const filename of filenames) {
         process.stdout.write(`>> Creating "${filename}"... `)
 
@@ -39,7 +45,22 @@ export function registerCreate(program: Command): void {
           const data = (await response.json()) as Record<string, unknown>
 
           if (data.job_id) {
-            console.log("done")
+            await pollJob(data.job_id as number, credentials, {
+              environment,
+              intervalMs: 1000,
+            }).catch(() => {
+              // Job may complete before we can poll it
+            })
+
+            const found = await findProgram(filename, credentials, environment)
+
+            if (found) {
+              console.log(`done (id: ${found.id}, key: ${found.key})`)
+              programs[found.key] = { file: filename, id: found.id }
+              configChanged = true
+            } else {
+              console.log("done")
+            }
           } else {
             console.error("failed")
             console.error(`${JSON.stringify(data)} -- skipping`)
@@ -49,6 +70,11 @@ export function registerCreate(program: Command): void {
           console.error((e as Error).message)
           process.exit(1)
         }
+      }
+
+      if (configChanged) {
+        await saveConfig({ ...config, programs })
+        console.log("Updated gt.config.json")
       }
     })
 }

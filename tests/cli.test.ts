@@ -27,7 +27,6 @@ describe("gt cli", () => {
     expect(result.stdout).toContain("push")
     expect(result.stdout).toContain("create")
     expect(result.stdout).toContain("build")
-    expect(result.stdout).toContain("compare")
     expect(result.code).toBe(0)
   })
 
