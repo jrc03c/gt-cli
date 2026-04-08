@@ -5,7 +5,7 @@ import { apiRequest, getEnvironment } from "../lib/api.js"
 import { buildProgram } from "../lib/build.js"
 import { resolveCredentials } from "../lib/auth.js"
 import { loadConfig } from "../lib/config.js"
-import type { ProgramRef } from "../types.js"
+import { type ProgramRef, getPushFile } from "../types.js"
 
 export function registerPush(program: Command): void {
   program
@@ -44,12 +44,13 @@ export function registerPush(program: Command): void {
       const pushed: { file: string; key: string }[] = []
 
       for (const [key, ref] of entries) {
+        const pushFile = getPushFile(ref)
         process.stdout.write(
-          `>> Updating "${ref.file}" (id: ${ref.id})... `
+          `>> Updating "${pushFile}" (id: ${ref.id})... `
         )
 
         const contents = await readFile(
-          resolve(process.cwd(), ref.file),
+          resolve(process.cwd(), pushFile),
           "utf-8"
         )
 
@@ -61,7 +62,7 @@ export function registerPush(program: Command): void {
         })
 
         console.log("done")
-        pushed.push({ file: ref.file, key })
+        pushed.push({ file: pushFile, key })
       }
 
       if (options.build && pushed.length > 0) {

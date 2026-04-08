@@ -3,6 +3,7 @@ import { getEnvironment } from "../lib/api.js"
 import { resolveCredentials } from "../lib/auth.js"
 import { buildProgram } from "../lib/build.js"
 import { loadConfig } from "../lib/config.js"
+import { getPushFile } from "../types.js"
 
 export function registerBuild(program: Command): void {
   program
@@ -34,7 +35,7 @@ export function registerBuild(program: Command): void {
       }
 
       for (const [key, ref] of entries) {
-        await buildProgram(ref.file, key, credentials, environment)
+        await buildProgram(getPushFile(ref), key, credentials, environment)
       }
     })
 }

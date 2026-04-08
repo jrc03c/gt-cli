@@ -104,6 +104,23 @@ This file is gitignored. Programs are keyed by their 7-character program key, an
 
 The `email` and `password` fields are optional — they provide an alternative to environment variables for authentication (see [Authentication](#authentication) above).
 
+### Separate push and pull files
+
+If you use a build step to transform your `.gt` files before pushing, you can specify separate source and dist paths:
+
+```json
+{
+  "programs": {
+    "abc1234": {
+      "file": { "src": "src/program.gt", "dist": "dist/program.gt" },
+      "id": 12345
+    }
+  }
+}
+```
+
+With this configuration, `gt pull` writes to `src/program.gt` and `gt push` reads from `dist/program.gt`.
+
 ## Development
 
 ```bash

@@ -4,7 +4,7 @@ import type { Command } from "commander"
 import { fetchProgramSource, getEnvironment } from "../lib/api.js"
 import { resolveCredentials } from "../lib/auth.js"
 import { loadConfig } from "../lib/config.js"
-import type { ProgramRef } from "../types.js"
+import { type ProgramRef, getPullFile } from "../types.js"
 
 export function registerPull(program: Command): void {
   program
@@ -40,8 +40,9 @@ export function registerPull(program: Command): void {
       console.log(`Pulling from ${environment}...`)
 
       for (const [, ref] of entries) {
+        const pullFile = getPullFile(ref)
         process.stdout.write(
-          `>> Downloading "${ref.file}" (id: ${ref.id})... `
+          `>> Downloading "${pullFile}" (id: ${ref.id})... `
         )
 
         const source = await fetchProgramSource(
@@ -50,7 +51,7 @@ export function registerPull(program: Command): void {
           environment
         )
 
-        await writeFile(resolve(process.cwd(), ref.file), source)
+        await writeFile(resolve(process.cwd(), pullFile), source)
         console.log("done")
       }
     })

@@ -12,8 +12,16 @@ export interface Credentials {
 }
 
 export interface ProgramRef {
-  file: string
+  file: string | { src: string; dist: string }
   id: number
+}
+
+export function getPullFile(ref: ProgramRef): string {
+  return typeof ref.file === "string" ? ref.file : ref.file.src
+}
+
+export function getPushFile(ref: ProgramRef): string {
+  return typeof ref.file === "string" ? ref.file : ref.file.dist
 }
 
 export interface GtConfig {

@@ -9,7 +9,7 @@ import { resolveCredentials } from "../lib/auth.js"
 import { CONFIG_FILENAME, loadConfig, saveConfig } from "../lib/config.js"
 import { getLocalGtFiles } from "../lib/files.js"
 import { ask, choose, confirm } from "../lib/prompt.js"
-import type { GtConfig, ProgramRef } from "../types.js"
+import { type GtConfig, type ProgramRef, getPullFile } from "../types.js"
 
 export function registerInit(program: Command): void {
   program
@@ -30,7 +30,7 @@ export function registerInit(program: Command): void {
       }
 
       // Build a set of already-linked files for quick lookup
-      const linkedFiles = new Set(Object.values(programs).map(p => p.file))
+      const linkedFiles = new Set(Object.values(programs).map(p => getPullFile(p)))
 
       for (const file of files) {
         if (linkedFiles.has(file)) {
@@ -92,7 +92,7 @@ export function registerInit(program: Command): void {
 
         if (programs[found.key]) {
           console.log(
-            `Program "${found.name}" is already linked to "${programs[found.key].file}", skipping.`
+            `Program "${found.name}" is already linked to "${getPullFile(programs[found.key])}", skipping.`
           )
           continue
         }
