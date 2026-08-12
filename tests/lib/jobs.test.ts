@@ -19,7 +19,7 @@ beforeAll(async () => {
   await pushProgramContents(
     testProgram.id,
     "*question: Job test?\n\t*type: text\n\t*save: job_answer",
-    creds
+    creds,
   )
 }, 30_000)
 
@@ -37,7 +37,7 @@ describe("pollJob", () => {
       embed.run_id,
       embed.access_key,
       creds,
-      "production"
+      "production",
     )
 
     const jobId =
@@ -58,7 +58,7 @@ describe("pollJob", () => {
         apiRequest("/delayed_jobs/0", {
           credentials: creds,
           environment: "production",
-        })
+        }),
       ).rejects.toThrow()
     }
   }, 30_000)

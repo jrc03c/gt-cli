@@ -24,11 +24,11 @@ Auth is resolved in this order:
 
 Set `GT_ENV` to target different GuidedTrack environments:
 
-| Value | Host |
-|-------|------|
-| `development` | `https://localhost:3000` |
-| `stage` | `https://guidedtrack-stage.herokuapp.com` |
-| `production` (default) | `https://www.guidedtrack.com` |
+| Value                  | Host                                      |
+| ---------------------- | ----------------------------------------- |
+| `development`          | `https://localhost:3000`                  |
+| `stage`                | `https://guidedtrack-stage.herokuapp.com` |
+| `production` (default) | `https://www.guidedtrack.com`             |
 
 ## Commands
 

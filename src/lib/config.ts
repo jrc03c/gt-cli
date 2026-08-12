@@ -20,7 +20,7 @@ export async function loadConfig(dir?: string): Promise<GtConfig> {
 
 export async function saveConfig(
   config: GtConfig,
-  dir?: string
+  dir?: string,
 ): Promise<void> {
   const configPath = resolve(dir ?? process.cwd(), CONFIG_FILENAME)
   await writeFile(configPath, JSON.stringify(config, null, 2) + "\n")

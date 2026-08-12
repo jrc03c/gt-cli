@@ -11,7 +11,7 @@ export function registerCreate(program: Command): void {
     .description("Create new programs on the server")
     .argument(
       "[names...]",
-      "Program names to create (defaults to all .gt files in cwd)"
+      "Program names to create (defaults to all .gt files in cwd)",
     )
     .action(async (names: string[]) => {
       const credentials = await resolveCredentials()

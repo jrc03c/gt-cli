@@ -1,5 +1,6 @@
 .env
 .gtconfig*
+.pnpm-store
 dist
 node_modules
 secrets.json

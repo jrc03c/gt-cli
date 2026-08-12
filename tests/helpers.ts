@@ -9,7 +9,7 @@ export function getCredentials(): Credentials {
   const password = process.env.GT_PASSWORD
   if (!email || !password) {
     throw new Error(
-      "GT_EMAIL and GT_PASSWORD environment variables must be set to run tests"
+      "GT_EMAIL and GT_PASSWORD environment variables must be set to run tests",
     )
   }
   return { email, password }
@@ -21,7 +21,7 @@ export function sleep(ms: number): Promise<void> {
 
 export async function createTestProgram(
   credentials: Credentials,
-  name?: string
+  name?: string,
 ): Promise<Program> {
   const programName = name ?? `gt-cli-test-${Date.now()}`
 
@@ -60,7 +60,7 @@ export async function createTestProgram(
 
 export async function deleteTestProgram(
   id: number,
-  credentials: Credentials
+  credentials: Credentials,
 ): Promise<void> {
   try {
     await apiRequest(`/programs/${id}.json`, {
@@ -76,7 +76,7 @@ export async function deleteTestProgram(
 export async function pushProgramContents(
   id: number,
   contents: string,
-  credentials: Credentials
+  credentials: Credentials,
 ): Promise<void> {
   await apiRequest(`/programs/${id}.json`, {
     method: "PUT",

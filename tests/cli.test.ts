@@ -2,15 +2,15 @@ import { execFile } from "node:child_process"
 import { describe, expect, it } from "vitest"
 
 function run(
-  args: string[]
+  args: string[],
 ): Promise<{ stdout: string; stderr: string; code: number | null }> {
   return new Promise(resolve => {
     execFile("npx", ["tsx", "src/index.ts", ...args], (error, stdout, stderr) =>
       resolve({
         stdout,
         stderr,
-        code: error ? error.code ?? 1 : 0,
-      })
+        code: error ? (error.code ?? 1) : 0,
+      }),
     )
   })
 }

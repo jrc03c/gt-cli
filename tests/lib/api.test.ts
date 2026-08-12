@@ -24,8 +24,8 @@ beforeAll(async () => {
   testProgram = await createTestProgram(creds)
   await pushProgramContents(
     testProgram.id,
-    '*question: What is your name?\n\t*type: text\n\t*save: participant_name',
-    creds
+    "*question: What is your name?\n\t*type: text\n\t*save: participant_name",
+    creds,
   )
   // Wait for the content push to propagate on the server
   for (let attempt = 0; attempt < 10; attempt++) {
@@ -79,7 +79,7 @@ describe("apiRequest", () => {
       apiRequest("/programs.json", {
         credentials: { email: "nobody@invalid.test", password: "wrong" },
         environment: "production",
-      })
+      }),
     ).rejects.toThrow("API request failed")
   })
 })
@@ -107,7 +107,7 @@ describe("findProgram", () => {
     const result = await findProgram(
       "gt-cli-nonexistent-program-" + Date.now(),
       creds,
-      "production"
+      "production",
     )
     expect(result).toBeNull()
   })
@@ -122,7 +122,7 @@ describe("fetchProgramSource", () => {
 
   it("throws on nonexistent program", async () => {
     await expect(
-      fetchProgramSource(999999999, creds, "production")
+      fetchProgramSource(999999999, creds, "production"),
     ).rejects.toThrow()
   })
 })

@@ -9,14 +9,11 @@ export function registerRequest(program: Command): void {
     .argument("<path>", "API path (e.g., /programs.json)")
     .option("-X, --method <method>", "HTTP method", "GET")
     .option("-d, --data <json>", "Request body (JSON string)")
-    .option(
-      "-H, --header <header...>",
-      "Additional headers (key:value)"
-    )
+    .option("-H, --header <header...>", "Additional headers (key:value)")
     .action(
       async (
         path: string,
-        options: { method: string; data?: string; header?: string[] }
+        options: { method: string; data?: string; header?: string[] },
       ) => {
         const credentials = await resolveCredentials()
         const environment = getEnvironment()
@@ -26,7 +23,9 @@ export function registerRequest(program: Command): void {
           for (const h of options.header) {
             const idx = h.indexOf(":")
             if (idx === -1) {
-              console.error(`Invalid header format: "${h}" (expected key:value)`)
+              console.error(
+                `Invalid header format: "${h}" (expected key:value)`,
+              )
               process.exit(1)
             }
             headers[h.slice(0, idx).trim()] = h.slice(idx + 1).trim()
@@ -58,6 +57,6 @@ export function registerRequest(program: Command): void {
         } catch {
           console.log(text)
         }
-      }
+      },
     )
 }

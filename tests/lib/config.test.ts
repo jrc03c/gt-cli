@@ -2,7 +2,11 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest"
 import { mkdtemp, rm, readFile } from "node:fs/promises"
 import { join } from "node:path"
 import { tmpdir } from "node:os"
-import { loadConfig, saveConfig, CONFIG_FILENAME } from "../../src/lib/config.js"
+import {
+  loadConfig,
+  saveConfig,
+  CONFIG_FILENAME,
+} from "../../src/lib/config.js"
 
 let tempDir: string
 
@@ -18,10 +22,7 @@ describe("loadConfig", () => {
   it("parses valid JSON", async () => {
     const config = { programs: { test: { id: 1, key: "abc1234" } } }
     const { writeFile } = await import("node:fs/promises")
-    await writeFile(
-      join(tempDir, CONFIG_FILENAME),
-      JSON.stringify(config)
-    )
+    await writeFile(join(tempDir, CONFIG_FILENAME), JSON.stringify(config))
 
     const result = await loadConfig(tempDir)
     expect(result).toEqual(config)
@@ -37,7 +38,7 @@ describe("loadConfig", () => {
     await writeFile(join(tempDir, CONFIG_FILENAME), "not json {{{")
 
     await expect(loadConfig(tempDir)).rejects.toThrow(
-      `Failed to read ${CONFIG_FILENAME}`
+      `Failed to read ${CONFIG_FILENAME}`,
     )
   })
 })

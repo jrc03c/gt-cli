@@ -9,13 +9,10 @@ import {
   findProgram,
   getEnvironment,
   listPrograms,
+  searchPrograms,
 } from "../lib/api.js"
 import { resolveCredentials } from "../lib/auth.js"
-import {
-  extractErrors,
-  getEmbedInfo,
-  getRunContents,
-} from "../lib/build.js"
+import { extractErrors, getEmbedInfo, getRunContents } from "../lib/build.js"
 import { pollJob } from "../lib/jobs.js"
 import { ENVIRONMENT_HOSTS } from "../types.js"
 
@@ -79,7 +76,7 @@ export function registerProgram(parent: Command): void {
       const source = await fetchProgramSource(
         found.id,
         credentials,
-        environment
+        environment,
       )
       process.stdout.write(source)
     })
@@ -92,17 +89,7 @@ export function registerProgram(parent: Command): void {
       const credentials = await resolveCredentials()
       const environment = getEnvironment()
 
-      const encoded = encodeURIComponent(query)
-      const response = await apiRequest(`/programs.json?query=${encoded}`, {
-        credentials,
-        environment,
-      })
-
-      const programs = (await response.json()) as {
-        id: number
-        name: string
-        key: string
-      }[]
+      const programs = await searchPrograms(query, credentials, environment)
 
       if (programs.length === 0) {
         console.log("No programs found.")
@@ -132,7 +119,7 @@ export function registerProgram(parent: Command): void {
 
       if (!options.yes) {
         const confirmed = await confirm(
-          `Delete "${name}" (id: ${found.id})? This cannot be undone. [y/N] `
+          `Delete "${name}" (id: ${found.id})? This cannot be undone. [y/N] `,
         )
         if (!confirmed) {
           console.log("Aborted.")
@@ -171,7 +158,7 @@ export function registerProgram(parent: Command): void {
         embed.run_id,
         embed.access_key,
         credentials,
-        environment
+        environment,
       )
 
       const jobId =
@@ -191,7 +178,7 @@ export function registerProgram(parent: Command): void {
         embed.run_id,
         embed.access_key,
         credentials,
-        environment
+        environment,
       )
       const errors = extractErrors(result)
 
@@ -310,4 +297,3 @@ function openBrowser(url: string): void {
         : "xdg-open"
   exec(`${cmd} ${JSON.stringify(url)}`)
 }
-

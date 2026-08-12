@@ -74,7 +74,7 @@ describe("resolveCredentials", () => {
         JSON.stringify({
           email: "config@example.com",
           password: "config-secret",
-        })
+        }),
       )
       process.chdir(tempDir)
 
@@ -106,7 +106,7 @@ describe("resolveCredentials", () => {
         JSON.stringify({
           email: "config@example.com",
           password: "config-secret",
-        })
+        }),
       )
       process.chdir(tempDir)
 

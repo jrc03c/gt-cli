@@ -167,16 +167,16 @@ All API requests use HTTP Basic Auth (`email:password`, base64-encoded).
 
 ### Endpoints
 
-| Method | Path | Description |
-|--------|------|-------------|
-| `GET` | `/programs.json` | List all programs |
-| `GET` | `/programs.json?query={name}` | Search programs by name |
-| `PUT` | `/programs/{id}.json` | Update program contents |
-| `POST` | `/programs` | Create a new program |
-| `GET` | `/delayed_jobs/{job_id}` | Poll job status |
-| `GET` | `/programs/{key}/embed` | Get embed info (run_id, access_key) |
-| `GET` | `/runs/{run_id}/contents` | Get program contents (requires `X-GuidedTrack-Access-Key` header) |
-| `GET` | `/programs/{id}/csv` | Download program data as CSV |
+| Method | Path                          | Description                                                       |
+| ------ | ----------------------------- | ----------------------------------------------------------------- |
+| `GET`  | `/programs.json`              | List all programs                                                 |
+| `GET`  | `/programs.json?query={name}` | Search programs by name                                           |
+| `PUT`  | `/programs/{id}.json`         | Update program contents                                           |
+| `POST` | `/programs`                   | Create a new program                                              |
+| `GET`  | `/delayed_jobs/{job_id}`      | Poll job status                                                   |
+| `GET`  | `/programs/{key}/embed`       | Get embed info (run_id, access_key)                               |
+| `GET`  | `/runs/{run_id}/contents`     | Get program contents (requires `X-GuidedTrack-Access-Key` header) |
+| `GET`  | `/programs/{id}/csv`          | Download program data as CSV                                      |
 
 ### Key concepts
 

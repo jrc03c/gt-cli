@@ -10,7 +10,7 @@ export async function getLocalGtFiles(dir: string): Promise<string[]> {
 async function scanDir(
   root: string,
   current: string,
-  results: string[]
+  results: string[],
 ): Promise<void> {
   const entries = await readdir(current, { withFileTypes: true })
   for (const entry of entries) {

@@ -22,7 +22,7 @@ export function registerBuild(program: Command): void {
         const ref = programs[options.only]
         if (!ref) {
           console.error(
-            `Program with key "${options.only}" not found in config.`
+            `Program with key "${options.only}" not found in config.`,
           )
           process.exit(1)
         }

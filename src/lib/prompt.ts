@@ -20,7 +20,7 @@ export async function confirm(question: string): Promise<boolean> {
 
 export async function choose(
   question: string,
-  options: string[]
+  options: string[],
 ): Promise<number> {
   console.log(question)
   for (let i = 0; i < options.length; i++) {

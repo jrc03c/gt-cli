@@ -23,7 +23,7 @@ export function registerPull(program: Command): void {
         const ref = programs[options.only]
         if (!ref) {
           console.error(
-            `Program with key "${options.only}" not found in config.`
+            `Program with key "${options.only}" not found in config.`,
           )
           process.exit(1)
         }
@@ -41,14 +41,12 @@ export function registerPull(program: Command): void {
 
       for (const [, ref] of entries) {
         const pullFile = getPullFile(ref)
-        process.stdout.write(
-          `>> Downloading "${pullFile}" (id: ${ref.id})... `
-        )
+        process.stdout.write(`>> Downloading "${pullFile}" (id: ${ref.id})... `)
 
         const source = await fetchProgramSource(
           ref.id,
           credentials,
-          environment
+          environment,
         )
 
         await writeFile(resolve(process.cwd(), pullFile), source)

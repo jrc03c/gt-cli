@@ -9,7 +9,7 @@ export async function pollJob(
   options?: {
     environment?: GtEnvironment
     intervalMs?: number
-  }
+  },
 ): Promise<Job> {
   const interval = options?.intervalMs ?? DEFAULT_POLL_INTERVAL_MS
 

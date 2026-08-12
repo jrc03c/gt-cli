@@ -5,7 +5,7 @@ import { pollJob } from "./jobs.js"
 export async function getEmbedInfo(
   key: string,
   credentials: Credentials,
-  environment: GtEnvironment
+  environment: GtEnvironment,
 ): Promise<EmbedInfo> {
   const response = await apiRequest(`/programs/${key}/embed`, {
     credentials,
@@ -18,7 +18,7 @@ export async function getRunContents(
   runId: number,
   accessKey: string,
   credentials: Credentials,
-  environment: GtEnvironment
+  environment: GtEnvironment,
 ): Promise<unknown> {
   const response = await apiRequest(`/runs/${runId}/contents`, {
     credentials,
@@ -33,9 +33,7 @@ export function extractErrors(contents: unknown): string[] {
     if (contents && typeof contents === "object") {
       // Single-program response: { "program-name": { metadata: { errors } } }
       const errors: string[] = []
-      for (const value of Object.values(
-        contents as Record<string, unknown>
-      )) {
+      for (const value of Object.values(contents as Record<string, unknown>)) {
         if (value && typeof value === "object" && "metadata" in value) {
           const metadata = (value as { metadata?: { errors?: string[] } })
             .metadata
@@ -65,7 +63,7 @@ export async function buildProgram(
   name: string,
   key: string,
   credentials: Credentials,
-  environment: GtEnvironment
+  environment: GtEnvironment,
 ): Promise<void> {
   console.log(`>> Building project "${name}" (key: ${key})`)
 
@@ -75,7 +73,7 @@ export async function buildProgram(
     embed.run_id,
     embed.access_key,
     credentials,
-    environment
+    environment,
   )
 
   const jobId =
@@ -95,7 +93,7 @@ export async function buildProgram(
     embed.run_id,
     embed.access_key,
     credentials,
-    environment
+    environment,
   )
 
   const errors = extractErrors(result)

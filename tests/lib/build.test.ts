@@ -70,10 +70,7 @@ describe("extractErrors", () => {
   })
 
   it("skips array items where metadata has no errors", () => {
-    const contents = [
-      { metadata: {} },
-      { metadata: { errors: ["found it"] } },
-    ]
+    const contents = [{ metadata: {} }, { metadata: { errors: ["found it"] } }]
     expect(extractErrors(contents)).toEqual(["found it"])
   })
 
@@ -119,7 +116,7 @@ beforeAll(async () => {
   await pushProgramContents(
     testProgram.id,
     "*question: Hello?\n\t*type: text\n\t*save: greeting",
-    creds
+    creds,
   )
 }, 30_000)
 
@@ -146,7 +143,7 @@ describe("getRunContents", () => {
       embed.run_id,
       embed.access_key,
       creds,
-      "production"
+      "production",
     )
     expect(contents).toBeDefined()
     expect(typeof contents).toBe("object")
@@ -156,7 +153,7 @@ describe("getRunContents", () => {
 describe("buildProgram", () => {
   it("completes without throwing for a valid program", async () => {
     await expect(
-      buildProgram(testProgram.name, testProgram.key, creds, "production")
+      buildProgram(testProgram.name, testProgram.key, creds, "production"),
     ).resolves.toBeUndefined()
   }, 30_000)
 })

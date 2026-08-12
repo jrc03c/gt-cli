@@ -25,7 +25,7 @@ export function registerPush(program: Command): void {
         const ref = programs[options.only]
         if (!ref) {
           console.error(
-            `Program with key "${options.only}" not found in config.`
+            `Program with key "${options.only}" not found in config.`,
           )
           process.exit(1)
         }
@@ -45,13 +45,11 @@ export function registerPush(program: Command): void {
 
       for (const [key, ref] of entries) {
         const pushFile = getPushFile(ref)
-        process.stdout.write(
-          `>> Updating "${pushFile}" (id: ${ref.id})... `
-        )
+        process.stdout.write(`>> Updating "${pushFile}" (id: ${ref.id})... `)
 
         const contents = await readFile(
           resolve(process.cwd(), pushFile),
-          "utf-8"
+          "utf-8",
         )
 
         await apiRequest(`/programs/${ref.id}.json`, {

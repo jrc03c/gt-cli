@@ -30,7 +30,9 @@ export function registerInit(program: Command): void {
       }
 
       // Build a set of already-linked files for quick lookup
-      const linkedFiles = new Set(Object.values(programs).map(p => getPullFile(p)))
+      const linkedFiles = new Set(
+        Object.values(programs).map(p => getPullFile(p)),
+      )
 
       for (const file of files) {
         if (linkedFiles.has(file)) {
@@ -40,7 +42,7 @@ export function registerInit(program: Command): void {
 
         console.log(`\nFound "${file}"`)
         const shouldLink = await confirm(
-          "Do you want to link it to a program on guidedtrack.com?"
+          "Do you want to link it to a program on guidedtrack.com?",
         )
 
         if (!shouldLink) continue
@@ -51,7 +53,7 @@ export function registerInit(program: Command): void {
             'The program\'s title (e.g., "My Cool Program")',
             "The program's ID (e.g., 12345)",
             'The program\'s key (e.g., "abc1234")',
-          ]
+          ],
         )
 
         if (idType === -1) continue
@@ -70,15 +72,13 @@ export function registerInit(program: Command): void {
             console.log("Invalid ID.")
             continue
           }
-          process.stdout.write(
-            `Looking up program ${id} in ${environment}... `
-          )
+          process.stdout.write(`Looking up program ${id} in ${environment}... `)
           found = await getProgram(id, credentials, environment)
         } else {
           const key = await ask("Enter program key: ")
           if (!key) continue
           process.stdout.write(
-            `Looking up program "${key}" in ${environment}... `
+            `Looking up program "${key}" in ${environment}... `,
           )
           found = await findProgramByKey(key, credentials, environment)
         }
@@ -92,7 +92,7 @@ export function registerInit(program: Command): void {
 
         if (programs[found.key]) {
           console.log(
-            `Program "${found.name}" is already linked to "${getPullFile(programs[found.key])}", skipping.`
+            `Program "${found.name}" is already linked to "${getPullFile(programs[found.key])}", skipping.`,
           )
           continue
         }
