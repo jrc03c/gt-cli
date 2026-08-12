@@ -54,10 +54,44 @@ gt program list                  # List all programs
 gt program find <query>          # Search programs by name
 gt program get <name>            # Fetch program metadata (JSON)
 gt program source <name>         # Fetch program source code
+gt program source <name> --bundle  # Download it plus subprograms as a zip
 gt program build <name>          # Build a specific program
 gt program delete <name>         # Delete a program (with confirmation)
 gt program delete <name> -y      # Delete without confirmation
 ```
+
+### Bundled source downloads
+
+`gt program source <name>` prints just that program's source. Adding `--bundle`
+downloads a zip of the program _and every subprogram it references_, to any
+depth — the same archive the GuidedTrack website produces via "Download code" in
+the three-dot menu.
+
+```bash
+gt program source <name> --bundle           # Write <name>.zip to the current directory
+gt program source <name> --bundle -o a.zip  # Write to a specific path
+```
+
+Only subprograms you can view are included — ones you own, collaborate on, or
+that have public code access. Subprograms you lack access to are silently
+omitted, so a bundle is not necessarily the complete dependency tree.
+
+Inside the archive is a single directory holding one extensionless file per
+program, the root program included, flat rather than nested by depth. Slashes in
+program names are replaced with `∕` (U+2215 DIVISION SLASH) so the names don't
+become directory separators:
+
+```text
+@jrc03c∕email∕verify-with-otp/
+├── @jrc03c∕email∕verify-with-otp        ← the root program
+├── @jrc03c∕email∕validate-address
+├── @jrc03c∕show-error
+├── @jrc03c∕string∕random
+└── @jrc03c∕string∕replace
+```
+
+Packaging happens server-side and takes a few seconds, so `--bundle` prints a
+progress line while it waits.
 
 ### Program data
 

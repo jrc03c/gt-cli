@@ -202,6 +202,69 @@ export async function fetchProgramSource(
     .replace(/&#39;/g, "'")
 }
 
+/**
+ * Asks the server to package a program and every subprogram the caller can
+ * view into a zip archive. This is the first of three steps: the archive is
+ * built asynchronously, so the returned job id must be polled to completion
+ * before `downloadProgramZip` will find anything on the other end.
+ *
+ * The `.json` suffix is required. The bare route is session-cookie only and
+ * ignores basic auth, redirecting to a sign-in page instead.
+ */
+export async function generateProgramZip(
+  programId: number,
+  credentials: Credentials,
+  environment?: GtEnvironment,
+): Promise<number> {
+  const response = await apiRequest(
+    `/programs/${programId}/generate_zip.json`,
+    { method: "PUT", credentials, environment },
+  )
+
+  // The server answers with the bare job id as text/plain, not JSON.
+  const body = (await response.text()).trim()
+  const jobId = Number(body)
+
+  if (body === "" || !Number.isInteger(jobId)) {
+    throw new Error(`Expected a job id from generate_zip, got: ${body}`)
+  }
+
+  return jobId
+}
+
+function parseContentDispositionFilename(header: string | null): string | null {
+  if (!header) return null
+
+  const match = header.match(/filename="([^"]+)"|filename=([^;]+)/i)
+  if (!match) return null
+
+  return (match[1] ?? match[2]).trim()
+}
+
+/**
+ * Downloads the archive built by `generateProgramZip`. The server responds with
+ * a redirect to a presigned S3 URL that expires within seconds, so this must
+ * follow immediately after the job completes. `fetch` follows the redirect and
+ * drops the Authorization header on the cross-origin hop, which S3 requires.
+ */
+export async function downloadProgramZip(
+  programId: number,
+  credentials: Credentials,
+  environment?: GtEnvironment,
+): Promise<{ data: Buffer; filename: string | null }> {
+  const response = await apiRequest(`/programs/${programId}/download.json`, {
+    credentials,
+    environment,
+  })
+
+  return {
+    data: Buffer.from(await response.arrayBuffer()),
+    filename: parseContentDispositionFilename(
+      response.headers.get("content-disposition"),
+    ),
+  }
+}
+
 export function getEnvironment(): GtEnvironment {
   const env = process.env.GT_ENV ?? "production"
   if (env !== "development" && env !== "stage" && env !== "production") {

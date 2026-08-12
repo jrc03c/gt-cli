@@ -167,16 +167,18 @@ All API requests use HTTP Basic Auth (`email:password`, base64-encoded).
 
 ### Endpoints
 
-| Method | Path                          | Description                                                       |
-| ------ | ----------------------------- | ----------------------------------------------------------------- |
-| `GET`  | `/programs.json`              | List all programs                                                 |
-| `GET`  | `/programs.json?query={name}` | Search programs by name                                           |
-| `PUT`  | `/programs/{id}.json`         | Update program contents                                           |
-| `POST` | `/programs`                   | Create a new program                                              |
-| `GET`  | `/delayed_jobs/{job_id}`      | Poll job status                                                   |
-| `GET`  | `/programs/{key}/embed`       | Get embed info (run_id, access_key)                               |
-| `GET`  | `/runs/{run_id}/contents`     | Get program contents (requires `X-GuidedTrack-Access-Key` header) |
-| `GET`  | `/programs/{id}/csv`          | Download program data as CSV                                      |
+| Method | Path                               | Description                                                       |
+| ------ | ---------------------------------- | ----------------------------------------------------------------- |
+| `GET`  | `/programs.json`                   | List all programs                                                 |
+| `GET`  | `/programs.json?query={name}`      | Search programs by name                                           |
+| `PUT`  | `/programs/{id}.json`              | Update program contents                                           |
+| `POST` | `/programs`                        | Create a new program                                              |
+| `GET`  | `/delayed_jobs/{job_id}`           | Poll job status                                                   |
+| `GET`  | `/programs/{key}/embed`            | Get embed info (run_id, access_key)                               |
+| `GET`  | `/runs/{run_id}/contents`          | Get program contents (requires `X-GuidedTrack-Access-Key` header) |
+| `GET`  | `/programs/{id}/csv`               | Download program data as CSV                                      |
+| `PUT`  | `/programs/{id}/generate_zip.json` | Package program + viewable subprograms; returns a job id          |
+| `GET`  | `/programs/{id}/download.json`     | Redirects to a presigned S3 URL for the packaged zip              |
 
 ### Key concepts
 
@@ -184,6 +186,17 @@ All API requests use HTTP Basic Auth (`email:password`, base64-encoded).
 - **Program key**: 7-character string from the public run URL (e.g., `i1qsozk`)
 - **Jobs**: Some operations (create, build) are asynchronous. The API returns a `job_id` and you poll `/delayed_jobs/{job_id}` until status is no longer `"running"`.
 - **Access key**: Required header (`X-GuidedTrack-Access-Key`) for fetching run contents.
+- **The `.json` suffix is not cosmetic.** For `generate_zip` and `download`, the bare HTML routes are session-cookie only: they ignore an `Authorization` header and redirect to a sign-in page. Adding `.json` (or `Accept: application/json`) puts them on the Basic Auth path the rest of the API uses.
+
+### Bundled source download
+
+Downloading a program with its subprograms takes three requests, in order:
+
+1. `PUT /programs/{id}/generate_zip.json` — returns the job id as **plain text**, not JSON (`text/plain`, e.g. `38772251`). Note this differs from `create`, which returns `{ "job_id": ... }`.
+2. `GET /delayed_jobs/{job_id}` — poll until status is no longer `"running"`.
+3. `GET /programs/{id}/download.json` — 302s to `guidedtrack-production-zips.s3.amazonaws.com/{program_key}` with `X-Amz-Expires=5`. That five-second window means the download must follow the job immediately; skipping step 1 entirely yields an S3 `NoSuchKey` error, since the archive is built on demand rather than kept warm.
+
+Node's `fetch` handles this correctly on its own: it follows the redirect and strips the `Authorization` header on the cross-origin hop, which S3 requires (a presigned URL carrying an extra auth header is rejected).
 
 ## Command roadmap
 
@@ -200,7 +213,7 @@ All API requests use HTTP Basic Auth (`email:password`, base64-encoded).
 - [x] `config` — Print current project config
 - [x] `program list` — List all programs
 - [x] `program get` — Fetch program metadata
-- [x] `program source` — Fetch program source code
+- [x] `program source` — Fetch program source code (`--bundle` for a zip of the program plus all viewable subprograms)
 - [x] `program find` — Search programs by name
 
 ### Phase 3 — Full feature set

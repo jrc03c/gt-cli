@@ -5,14 +5,17 @@ import { createInterface } from "node:readline"
 import type { Command } from "commander"
 import {
   apiRequest,
+  downloadProgramZip,
   fetchProgramSource,
   findProgram,
+  generateProgramZip,
   getEnvironment,
   listPrograms,
   searchPrograms,
 } from "../lib/api.js"
 import { resolveCredentials } from "../lib/auth.js"
 import { extractErrors, getEmbedInfo, getRunContents } from "../lib/build.js"
+import { bundleFilename } from "../lib/files.js"
 import { pollJob } from "../lib/jobs.js"
 import { ENVIRONMENT_HOSTS } from "../types.js"
 
@@ -62,24 +65,68 @@ export function registerProgram(parent: Command): void {
     .command("source")
     .description("Fetch program source code")
     .argument("<name>", "Program name")
-    .action(async (name: string) => {
-      const credentials = await resolveCredentials()
-      const environment = getEnvironment()
+    .option(
+      "--bundle",
+      "Download the program and every subprogram you can view as a zip archive",
+    )
+    .option("-o, --output <path>", "Where to write the archive (with --bundle)")
+    .action(
+      async (name: string, options: { bundle?: boolean; output?: string }) => {
+        if (options.output && !options.bundle) {
+          console.error("--output requires --bundle")
+          process.exit(1)
+        }
 
-      const found = await findProgram(name, credentials, environment)
+        const credentials = await resolveCredentials()
+        const environment = getEnvironment()
 
-      if (!found) {
-        console.error(`Program "${name}" not found.`)
-        process.exit(1)
-      }
+        const found = await findProgram(name, credentials, environment)
 
-      const source = await fetchProgramSource(
-        found.id,
-        credentials,
-        environment,
-      )
-      process.stdout.write(source)
-    })
+        if (!found) {
+          console.error(`Program "${name}" not found.`)
+          process.exit(1)
+        }
+
+        if (!options.bundle) {
+          const source = await fetchProgramSource(
+            found.id,
+            credentials,
+            environment,
+          )
+          process.stdout.write(source)
+          return
+        }
+
+        console.log(`Packaging "${found.name}" and its subprograms...`)
+
+        const jobId = await generateProgramZip(
+          found.id,
+          credentials,
+          environment,
+        )
+        const job = await pollJob(jobId, credentials, { environment })
+
+        if (job.status === "failed") {
+          console.error(`Packaging failed (job ${jobId}).`)
+          process.exit(1)
+        }
+
+        // The archive lives behind a presigned URL that expires within
+        // seconds, so this has to follow the job immediately.
+        const { data, filename } = await downloadProgramZip(
+          found.id,
+          credentials,
+          environment,
+        )
+
+        const target = resolve(
+          options.output ?? bundleFilename(filename, found.name),
+        )
+        await writeFile(target, data)
+
+        console.log(`Wrote ${target} (${data.length} bytes)`)
+      },
+    )
 
   program
     .command("find")

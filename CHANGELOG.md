@@ -15,6 +15,7 @@
 
 ### Added
 
+- `program source --bundle` downloads a program plus every subprogram you can view as a zip archive, matching the website's "Download code" feature (with optional `-o` flag to choose the path)
 - `program data` / `program csv` command to download program data as CSV (with optional `-o` flag to save to file)
 
 ### Fixed

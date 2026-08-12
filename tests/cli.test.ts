@@ -34,4 +34,17 @@ describe("gt cli", () => {
     const result = await run(["nonexistent"])
     expect(result.code).not.toBe(0)
   })
+
+  it("offers --bundle and --output on program source", async () => {
+    const result = await run(["program", "source", "--help"])
+    expect(result.stdout).toContain("--bundle")
+    expect(result.stdout).toContain("--output")
+    expect(result.code).toBe(0)
+  })
+
+  it("rejects --output without --bundle on program source", async () => {
+    const result = await run(["program", "source", "some-name", "-o", "x.zip"])
+    expect(result.stderr).toMatch(/--output requires --bundle/i)
+    expect(result.code).not.toBe(0)
+  })
 })

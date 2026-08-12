@@ -1,5 +1,25 @@
 import { readdir } from "node:fs/promises"
-import { join, relative } from "node:path"
+import { basename, join, relative } from "node:path"
+
+/**
+ * Picks the name to save a downloaded program bundle under. The server's
+ * Content-Disposition name is preferred, reduced to its basename so a stray
+ * path in the header cannot write outside the target directory. When the
+ * server sends no usable name, one is derived from the program name using the
+ * server's own convention of replacing slashes with underscores.
+ */
+export function bundleFilename(
+  serverFilename: string | null,
+  programName: string,
+): string {
+  const supplied = serverFilename ? basename(serverFilename.trim()) : ""
+
+  if (supplied !== "" && supplied !== "." && supplied !== "..") {
+    return supplied
+  }
+
+  return `${programName.replace(/[/\\]/g, "_")}.zip`
+}
 
 export async function getLocalGtFiles(dir: string): Promise<string[]> {
   const files: string[] = []
