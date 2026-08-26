@@ -17,5 +17,8 @@
     "serve": "python3 -m http.server",
     "watch": "node build.mjs --watch"
   },
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "@jrc03c/js-text-tools": "^0.0.107"
+  }
 }

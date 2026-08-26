@@ -7,6 +7,10 @@ settings:
 importers:
 
   .:
+    dependencies:
+      '@jrc03c/js-text-tools':
+        specifier: ^0.0.107
+        version: 0.0.107
     devDependencies:
       '@eslint/css':
         specifier: ^0.14.1
@@ -282,11 +286,26 @@ packages:
     resolution: {integrity: sha512-bV0Tgo9K4hfPCek+aMAn81RppFKv2ySDQeMoSZuvTASywNTnVJCArCZE2FWqpvIatKu7VMRLWlR1EazvVhDyhQ==}
     engines: {node: '>=18.18'}
 
+  '@jrc03c/bash-colors@0.0.9':
+    resolution: {integrity: sha512-9ZXLRBes94L9tMgNt9sTg0XPfcz4xDMjEcHv7gNqzzL5DIAhLqC3BqBc+r95Y/+kA0ubLbrjIcHhVJefZrFHPw==}
+    hasBin: true
+
   '@jrc03c/fs-extras@0.0.21':
     resolution: {integrity: sha512-M++w/WVxVzL7AetCf510hgvyGfilTvwHPfcaMvWN8YHdZp7RQN1juNdxk+sUD7nl41RSSMgHYLlLBouFZ9aSfQ==}
 
+  '@jrc03c/js-math-tools@0.0.104':
+    resolution: {integrity: sha512-DS4rQRua0bLiCG/mpm61mwA3YjCyoBj/lbEou3biMyLhdq3wZHtsdgxB7qGaBrmiKw+QpojvJzwqC4XVm1Mfeg==}
+
   '@jrc03c/js-math-tools@0.0.87':
     resolution: {integrity: sha512-Ub8QWkdOq908M7/ImbcJ7hezUi3U5C/s/FjzljxehBJqmZB9K4GdOy+jg6Yq+V72nz49Kne9dc+TlEExwJTE8A==}
+
+  '@jrc03c/js-text-tools@0.0.107':
+    resolution: {integrity: sha512-lD3sMACCMpYcUi+iTaQCqEls/qNFFU/I9oyp5HdZF4si1SzSDwAhUPStRwesec48ufawulNTYmeilER+sY43/g==}
+    hasBin: true
+
+  '@jrc03c/make-key@0.0.41':
+    resolution: {integrity: sha512-NFoQ2oKZnZdcWZnc8WSV1FGJ8LB6c+wvFUu0XLwIP/KbfJZIio2mvTRfWNlgVmEtxlgqMKBI3I1LhRlZrdGeOA==}
+    hasBin: true
 
   '@jrc03c/watch@0.0.18':
     resolution: {integrity: sha512-MlEhwNlHDXVlJ0gs6GEpY4HYNKAPedv+JzVf+cJEEYNDO4+Q/kHOxsWRs2okkcFPE+elIQWCPR/ypnChLOaw2Q==}
@@ -1376,11 +1395,23 @@ snapshots:
 
   '@humanwhocodes/retry@0.4.3': {}
 
+  '@jrc03c/bash-colors@0.0.9': {}
+
   '@jrc03c/fs-extras@0.0.21':
     dependencies:
       '@jrc03c/js-math-tools': 0.0.87
 
+  '@jrc03c/js-math-tools@0.0.104': {}
+
   '@jrc03c/js-math-tools@0.0.87': {}
+
+  '@jrc03c/js-text-tools@0.0.107':
+    dependencies:
+      '@jrc03c/bash-colors': 0.0.9
+      '@jrc03c/js-math-tools': 0.0.104
+      '@jrc03c/make-key': 0.0.41
+
+  '@jrc03c/make-key@0.0.41': {}
 
   '@jrc03c/watch@0.0.18':
     dependencies:
