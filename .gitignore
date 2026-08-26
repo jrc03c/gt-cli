@@ -1,8 +1,2 @@
 .env
-.gtconfig*
-.pnpm-store
-dist
 node_modules
-secrets.json
-temp*
-todo.md
