@@ -36,6 +36,11 @@ Set `GT_ENV` to target different GuidedTrack environments:
 
 ```bash
 gt init                          # Create gt.config.json by scanning for program files
+gt link                          # Add an existing server program to gt.config.json (prompts)
+gt link <query>                  # ...found by name search
+gt link --id <id>                # ...found by numeric ID
+gt link --key <key>              # ...found by 7-character key
+gt link --key <key> -f a.gt -p   # ...linked to a.gt and pulled right away
 gt config                        # Print current project configuration
 gt push                          # Upload local programs and build
 gt push --only <key>             # Push a single program
@@ -119,7 +124,7 @@ gt request <path> -H "X-Custom:value"         # Add custom headers
 
 ## Configuration
 
-`gt init` creates a `gt.config.json` in the current directory:
+`gt init` creates a `gt.config.json` in the current directory, and `gt link` adds a program that already exists on the server to it (prompting for the local filename when `--file` is not given):
 
 ```json
 {

@@ -1,14 +1,10 @@
 import type { Command } from "commander"
-import {
-  findProgramByKey,
-  findProgramByTitle,
-  getEnvironment,
-  getProgram,
-} from "../lib/api.js"
+import { getEnvironment } from "../lib/api.js"
 import { resolveCredentials } from "../lib/auth.js"
 import { CONFIG_FILENAME, loadConfig, saveConfig } from "../lib/config.js"
 import { getLocalGtFiles } from "../lib/files.js"
-import { ask, choose, confirm } from "../lib/prompt.js"
+import { promptForProgram } from "../lib/lookup.js"
+import { confirm } from "../lib/prompt.js"
 import { type GtConfig, type ProgramRef, getPullFile } from "../types.js"
 
 export function registerInit(program: Command): void {
@@ -47,48 +43,9 @@ export function registerInit(program: Command): void {
 
         if (!shouldLink) continue
 
-        const idType = await choose(
-          "Which identifier do you want to use to find the program?",
-          [
-            'The program\'s title (e.g., "My Cool Program")',
-            "The program's ID (e.g., 12345)",
-            'The program\'s key (e.g., "abc1234")',
-          ],
-        )
+        const found = await promptForProgram(credentials, environment)
 
-        if (idType === -1) continue
-
-        let found = null
-
-        if (idType === 0) {
-          const title = await ask("Enter program title: ")
-          if (!title) continue
-          process.stdout.write(`Looking up "${title}" in ${environment}... `)
-          found = await findProgramByTitle(title, credentials, environment)
-        } else if (idType === 1) {
-          const idStr = await ask("Enter program ID: ")
-          const id = parseInt(idStr, 10)
-          if (isNaN(id)) {
-            console.log("Invalid ID.")
-            continue
-          }
-          process.stdout.write(`Looking up program ${id} in ${environment}... `)
-          found = await getProgram(id, credentials, environment)
-        } else {
-          const key = await ask("Enter program key: ")
-          if (!key) continue
-          process.stdout.write(
-            `Looking up program "${key}" in ${environment}... `,
-          )
-          found = await findProgramByKey(key, credentials, environment)
-        }
-
-        if (!found) {
-          console.log("not found.")
-          continue
-        }
-
-        console.log(`found! ("${found.name}")`)
+        if (!found) continue
 
         if (programs[found.key]) {
           console.log(

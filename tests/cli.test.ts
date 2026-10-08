@@ -47,4 +47,25 @@ describe("gt cli", () => {
     expect(result.stderr).toMatch(/--output requires --bundle/i)
     expect(result.code).not.toBe(0)
   })
+
+  it("offers --id, --key, --file, and --pull on link", async () => {
+    const result = await run(["link", "--help"])
+    expect(result.stdout).toContain("--id")
+    expect(result.stdout).toContain("--key")
+    expect(result.stdout).toContain("--file")
+    expect(result.stdout).toContain("--pull")
+    expect(result.code).toBe(0)
+  })
+
+  it("rejects more than one identifier on link", async () => {
+    const result = await run(["link", "some-name", "--id", "123"])
+    expect(result.stderr).toMatch(/only one of/i)
+    expect(result.code).not.toBe(0)
+  })
+
+  it("rejects a non-numeric --id on link", async () => {
+    const result = await run(["link", "--id", "abc"])
+    expect(result.stderr).toMatch(/invalid program id/i)
+    expect(result.code).not.toBe(0)
+  })
 })

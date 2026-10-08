@@ -3,6 +3,7 @@ import { registerBuild } from "./commands/build.js"
 import { registerConfig } from "./commands/config.js"
 import { registerCreate } from "./commands/create.js"
 import { registerInit } from "./commands/init.js"
+import { registerLink } from "./commands/link.js"
 import { registerProgram } from "./commands/program.js"
 import { registerPull } from "./commands/pull.js"
 import { registerPush } from "./commands/push.js"
@@ -20,6 +21,7 @@ registerPull(program)
 registerCreate(program)
 registerBuild(program)
 registerInit(program)
+registerLink(program)
 registerConfig(program)
 registerProgram(program)
 registerRequest(program)
