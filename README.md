@@ -41,6 +41,8 @@ gt link <query>                  # ...found by name search
 gt link --id <id>                # ...found by numeric ID
 gt link --key <key>              # ...found by 7-character key
 gt link --key <key> -f a.gt -p   # ...linked to a.gt and pulled right away
+gt link --key <key> --file-src src/a.gt --file-dist dist/a.gt
+                                 # ...linked with separate pull/push files
 gt config                        # Print current project configuration
 gt push                          # Upload local programs and build
 gt push --only <key>             # Push a single program
@@ -124,7 +126,7 @@ gt request <path> -H "X-Custom:value"         # Add custom headers
 
 ## Configuration
 
-`gt init` creates a `gt.config.json` in the current directory, and `gt link` adds a program that already exists on the server to it (prompting for the local filename when `--file` is not given):
+`gt init` creates a `gt.config.json` in the current directory, and `gt link` adds a program that already exists on the server to it (prompting for the local filename when none of `--file`, `--file-src`, or `--file-dist` is given):
 
 ```json
 {
@@ -161,6 +163,8 @@ If you use a build step to transform your `.gt` files before pushing, you can sp
 ```
 
 With this configuration, `gt pull` writes to `src/program.gt` and `gt push` reads from `dist/program.gt`.
+
+`gt link` can create this form directly with `--file-src` and `--file-dist`. If you pass only one of them, it prompts for the other; if you pass neither (and no `--file`), it first asks whether you want separate source and dist files. `--file` cannot be combined with either option.
 
 ## Development
 

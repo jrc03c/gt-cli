@@ -50,7 +50,8 @@ export async function ask(question: string): Promise<string> {
 
   return new Promise(resolve => {
     waiting.push(line => {
-      rl.pause()
+      // The close handler also resolves waiters; pausing then would throw.
+      if (!closed) rl.pause()
       resolve(line.trim())
     })
   })

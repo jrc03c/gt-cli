@@ -48,13 +48,57 @@ describe("gt cli", () => {
     expect(result.code).not.toBe(0)
   })
 
-  it("offers --id, --key, --file, and --pull on link", async () => {
+  it("offers --id, --key, --file, --file-src, --file-dist, and --pull on link", async () => {
     const result = await run(["link", "--help"])
     expect(result.stdout).toContain("--id")
     expect(result.stdout).toContain("--key")
-    expect(result.stdout).toContain("--file")
+    expect(result.stdout).toContain("--file ")
+    expect(result.stdout).toContain("--file-src")
+    expect(result.stdout).toContain("--file-dist")
     expect(result.stdout).toContain("--pull")
     expect(result.code).toBe(0)
+  })
+
+  it("rejects --file combined with --file-src on link", async () => {
+    const result = await run([
+      "link",
+      "--id",
+      "123",
+      "--file",
+      "a.gt",
+      "--file-src",
+      "src/a.gt",
+    ])
+    expect(result.stderr).toMatch(/--file cannot be combined with/i)
+    expect(result.code).not.toBe(0)
+  })
+
+  it("rejects --file combined with --file-dist on link", async () => {
+    const result = await run([
+      "link",
+      "--id",
+      "123",
+      "--file",
+      "a.gt",
+      "--file-dist",
+      "dist/a.gt",
+    ])
+    expect(result.stderr).toMatch(/--file cannot be combined with/i)
+    expect(result.code).not.toBe(0)
+  })
+
+  it("rejects identical --file-src and --file-dist on link", async () => {
+    const result = await run([
+      "link",
+      "--id",
+      "123",
+      "--file-src",
+      "a.gt",
+      "--file-dist",
+      "a.gt",
+    ])
+    expect(result.stderr).toMatch(/same path/i)
+    expect(result.code).not.toBe(0)
   })
 
   it("rejects more than one identifier on link", async () => {

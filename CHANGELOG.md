@@ -15,11 +15,13 @@
 
 ### Added
 
+- `gt link` accepts `--file-src` and `--file-dist` to link a program with separate pull and push files, prompting for whichever is missing (or asking whether to use separate files when no file option is given)
 - `program source --bundle` downloads a program plus every subprogram you can view as a zip archive, matching the website's "Download code" feature (with optional `-o` flag to choose the path)
 - `program data` / `program csv` command to download program data as CSV (with optional `-o` flag to save to file)
 
 ### Fixed
 
+- Interactive prompts no longer crash with `ERR_USE_AFTER_CLOSE` when stdin ends while a question is pending
 - Unhandled async errors now display clean error messages instead of stack traces
 
 ### Changed

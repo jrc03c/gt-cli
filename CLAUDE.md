@@ -210,7 +210,7 @@ Node's `fetch` handles this correctly on its own: it follows the redirect and st
 
 - [x] `pull` — Download program source from server
 - [x] `init` — Create gt.config.json, scan for program files
-- [x] `link` — Add an existing server program to gt.config.json by name search, ID, or key (`--file` is prompted for if omitted; `--pull` downloads the source)
+- [x] `link` — Add an existing server program to gt.config.json by name search, ID, or key (`--file`, or `--file-src` + `--file-dist` for separate pull/push files; prompts for whatever is omitted; `--pull` downloads the source)
 - [x] `config` — Print current project config
 - [x] `program list` — List all programs
 - [x] `program get` — Fetch program metadata
