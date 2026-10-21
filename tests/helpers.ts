@@ -1,6 +1,12 @@
 import type { Credentials, Program } from "../src/types.js"
-import { apiRequest, fetchProgramSource, findProgram } from "../src/lib/api.js"
+import {
+  apiRequest,
+  fetchProgramSource,
+  findProgram,
+  updateProgramContents,
+} from "../src/lib/api.js"
 import { getEmbedInfo } from "../src/lib/build.js"
+import { pollJob } from "../src/lib/jobs.js"
 
 const ENV = "production" as const
 
@@ -78,10 +84,6 @@ export async function pushProgramContents(
   contents: string,
   credentials: Credentials,
 ): Promise<void> {
-  await apiRequest(`/programs/${id}.json`, {
-    method: "PUT",
-    credentials,
-    environment: ENV,
-    body: { contents, program: { description: "" } },
-  })
+  const jobId = await updateProgramContents(id, contents, credentials, ENV)
+  await pollJob(jobId, credentials, { environment: ENV })
 }

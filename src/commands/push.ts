@@ -1,10 +1,11 @@
 import { readFile } from "node:fs/promises"
 import { resolve } from "node:path"
 import type { Command } from "commander"
-import { apiRequest, getEnvironment } from "../lib/api.js"
+import { getEnvironment, updateProgramContents } from "../lib/api.js"
 import { buildProgram } from "../lib/build.js"
 import { resolveCredentials } from "../lib/auth.js"
 import { loadConfig } from "../lib/config.js"
+import { pollJob } from "../lib/jobs.js"
 import { type ProgramRef, getPushFile } from "../types.js"
 
 export function registerPush(program: Command): void {
@@ -52,12 +53,16 @@ export function registerPush(program: Command): void {
           "utf-8",
         )
 
-        await apiRequest(`/programs/${ref.id}.json`, {
-          method: "PUT",
+        const jobId = await updateProgramContents(
+          ref.id,
+          contents,
           credentials,
           environment,
-          body: { contents, program: { description: "" } },
-        })
+        )
+
+        // The update is applied by a server job; wait for it so that a build
+        // started below compiles the new contents rather than the old ones.
+        await pollJob(jobId, credentials, { environment })
 
         console.log("done")
         pushed.push({ file: pushFile, key })

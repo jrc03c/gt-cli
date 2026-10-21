@@ -34,6 +34,7 @@ export interface Program {
   id: number
   name: string
   key: string
+  description?: string
   contents?: string
 }
 

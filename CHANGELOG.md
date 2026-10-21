@@ -21,6 +21,8 @@
 
 ### Fixed
 
+- `gt push` no longer blanks a program's description: the program's metadata is read first and its description is sent back unchanged
+- `gt push` now waits for the server to apply each update before building, so `--build` compiles the pushed contents instead of sometimes reporting "No changes to build" against the old ones
 - Interactive prompts no longer crash with `ERR_USE_AFTER_CLOSE` when stdin ends while a question is pending
 - Unhandled async errors now display clean error messages instead of stack traces
 

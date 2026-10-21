@@ -4,9 +4,12 @@ import {
   buildAuthHeader,
   apiRequest,
   findProgram,
+  getProgram,
   listPrograms,
   fetchProgramSource,
+  updateProgramContents,
 } from "../../src/lib/api.js"
+import { pollJob } from "../../src/lib/jobs.js"
 import type { Credentials, Program } from "../../src/types.js"
 import {
   getCredentials,
@@ -124,5 +127,46 @@ describe("fetchProgramSource", () => {
     await expect(
       fetchProgramSource(999999999, creds, "production"),
     ).rejects.toThrow()
+  })
+})
+
+describe("updateProgramContents", () => {
+  it("replaces the source without blanking the description", async () => {
+    const description = `gt-cli test description ${Date.now()}`
+    const contents = "*question: What is your favorite color?\n\t*save: color"
+
+    // Give the program a description by sending one explicitly. Updates are
+    // applied by a server job, so wait for it before reading anything back.
+    const setup = await apiRequest(`/programs/${testProgram.id}.json`, {
+      method: "PUT",
+      credentials: creds,
+      environment: "production",
+      body: { contents: "Placeholder", program: { description } },
+    })
+    const { job_id: setupJob } = (await setup.json()) as { job_id: number }
+    await pollJob(setupJob, creds, { environment: "production" })
+
+    const before = await getProgram(testProgram.id, creds, "production")
+    expect(before!.description).toBe(description)
+
+    const jobId = await updateProgramContents(
+      testProgram.id,
+      contents,
+      creds,
+      "production",
+    )
+    await pollJob(jobId, creds, { environment: "production" })
+
+    const updated = await getProgram(testProgram.id, creds, "production")
+    expect(updated!.description).toBe(description)
+
+    const source = await fetchProgramSource(testProgram.id, creds, "production")
+    expect(source).toContain("favorite color")
+  }, 60_000)
+
+  it("throws on nonexistent program", async () => {
+    await expect(
+      updateProgramContents(999999999, "x", creds, "production"),
+    ).rejects.toThrow("not found")
   })
 })

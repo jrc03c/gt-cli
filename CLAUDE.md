@@ -131,13 +131,15 @@ Per-project config file. Created by `gt init` (or manually). Gitignored.
 ```json
 {
   "programs": {
-    "my-program": {
+    "abc1234": {
       "id": 12345,
-      "key": "abc1234"
+      "file": "my-program.gt"
     }
   }
 }
 ```
+
+Each entry is keyed by the program's key. `file` is either a single path (used for both pull and push) or `{ "src": ..., "dist": ... }` to pull into one file and push from another.
 
 ### Authentication
 
@@ -171,7 +173,7 @@ All API requests use HTTP Basic Auth (`email:password`, base64-encoded).
 | ------ | ---------------------------------- | ----------------------------------------------------------------- |
 | `GET`  | `/programs.json`                   | List all programs                                                 |
 | `GET`  | `/programs.json?query={name}`      | Search programs by name                                           |
-| `PUT`  | `/programs/{id}.json`              | Update program contents                                           |
+| `PUT`  | `/programs/{id}.json`              | Update program contents (see note on `program.description` below) |
 | `POST` | `/programs`                        | Create a new program                                              |
 | `GET`  | `/delayed_jobs/{job_id}`           | Poll job status                                                   |
 | `GET`  | `/programs/{key}/embed`            | Get embed info (run_id, access_key)                               |
@@ -186,6 +188,7 @@ All API requests use HTTP Basic Auth (`email:password`, base64-encoded).
 - **Program key**: 7-character string from the public run URL (e.g., `i1qsozk`)
 - **Jobs**: Some operations (create, build) are asynchronous. The API returns a `job_id` and you poll `/delayed_jobs/{job_id}` until status is no longer `"running"`.
 - **Access key**: Required header (`X-GuidedTrack-Access-Key`) for fetching run contents.
+- **Updating contents is asynchronous and also updates the description.** `PUT /programs/{id}.json` takes `{ contents, program: { description } }` and returns `{ job_id }`; the change is only visible once that job finishes. The `program` object must be non-empty (an empty one is a 400), and the description is replaced with whatever is sent (an empty string clears it; omitting the field leaves it alone). `updateProgramContents` in `lib/api.ts` reads the program first, sends its current description back, and returns the job id, so callers should go through it rather than issuing the PUT directly.
 - **The `.json` suffix is not cosmetic.** For `generate_zip` and `download`, the bare HTML routes are session-cookie only: they ignore an `Authorization` header and redirect to a sign-in page. Adding `.json` (or `Accept: application/json`) puts them on the Basic Auth path the rest of the API uses.
 
 ### Bundled source download

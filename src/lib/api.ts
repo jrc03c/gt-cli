@@ -137,6 +137,44 @@ export async function getProgram(
   }
 }
 
+/**
+ * Replaces a program's source code, leaving its other metadata alone, and
+ * returns the id of the server job that applies the change.
+ *
+ * The update endpoint requires a non-empty `program` object and replaces the
+ * program's description with whatever is sent under `program.description`
+ * (an empty string clears it). So the program's current metadata is fetched
+ * first and its description is sent back unchanged.
+ *
+ * The update is applied asynchronously: the new contents (and description)
+ * are not visible until the returned job has finished.
+ */
+export async function updateProgramContents(
+  id: number,
+  contents: string,
+  credentials: Credentials,
+  environment?: GtEnvironment,
+): Promise<number> {
+  const current = await getProgram(id, credentials, environment)
+
+  if (!current) {
+    throw new Error(`Program ${id} not found.`)
+  }
+
+  const response = await apiRequest(`/programs/${id}.json`, {
+    method: "PUT",
+    credentials,
+    environment,
+    body: {
+      contents,
+      program: { description: current.description ?? "" },
+    },
+  })
+
+  const { job_id: jobId } = (await response.json()) as { job_id: number }
+  return jobId
+}
+
 export async function findProgramByKey(
   key: string,
   credentials: Credentials,
