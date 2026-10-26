@@ -47,12 +47,29 @@ gt config                        # Print current project configuration
 gt push                          # Upload local programs and build
 gt push --only <key>             # Push a single program
 gt push --no-build               # Push without building
+gt push --force                  # Push even if the server copy changed since the last sync
 gt pull                          # Download all program sources from the server
 gt pull --only <key>             # Pull a single program
+gt mirror                        # Download every program on the account into programs/
+gt mirror --dir <dir>            # ...into another directory
+gt mirror --full                 # ...refetching everything, not just what changed
+gt mirror --force                # ...overwriting locally modified files
 gt create [names...]             # Create new programs (updates gt.config.json)
 gt build                         # Compile programs and report errors
 gt build --only <key>            # Build a single program
 ```
+
+### Drift guard
+
+`gt pull` and `gt push` record each program's server `updated_at` in `gt.lock.json` next to `gt.config.json`. Commit that file. Before uploading, `gt push` fetches the program's current metadata and refuses to push if the server copy changed since the recorded sync, which is what happens when someone edits the program in the browser. The refusal names the program and the two timestamps. `gt pull --only <key>` shows what changed; `gt push --only <key> --force` overwrites it. A program with no lock entry pushes with a warning.
+
+### Mirroring an account
+
+`gt mirror` lists every program the account can see and writes each one's source to `<dir>/<name>.gt`, so that `*program: @jrc03c/math/dot` can be found at `programs/@jrc03c/math/dot.gt` by inspection. Slashes in names become directories; characters a file system would reject (`\ : * ? " < > |` and control characters) become `_`; two programs whose paths would collide get `~<key>` before the extension.
+
+The directory also gets an `index.json` mapping each program key to its id, name, path, server `updated_at`, the names of the programs it calls (`related_programs`), a hash of the file as written, and when it was mirrored. Later runs refetch only programs whose `updated_at` changed, whose file is missing, or that are new; programs that disappeared or were renamed have their old files removed. A file whose hash no longer matches the index has been edited locally and is left alone (with a warning) unless `--force`.
+
+If the directory holds a `gt.config.json`, every linked program whose pull file differs from its mirror path gets a warning, so a build that writes into the mirror stays aligned with it.
 
 ### Program management
 
@@ -149,7 +166,7 @@ The `email` and `password` fields are optional — they provide an alternative t
 
 ### Separate push and pull files
 
-If you use a build step to transform your `.gt` files before pushing, you can specify separate source and dist paths:
+If you use a build step to transform your `.gt` files before pushing, you can specify separate source and dist paths. `gt pull` writes to `dist` (never to `src`, which is your template), and `gt push` reads from `dist`:
 
 ```json
 {

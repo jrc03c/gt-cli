@@ -37,7 +37,9 @@ gt-cli/
 │   │   ├── build.ts       # Build/compile helpers
 │   │   ├── config.ts      # gt.config.json reading/writing
 │   │   ├── files.ts       # File reading utilities
-│   │   └── jobs.ts        # Job polling logic
+│   │   ├── jobs.ts        # Job polling logic
+│   │   ├── lock.ts        # gt.lock.json (last-synced server timestamps) and drift check
+│   │   └── mirror.ts      # Program-name → path mapping and the pure mirror planner
 │   └── types.ts           # Shared type definitions
 ├── tests/                 # Vitest test files (*.test.ts)
 ├── gt                     # Original bash script (reference implementation)
@@ -139,7 +141,15 @@ Per-project config file. Created by `gt init` (or manually). Gitignored.
 }
 ```
 
-Each entry is keyed by the program's key. `file` is either a single path (used for both pull and push) or `{ "src": ..., "dist": ... }` to pull into one file and push from another.
+Each entry is keyed by the program's key. `file` is either a single path (used for both pull and push) or `{ "src": ..., "dist": ... }` for programs with a build step. Both pull and push use `dist`; `src` is the template a build renders from and is never written by the CLI.
+
+### gt.lock.json
+
+Written by `pull` and `push`, committed to the project. Records each linked program's server `updated_at` at the last sync. `push` refuses a program whose server timestamp no longer matches (someone edited it in the browser) unless `--force`. `checkDrift` in `lib/lock.ts` is the pure comparison.
+
+### Mirror directory
+
+`gt mirror` writes every program on the account to `<dir>/<name>.gt` plus `<dir>/index.json`. `lib/mirror.ts` holds `mirrorPath` (name → path), `assignPaths` (collision handling) and `planMirror`, a pure function from the server listing, the previous index and the hashes of files on disk to a list of fetches, deletions and skips. Keep the rules there, tested, and keep `commands/mirror.ts` as thin I/O around them.
 
 ### Authentication
 
@@ -171,7 +181,7 @@ All API requests use HTTP Basic Auth (`email:password`, base64-encoded).
 
 | Method | Path                               | Description                                                       |
 | ------ | ---------------------------------- | ----------------------------------------------------------------- |
-| `GET`  | `/programs.json`                   | List all programs                                                 |
+| `GET`  | `/programs.json`                   | List all programs (includes `updated_at` and `related_programs`)  |
 | `GET`  | `/programs.json?query={name}`      | Search programs by name                                           |
 | `PUT`  | `/programs/{id}.json`              | Update program contents (see note on `program.description` below) |
 | `POST` | `/programs`                        | Create a new program                                              |
@@ -186,6 +196,8 @@ All API requests use HTTP Basic Auth (`email:password`, base64-encoded).
 
 - **Program ID**: Numeric identifier from the edit page URL (e.g., `9197`)
 - **Program key**: 7-character string from the public run URL (e.g., `i1qsozk`)
+- **`related_programs`** is the names of programs referenced via `*program`. The list endpoint returns an array (with duplicates); `GET /programs/{id}.json` returns the same array serialized as a JSON string. `parseRelatedPrograms` in `lib/mirror.ts` normalizes both.
+- **Program source has no JSON endpoint.** `fetchProgramSource` scrapes the `<textarea name="contents">` from `/programs/{id}/edit`. A full mirror of ~850 programs is ~850 of these requests, which is why `gt mirror` is incremental by `updated_at`.
 - **Jobs**: Some operations (create, build) are asynchronous. The API returns a `job_id` and you poll `/delayed_jobs/{job_id}` until status is no longer `"running"`.
 - **Access key**: Required header (`X-GuidedTrack-Access-Key`) for fetching run contents.
 - **Updating contents is asynchronous and also updates the description.** `PUT /programs/{id}.json` takes `{ contents, program: { description } }` and returns `{ job_id }`; the change is only visible once that job finishes. The `program` object must be non-empty (an empty one is a 400), and the description is replaced with whatever is sent (an empty string clears it; omitting the field leaves it alone). `updateProgramContents` in `lib/api.ts` reads the program first, sends its current description back, and returns the job id, so callers should go through it rather than issuing the PUT directly.
@@ -205,13 +217,14 @@ Node's `fetch` handles this correctly on its own: it follows the redirect and st
 
 ### Phase 1 — Core (matching bash script)
 
-- [x] `push` — Upload local program files to server (builds by default; `--no-build` to skip)
+- [x] `push` — Upload local program files to server (builds by default; `--no-build` to skip; refuses on server-side drift unless `--force`)
 - [x] `create` — Create new programs (auto-registers in gt.config.json)
 - [x] `build` — Compile programs from gt.config.json (supports `--only <key>`)
 
 ### Phase 2 — Essential additions
 
-- [x] `pull` — Download program source from server
+- [x] `pull` — Download program source from server (into `dist` for split entries; records `gt.lock.json`)
+- [x] `mirror` — Download every program on the account into a directory named by program name, incrementally
 - [x] `init` — Create gt.config.json, scan for program files
 - [x] `link` — Add an existing server program to gt.config.json by name search, ID, or key (`--file`, or `--file-src` + `--file-dist` for separate pull/push files; prompts for whatever is omitted; `--pull` downloads the source)
 - [x] `config` — Print current project config

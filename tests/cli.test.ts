@@ -18,7 +18,7 @@ function run(
 describe("gt cli", () => {
   it("prints version with --version", async () => {
     const result = await run(["--version"])
-    expect(result.stdout.trim()).toBe("0.1.0")
+    expect(result.stdout.trim()).toBe("0.2.0")
     expect(result.code).toBe(0)
   })
 
@@ -27,6 +27,21 @@ describe("gt cli", () => {
     expect(result.stdout).toContain("push")
     expect(result.stdout).toContain("create")
     expect(result.stdout).toContain("build")
+    expect(result.code).toBe(0)
+  })
+
+  it("offers --force on push", async () => {
+    const result = await run(["push", "--help"])
+    expect(result.stdout).toContain("--force")
+    expect(result.code).toBe(0)
+  })
+
+  it("offers --dir, --full, --force and --concurrency on mirror", async () => {
+    const result = await run(["mirror", "--help"])
+    expect(result.stdout).toContain("--dir")
+    expect(result.stdout).toContain("--full")
+    expect(result.stdout).toContain("--force")
+    expect(result.stdout).toContain("--concurrency")
     expect(result.code).toBe(0)
   })
 

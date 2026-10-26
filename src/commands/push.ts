@@ -1,11 +1,16 @@
 import { readFile } from "node:fs/promises"
 import { resolve } from "node:path"
 import type { Command } from "commander"
-import { getEnvironment, updateProgramContents } from "../lib/api.js"
+import {
+  getEnvironment,
+  getProgram,
+  updateProgramContents,
+} from "../lib/api.js"
 import { buildProgram } from "../lib/build.js"
 import { resolveCredentials } from "../lib/auth.js"
 import { loadConfig } from "../lib/config.js"
 import { pollJob } from "../lib/jobs.js"
+import { LOCK_FILENAME, checkDrift, loadLock, saveLock } from "../lib/lock.js"
 import { type ProgramRef, getPushFile } from "../types.js"
 
 export function registerPush(program: Command): void {
@@ -14,10 +19,15 @@ export function registerPush(program: Command): void {
     .description("Upload local program files to the server")
     .option("-o, --only <key>", "Push only the specified program (by key)")
     .option("--no-build", "Skip building after push")
+    .option(
+      "-f, --force",
+      `Push even if the server copy changed since the last sync recorded in ${LOCK_FILENAME}`,
+    )
     .action(async options => {
       const credentials = await resolveCredentials()
       const environment = getEnvironment()
       const config = await loadConfig()
+      const lock = await loadLock()
       const programs = config.programs ?? {}
 
       let entries: [string, ProgramRef][]
@@ -43,10 +53,37 @@ export function registerPush(program: Command): void {
       console.log(`Pushing to ${environment}...`)
 
       const pushed: { file: string; key: string }[] = []
+      const refused: string[] = []
 
       for (const [key, ref] of entries) {
         const pushFile = getPushFile(ref)
         process.stdout.write(`>> Updating "${pushFile}" (id: ${ref.id})... `)
+
+        const before = await getProgram(ref.id, credentials, environment)
+
+        if (!before) {
+          console.log("not found on server, skipped")
+          refused.push(key)
+          continue
+        }
+
+        const drift = checkDrift(lock.programs[key], before.updated_at)
+
+        if (drift.status === "drift" && !options.force) {
+          console.log("refused")
+          console.error(
+            `   The server copy of "${before.name}" changed at ${drift.server}, after the last sync at ${drift.locked}.\n` +
+              `   Run \`gt pull --only ${key}\` to see the change, or \`gt push --only ${key} --force\` to overwrite it.`,
+          )
+          refused.push(key)
+          continue
+        }
+
+        if (drift.status === "unknown") {
+          process.stdout.write(
+            `(no entry in ${LOCK_FILENAME}, pushing anyway) `,
+          )
+        }
 
         const contents = await readFile(
           resolve(process.cwd(), pushFile),
@@ -64,6 +101,18 @@ export function registerPush(program: Command): void {
         // started below compiles the new contents rather than the old ones.
         await pollJob(jobId, credentials, { environment })
 
+        const after = await getProgram(ref.id, credentials, environment)
+
+        if (after?.updated_at) {
+          lock.programs[key] = {
+            id: ref.id,
+            name: after.name,
+            updated_at: after.updated_at,
+            synced_at: new Date().toISOString(),
+          }
+          await saveLock(lock)
+        }
+
         console.log("done")
         pushed.push({ file: pushFile, key })
       }
@@ -73,6 +122,11 @@ export function registerPush(program: Command): void {
         for (const { file, key } of pushed) {
           await buildProgram(file, key, credentials, environment)
         }
+      }
+
+      if (refused.length > 0) {
+        console.error(`\n${refused.length} program(s) not pushed.`)
+        process.exit(1)
       }
     })
 }
