@@ -4,11 +4,7 @@ A TypeScript CLI for the unofficial, undocumented [GuidedTrack](https://guidedtr
 
 ## Project overview
 
-This project rewrites the existing `gt` bash script as a fully-featured TypeScript CLI tool. The bash script (`./gt`) serves as the reference implementation and documents the known API surface. The goal is a well-structured, well-documented CLI that's easy to extend as we discover more of the API.
-
-### Current status
-
-The TypeScript rewrite is feature-complete for Phases 1–3 of the command roadmap. All commands from the bash script have been ported and extended with additional commands from the previous Node.js version.
+A TypeScript CLI over the unofficial GuidedTrack web API. The original `gt` bash script (`./gt`) is the reference for known API behavior; everything it did is ported, plus the commands listed under Commands below.
 
 ## Architecture
 
@@ -57,42 +53,13 @@ gt-cli/
 
 ## Development
 
-### Setup
-
 ```bash
 pnpm install
-```
-
-### Run in development
-
-```bash
-pnpm dev [command] [args]     # Runs src/index.ts via tsx
-```
-
-### Build
-
-```bash
-pnpm build                    # Bundles to dist/ via tsup
-```
-
-### Test
-
-```bash
-pnpm test                     # Run all tests via Vitest
-pnpm test:watch               # Watch mode
-```
-
-### Lint and format
-
-```bash
-pnpm lint                     # ESLint
-pnpm format                   # Prettier
-```
-
-### Install locally (for testing the built CLI)
-
-```bash
-pnpm link --global            # Makes `gt` available globally
+pnpm dev [command] [args]     # run src/index.ts via tsx
+pnpm build                    # bundle to dist/ via tsup
+pnpm test                     # vitest (most tests hit the live production server; needs GT_EMAIL/GT_PASSWORD)
+pnpm lint && pnpm format      # eslint, prettier
+pnpm link --global            # make the built `gt` available globally
 ```
 
 ## Code conventions
@@ -213,33 +180,14 @@ Downloading a program with its subprograms takes three requests, in order:
 
 Node's `fetch` handles this correctly on its own: it follows the redirect and strips the `Authorization` header on the cross-origin hop, which S3 requires (a presigned URL carrying an extra auth header is rejected).
 
-## Command roadmap
+## Commands
 
-### Phase 1 — Core (matching bash script)
-
-- [x] `push` — Upload local program files to server (builds by default; `--no-build` to skip; refuses on server-side drift unless `--force`)
-- [x] `create` — Create new programs (auto-registers in gt.config.json)
-- [x] `build` — Compile programs from gt.config.json (supports `--only <key>`)
-
-### Phase 2 — Essential additions
-
-- [x] `pull` — Download program source from server (into `dist` for split entries; records `gt.lock.json`)
-- [x] `mirror` — Download every program on the account into a directory named by program name, incrementally
-- [x] `init` — Create gt.config.json, scan for program files
-- [x] `link` — Add an existing server program to gt.config.json by name search, ID, or key (`--file`, or `--file-src` + `--file-dist` for separate pull/push files; prompts for whatever is omitted; `--pull` downloads the source)
-- [x] `config` — Print current project config
-- [x] `program list` — List all programs
-- [x] `program get` — Fetch program metadata
-- [x] `program source` — Fetch program source code (`--bundle` for a zip of the program plus all viewable subprograms)
-- [x] `program find` — Search programs by name
-
-### Phase 3 — Full feature set
-
-- [x] `program delete` — Delete a program (with confirmation + `-y` flag)
-- [x] `program data` / `program csv` — Download program data
-- [x] `program view` / `program preview` / `program run` — Open browser to program pages
-- [x] `program build` — Build a specific program by name/ID/key
-- [x] `request` — Generic API request
+- `push`: upload linked files; builds by default (`--no-build`); refuses on server-side drift unless `--force`.
+- `pull`: download into `dist` for split entries; records `gt.lock.json`.
+- `mirror`: download every program on the account into a directory named by program name, incrementally.
+- `create`, `build` (`--only <key>`), `init`, `link` (by name, `--id` or `--key`; `--file` or `--file-src` + `--file-dist`; `--pull`), `config`.
+- `program list | get | find | source [--bundle] | build | delete [-y] | data | csv | view | preview | run`.
+- `request`: generic API request.
 
 ## Git workflow
 
