@@ -4,7 +4,7 @@ A TypeScript CLI for the unofficial, undocumented [GuidedTrack](https://guidedtr
 
 ## Project overview
 
-A TypeScript CLI over the unofficial GuidedTrack web API. The original `gt` bash script (`./gt`) is the reference for known API behavior; everything it did is ported, plus the commands listed under Commands below.
+A TypeScript CLI over the unofficial GuidedTrack web API. Known API behavior is documented under GuidedTrack API reference below.
 
 ## Architecture
 
@@ -38,7 +38,6 @@ gt-cli/
 │   │   └── mirror.ts      # Program-name → path mapping and the pure mirror planner
 │   └── types.ts           # Shared type definitions
 ├── tests/                 # Vitest test files (*.test.ts)
-├── gt                     # Original bash script (reference implementation)
 ├── gt.config.json         # Per-project config (user-created, gitignored)
 ├── package.json
 ├── tsconfig.json
@@ -48,7 +47,7 @@ gt-cli/
 ### Design principles
 
 - **Start simple, grow incrementally.** Each command is a standalone module. Add new commands by adding a file to `commands/` and registering it in `index.ts`.
-- **Respect the bash script.** The bash script is the source of truth for known API behavior. Don't guess at API endpoints — verify against the script or test against a live environment.
+- **Respect the API reference.** The GuidedTrack API reference section below is the source of truth for known API behavior. Don't guess at API endpoints — verify against the reference, the Rails app source if available, or a live environment.
 - **Fail clearly.** Show helpful error messages. Distinguish between auth failures, network errors, and API errors.
 
 ## Development
@@ -138,7 +137,7 @@ Production requires interactive confirmation before destructive operations.
 
 ## GuidedTrack API reference
 
-This documents what we know about the undocumented API, derived from the bash script.
+This documents what we know about the undocumented API.
 
 ### Authentication
 
